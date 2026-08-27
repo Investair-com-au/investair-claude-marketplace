@@ -1,5 +1,8 @@
 .DS_Store
 .env
 .env.*
+!.env.example
+!.env.horizon.example
 *.log
 .cursor/
+.env.horizon
