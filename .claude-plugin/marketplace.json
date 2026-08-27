@@ -1,0 +1,29 @@
+{
+  "name": "investair",
+  "owner": {
+    "name": "Investair",
+    "email": "terry@investair.com.au"
+  },
+  "metadata": {
+    "description": "Investair Claude plugins — ASX research skills over the Investair MCP (snapshots, peers, initiation/sector reports, weekly digests).",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "investair",
+      "source": "./plugins/investair",
+      "description": "Research workflows over Investair_data MCP: initiation, snapshots, sector reports, peer comparisons, investor targeting, weekly funding-risk and capital-raise digests. Skills call MCP tools; they do not define MCP functions.",
+      "version": "0.18.0",
+      "author": {
+        "name": "Stuart Frith"
+      },
+      "keywords": [
+        "investair",
+        "asx",
+        "equities-research",
+        "capital-markets",
+        "mcp"
+      ]
+    }
+  ]
+}
