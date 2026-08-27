@@ -103,9 +103,9 @@ For each company, in one short phrase:
 
 ## 7. Build the visual timeline
 
-Load the `artifact-design` skill before building (required for any
-artifact), and the `dataviz` skill for the categorical color/legend
-guidance. Build an HTML artifact: a calendar-grid timeline, one row per
+Load the Investair `artifact-design` skill (HTML artifact polish) and the
+Investair `dataviz` skill (categorical color / legend / marker weight) before
+building. Build an HTML artifact: a calendar-grid timeline, one row per
 company (target first, then peers), one column per month across the
 window — company name/ticker/runway in the row header. Cell content per
 company/month:
