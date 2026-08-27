@@ -9,9 +9,9 @@ Skills call the hosted **Investair MCP** (`https://investair-mcp.fastmcp.app/mcp
 1. Open Claude → **Plugins / Marketplace** → **Add marketplace** → **Add from a repository**
 2. Enter:
    ```text
-   TerryTian-Investair/investair-claude-marketplace
+   Investair-com-au/investair-claude-marketplace
    ```
-   (company account; personal mirror: `TerryTianXiangyu/investair-claude-marketplace`)
+   (org marketplace; personal mirror: `TerryTianXiangyu/investair-claude-marketplace`)
 3. Install plugin: **investair** (from this marketplace)
 4. Ensure MCP auth works:
    - Either connect Investair MCP in Claude’s connector UI, **or**
