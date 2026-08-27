@@ -65,5 +65,9 @@ is for. If the user follows up asking for more depth, offer to run
 `initiation-report`, `peer-cash-comparison`, or `investor-targeting` instead of
 expanding this reply.
 
-Close with a short, specific feedback prompt — e.g. "Let me know if
-anything here looks off." Not a generic sign-off.
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

@@ -88,7 +88,9 @@ from a "new" target.
 Say both so the list isn't mistaken for a complete investor register or a
 uniformly strong-conviction shortlist.
 
-## 5. Close with a feedback prompt
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
 
-End the reply with a short, specific feedback prompt — e.g. "Let me know if
-the peer group or shortlist needs adjusting." Not a generic sign-off.
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

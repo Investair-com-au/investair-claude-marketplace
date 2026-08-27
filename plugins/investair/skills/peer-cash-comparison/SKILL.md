@@ -57,6 +57,9 @@ improved and invite feedback (`log_feedback`).
 
 Only if the user asks — simple EV or market-cap comparison.
 
-## 6. Close
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
 
-Short, specific feedback prompt.
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

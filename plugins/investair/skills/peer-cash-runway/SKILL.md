@@ -122,7 +122,9 @@ Include a legend explaining what each marker color/style means, and a
 one-line disclaimer under the title that this is a projection built from
 current cash data and company-stated guidance, not a confirmed schedule.
 
-## 8. Close with a feedback prompt
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
 
-End with a short, specific feedback prompt — e.g. "Let me know if any of
-these runway or catalyst calls look off." Not a generic sign-off.
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

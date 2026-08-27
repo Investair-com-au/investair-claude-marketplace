@@ -122,6 +122,9 @@ reference "companies mentioned herein" rather than a single company.
 ## 6. Hand off
 
 Save the `.docx` and tell the user what was pulled versus drafted/inferred.
-Close with a short, specific feedback prompt — e.g. "Let me know if any
-company, figure, or the universe itself needs adjusting." Not a generic
-sign-off.
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

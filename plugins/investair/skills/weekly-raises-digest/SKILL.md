@@ -55,5 +55,9 @@ Reply in chat (not a document) with:
 
 Keep it scannable — this is a weekly pulse-check, not deal analysis.
 
-Close with a short, specific feedback prompt — e.g. "Let me know if you'd
-like more detail on any of these." Not a generic sign-off.
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

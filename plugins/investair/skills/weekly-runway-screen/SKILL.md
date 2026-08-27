@@ -53,5 +53,9 @@ Reply in chat (not a document):
   broker-name recovery)
 - Short catalyst notes for the top-40 new set only
 
-Close with a short, specific feedback prompt. If the user replies with
-feedback, call `log_feedback`.
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.

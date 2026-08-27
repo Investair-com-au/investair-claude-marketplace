@@ -11,4 +11,11 @@ Post a concise digest in this chat session:
 - Top 2-3 sectors from `summary.sector_breakdown` if there's a notable concentration
 - One or two sentences on any standout deal (unusually large, unusually priced)
 
-Keep it scannable — this is a weekly pulse-check, not deal analysis. Close with a short, specific feedback prompt (e.g. "Let me know if you'd like more detail on any of these"), not a generic sign-off. If the Investair_data connector is not connected/available, say so plainly and stop rather than guessing at figures.
+Keep it scannable — this is a weekly pulse-check, not deal analysis.
+
+## Required closing
+Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+
+How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+
+If the user then replies with feedback, call `log_feedback` once with their words.
