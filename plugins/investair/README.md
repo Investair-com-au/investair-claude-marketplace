@@ -1,6 +1,6 @@
 # Investair
 
-Install via marketplace repo `TerryTianXiangyu/investair-claude-marketplace` (Claude → Add marketplace → Add from a repository), then install plugin `investair`.
+Install via marketplace repo `Investair-com-au/investair-claude-marketplace` (Claude → Add marketplace → Add from a repository), then install plugin `investair`.
 
 
 Research workflows built on the `Investair_data` MCP connector
