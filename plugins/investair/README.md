@@ -51,10 +51,13 @@ The `initiation-report` and `sector-report` skills also use the built-in
 ## Scheduled reports
 
 Registered automatically — no manual step needed. A `SessionStart` hook
-(`hooks/setup_scheduled_reports.py`) runs on every session start and
+(`hooks/scripts/setup_scheduled_reports.py`) runs on every session start and
 idempotently registers two tasks directly in Cowork's native "Scheduled"
 panel (not Claude Code's local scheduler, and not the ephemeral
-session-only cron):
+session-only cron). A second SessionStart hook
+(`hooks/scripts/check_plugin_version.py`) compares the installed plugin
+version to GitHub `main` and prints a one-line update notice only when you
+are behind; otherwise it stays silent.
 
 - **Weekly cash-runway / funding-risk screen** — Mondays 8:00am
 - **Weekly capital raises digest** — Mondays 8:00am
