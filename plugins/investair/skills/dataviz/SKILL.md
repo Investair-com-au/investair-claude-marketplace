@@ -4,6 +4,8 @@ description: >
   Thin Investair guidance for categorical colors, legends, and timeline markers
   in HTML research visuals. Use with peer-cash-runway calendars and similar
   multi-series / multi-marker artifacts.
+  Helper only — not a user slash command.
+user-invocable: false
 ---
 
 # Investair dataviz (thin)

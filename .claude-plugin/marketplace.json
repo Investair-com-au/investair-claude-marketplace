@@ -12,8 +12,8 @@
     {
       "name": "investair",
       "source": "./plugins/investair",
-      "description": "Research workflows over Investair_data MCP: initiation, snapshots, sector reports, peer comparisons, investor targeting, weekly funding-risk and capital-raise digests. Skills call MCP tools; they do not define MCP functions.",
-      "version": "0.18.2",
+      "description": "Research workflows over Investair_data MCP: initiation, snapshots, sector reports, peer comparisons, investor targeting, weekly digests, and /log-feedback. Skills call MCP tools; they do not define MCP functions.",
+      "version": "0.18.3",
       "author": {
         "name": "Stuart Frith"
       },

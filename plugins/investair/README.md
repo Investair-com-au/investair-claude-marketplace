@@ -45,6 +45,7 @@ The `initiation-report` and `sector-report` skills also use the built-in
 | `investor-targeting` | "institutional targeting list for [ticker]" | Chat reply (table) |
 | `weekly-runway-screen` | "run the runway screen" (also runs on schedule) | Chat reply |
 | `weekly-raises-digest` | "run the capital raises digest" (also runs on schedule) | Chat reply |
+| `log-feedback` | "/log-feedback …", "send feedback on the last answer" | Calls MCP `log_feedback` (email to Investair) |
 | `setup-scheduled-reports` | "set up the scheduled reports" (manual fallback — runs automatically via a hook on install) | Registers the two weekly digests in Cowork's own scheduler |
 
 ## Scheduled reports

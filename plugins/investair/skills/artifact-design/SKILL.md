@@ -4,6 +4,8 @@ description: >
   Thin Investair guidance for HTML artifacts (timelines, one-pagers). Use when
   building a Claude HTML artifact for research visuals — especially peer cash
   runway calendars. Prefer readable, product-like layout over decorative chrome.
+  Helper only — not a user slash command.
+user-invocable: false
 ---
 
 # Investair artifact design (thin)

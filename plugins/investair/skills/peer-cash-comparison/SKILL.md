@@ -60,6 +60,6 @@ Only if the user asks — simple EV or market-cap comparison.
 ## Required closing
 Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
 
-How did this land — accurate, useful content, right format? Reply with feedback in your next message and I'll log it.
+How did this land — accurate, useful content, right format? Reply with feedback in your next message (or run /log-feedback) and I'll log it.
 
-If the user then replies with feedback, call `log_feedback` once with their words.
+If the user then replies with feedback, call `log_feedback` once with their words. They can also run `/log-feedback` anytime.
