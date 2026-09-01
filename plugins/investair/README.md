@@ -11,24 +11,14 @@ and institutional targeting lists — plus two weekly digests.
 ## Requirements
 
 This plugin **bundles the connection** to `Investair_data` via
-`.mcp.json` — you don't need to connect it separately in Cowork first.
-It currently points at `https://investair-mcp.fastmcp.app/mcp` — the **production**
-deployment — and authenticates with a Bearer token read from the
-`INVESTAIR_MCP_API_KEY` environment variable. The plugin file itself never
-contains the actual key. Swap the `url` in `.mcp.json` to the production
-endpoint once testing is done.
+`.mcp.json` — URL only, no Bearer API key. It points at
+`https://investair-mcp.fastmcp.app/mcp` (production). Authenticate with
+Claude’s **OAuth / MCP connector** login for that server (do not set
+`INVESTAIR_MCP_API_KEY` on this path — a stale key was causing expired-token
+failures when stacked with OAuth).
 
-Before installing, set that variable in your local environment with a
-valid API key/token for this FastMCP deployment (from your Prefect/FastMCP
-Cloud account). If the deployment actually expects a different header or
-auth scheme than a Bearer token, update the `headers` block in `.mcp.json`
-to match — this was written from FastMCP Cloud's typical pattern, not
-verified against a live connection.
-
-If the server's URL or auth requirements change in the future (the
-connector is expected to evolve), update `.mcp.json` accordingly — nothing
-else in the plugin should need to change, since the skills reference tools
-by name, not by connection details.
+If the server URL changes, update `.mcp.json` only — skills reference tools
+by name, not connection details.
 
 The `initiation-report` and `sector-report` skills also use the built-in
 `docx` skill to produce editable Word documents — no extra setup needed.

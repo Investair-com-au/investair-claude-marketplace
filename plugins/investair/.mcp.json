@@ -2,10 +2,7 @@
   "mcpServers": {
     "Investair_data": {
       "type": "http",
-      "url": "https://investair-mcp.fastmcp.app/mcp",
-      "headers": {
-        "Authorization": "Bearer ${INVESTAIR_MCP_API_KEY}"
-      }
+      "url": "https://investair-mcp.fastmcp.app/mcp"
     }
   }
 }
