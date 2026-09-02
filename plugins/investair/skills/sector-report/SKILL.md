@@ -91,7 +91,8 @@ for market-wide risk framing):
   restraint as the announcements rule below).
 - `list_announcements` per company only for the highest-materiality names
   (do not pull a full announcement feed for every company in a large
-  universe)
+  universe; prefer `short_preview`, escalate with `get_announcement` only
+  when needed)
 
 ## 3. Draft the report
 

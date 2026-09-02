@@ -69,6 +69,9 @@ cost reduction, or asset sale changes it.
   timeframe. **Only use a catalyst and its timing if the announcement
   text actually states or clearly implies both** — do not infer a
   catalyst that isn't named, and do not invent a date that isn't stated.
+  Do **not** set `include_body=true` on this multi-ticker screen. If one
+  announcement needs the full long summary, call `get_announcement`
+  with that row's `feed_id` after listing.
 - If a company has no forward-looking announcement in the window, leave
   its row without a catalyst marker rather than guessing one. Cite the
   announcement date next to any catalyst you do use.

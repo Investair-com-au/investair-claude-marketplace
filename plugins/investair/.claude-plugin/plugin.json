@@ -1,6 +1,6 @@
 {
   "name": "investair",
-  "version": "0.18.5",
+  "version": "0.18.6",
   "description": "Claude skills (research workflows) over the Investair_data MCP — initiation, snapshots, sector reports, peer comparisons, investor targeting, weekly digests, and /log-feedback. Skills call MCP tools; they do not define MCP functions or peer/SQL logic.",
   "author": {
     "name": "Stuart Frith"

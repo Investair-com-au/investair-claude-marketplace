@@ -45,7 +45,9 @@ a specific date — the tools default to the latest snapshot):
 - `get_peers` — the peer set for the valuation section
 - `list_capital_raises` (ticker) — raise history and pricing/DAP performance
 - `list_announcements` (ticker) — recent announcements to source drilling
-  results, catalysts, and metallurgy/technical updates from
+  results, catalysts, and metallurgy/technical updates from (prefer
+  `short_preview`; use `get_announcement(feed_id)` only when one filing
+  needs the full long summary)
 - `get_substantial_holders` (ticker) — top holders, referenced in the capital
   structure section if notable. Flag any holder with
   `prime_broker_clause_detected: true` explicitly in that section, not as

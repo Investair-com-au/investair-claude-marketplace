@@ -40,8 +40,10 @@ still count in the headline and appear in a compact list.
 For those top-40 new tickers:
 
 - `list_announcements` with `tickers` batched ≤10 per call, `days_back=90`
+  (title + `short_preview` only — do not set `include_body=true`)
 - Only use forward-looking catalysts actually stated in announcements /
-  `current_quarter_key_milestones` — never invent dates or events
+  `current_quarter_key_milestones` — never invent dates or events. If one
+  item needs the full long summary, call `get_announcement(feed_id)`.
 
 ## 3. Present the digest
 

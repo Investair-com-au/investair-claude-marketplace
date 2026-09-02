@@ -22,7 +22,7 @@ Skills call the hosted **Investair MCP** (`https://investair-mcp.fastmcp.app/mcp
 | Path | Purpose |
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog |
-| `plugins/investair/` | Investair skills plugin v0.18.5 |
+| `plugins/investair/` | Investair skills plugin v0.18.6 |
 
 ## Updates
 
