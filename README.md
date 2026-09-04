@@ -2,7 +2,7 @@
 
 Claude plugin marketplace for Investair research skills. Sync this repo in Claude via **Add marketplace → Add from a repository**, then install the `investair` plugin.
 
-Skills call the hosted **Investair MCP** (`https://investair-mcp.fastmcp.app/mcp`). They do not embed SQL or peer logic — that lives on the MCP server.
+Skills call the hosted **Investair MCP** (`https://mcp.investair.com.au/mcp/prefect-v1`, fronted by a Zuplo gateway). They do not embed SQL or peer logic — that lives on the MCP server.
 
 ## Add in Claude
 
@@ -22,7 +22,7 @@ Skills call the hosted **Investair MCP** (`https://investair-mcp.fastmcp.app/mcp
 | Path | Purpose |
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog |
-| `plugins/investair/` | Investair skills plugin v0.18.6 |
+| `plugins/investair/` | Investair skills plugin v0.19.0 |
 
 ## Updates
 
