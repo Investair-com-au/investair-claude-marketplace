@@ -12,8 +12,9 @@ and institutional targeting lists — plus two weekly digests.
 
 This plugin **bundles the connection** to `Investair_data` via
 `.mcp.json` — URL only, no Bearer API key. It points at
-`https://investair-mcp.fastmcp.app/mcp` (production). Authenticate with
-Claude’s **OAuth / MCP connector** login for that server (do not set
+`https://mcp.investair.com.au/mcp/prefect-v1` (production, fronted by a
+Zuplo gateway). Authenticate with Claude's **OAuth / MCP connector** login
+for that server — Clerk handles auth on the gateway side (do not set
 `INVESTAIR_MCP_API_KEY` on this path — a stale key was causing expired-token
 failures when stacked with OAuth).
 

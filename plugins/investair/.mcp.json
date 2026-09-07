@@ -2,7 +2,7 @@
   "mcpServers": {
     "Investair_data": {
       "type": "http",
-      "url": "https://investair-mcp.fastmcp.app/mcp"
+      "url": "https://mcp.investair.com.au/mcp/prefect-v1"
     }
   }
 }
