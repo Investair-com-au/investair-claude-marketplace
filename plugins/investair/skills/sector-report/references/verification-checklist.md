@@ -32,7 +32,7 @@ available," or ask the user, rather than leaving it in.
 - EV = Market Cap − Cash holds for every row
 - Sort order matches the spec (EV ascending, size cohorts split if the
   range spans an order of magnitude)
-- Any company whose cash figure includes an unconfirmed raise, or is stale
+- Any company whose cash figure is stale
   relative to the universe's as-at date, has a footnote
 
 ## 4. Funding-risk breakdown matches `screen_cashflow`

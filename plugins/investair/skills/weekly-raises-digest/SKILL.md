@@ -42,7 +42,7 @@ that pattern is for peer-broker shortlists (`screen_peer_brokers` or the
 
 Reply in chat (not a document) with:
 
-- Headline: `summary.deal_count` raises in the window, `summary.sum_proceeds_total_best`
+- Headline: `summary.deal_count` raises in the window, `summary.sum_actual_proceeds_total_best`
   total capital raised, and note if `summary.truncated` is true (more deals
   exist than the ranked list shows)
 - A short table from `ranked`: Ticker, Company, Raise size (A$M), Price,

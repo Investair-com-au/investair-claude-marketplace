@@ -48,7 +48,7 @@ recent pull throughout.
 - EV = Market Cap − Cash holds for every row, not just the target
 - Rows are sorted by EV ascending as specified, with larger/more-advanced
   peers separated out if the range spans an order of magnitude
-- Any peer whose cash figure includes an unconfirmed raise, or is stale
+- Any peer whose cash figure is stale
   relative to the target's as-at date, has a footnote — not a silent
   inclusion
 

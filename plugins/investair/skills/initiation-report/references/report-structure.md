@@ -56,7 +56,7 @@ or production economics exist yet").
   Cash (A$M), EV (A$M), Burn/Qtr (A$M), Runway (Qtrs). Sort by EV ascending
   within similarly-sized peers; call out larger/more-advanced peers
   separately if the EV range spans an order of magnitude.
-- If any peer's cash figure includes an unconfirmed raise, or is stale,
+- If any peer's cash figure is stale,
   footnote it rather than silently including it.
 - A short paragraph positioning the target company within the peer cohort:
   where it sits on EV, what differentiates it (larger/smaller resource,
