@@ -29,7 +29,7 @@ requires a specific ticker and cannot return a market-wide digest; it will
 error or force you to pick one company. `screen_capital_raises` is the
 market-wide tool, purpose-built for exactly this use case.
 
-Use its `summary` (deal_count, sector breakdown) and `ranked`
+Use its `summary` (deal_count, sum_proceeds, sector breakdown) and `ranked`
 list directly — do not page `run_readonly_sql` or call company-by-company
 tools to reconstruct a fuller list; that defeats the purpose of the screen
 tool. If the digest should show broker involvement, follow up with
@@ -42,11 +42,12 @@ that pattern is for peer-broker shortlists (`screen_peer_brokers` or the
 
 Reply in chat (not a document) with:
 
-- Headline: `summary.deal_count` raises in the window, and note if
+- Headline: `summary.deal_count` raises in the window,
+  `summary.sum_proceeds` total confirmed capital raised, and note if
   `summary.truncated` is true (more deals exist than the ranked list shows)
-- A short table from `ranked`: Ticker, Company, Discount (if available),
-  DAP (if available). Do **not** cite AUD proceeds or issue price — those
-  fields are not on the MCP
+- A short table from `ranked`: Ticker, Company, Proceeds (A$M from
+  `proceeds` — confirmed only), Discount (if available), DAP (if available).
+  Do **not** cite proposed proceeds or issue price — those are not on the MCP
 - Top 2-3 sectors from `summary.sector_breakdown` if there's a notable
   concentration
 - One or two sentences on any standout deal (unusual discount / timing,
