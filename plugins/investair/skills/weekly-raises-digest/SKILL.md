@@ -44,7 +44,8 @@ Reply in chat (not a document) with:
 
 - Headline: `summary.deal_count` raises in the window,
   `summary.sum_proceeds` total confirmed capital raised, and note if
-  `summary.truncated` is true (more deals exist than the ranked list shows)
+  `summary.truncated` is true (more deals exist than the ranked list shows).
+  Reminder: MCP only includes raises with confirmed proceeds above A$500k.
 - A short table from `ranked`: Ticker, Company, Proceeds (A$M from
   `proceeds` — confirmed only), Discount (if available), DAP (if available).
   Do **not** cite proposed proceeds or issue price — those are not on the MCP
