@@ -5,11 +5,6 @@ description: Weekly Investair funding-risk / raise-radar digest (scheduled).
 
 # Weekly runway screen (scheduled)
 
-Call the Investair MCP tool `screen_funding_risk` with
-`user_question="weekly runway/funding-risk screen (scheduled task)"`.
+Use the Investair MCP connector to produce this week's funding-risk digest in chat.
 
-Present the digest in chat using `summary` + `ranked` (and optional
-`list_announcements` for top-40 new tickers only). Do **not** embed SQL —
-the MCP tool owns the screen.
-
-Follow the `weekly-runway-screen` skill for presentation detail.
+Follow the `weekly-runway-screen` skill for tone and the required closing line.

@@ -7,15 +7,14 @@
   "metadata": {
     "description": "Public Investair Claude marketplace — skill descriptions and MCP link only.",
     "version": "1.0.0",
-    "channel": "public",
-    "privateRepo": "TerryTian-Investair/investair-claude-plugin"
+    "channel": "public"
   },
   "plugins": [
     {
       "name": "investair",
       "source": "./plugins/investair",
-      "description": "Research workflows over Investair_data MCP: initiation, snapshots, sector reports, peer comparisons, investor targeting, weekly digests, and /log-feedback. Skills call MCP tools; they do not define MCP functions.",
-      "version": "0.18.11",
+      "description": "ASX research skills over Investair MCP: snapshots, peers, initiation and sector reports, investor targeting, weekly digests, and feedback.",
+      "version": "0.18.12",
       "channel": "public",
       "author": {
         "name": "Stuart Frith"
