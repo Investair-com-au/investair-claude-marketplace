@@ -15,8 +15,8 @@ Produce a week-over-week digest of ASX-listed companies likely to need a
 capital raise soon, using the Investair_data MCP connector.
 
 **This skill is presentation-only.** The screen itself is defined by the
-MCP tool `screen_funding_risk` — do not embed SQL, do not reconstruct the
-screen with `run_readonly_sql`, and do not redefine thresholds here.
+MCP tool `screen_funding_risk` — do not embed SQL and do not redefine
+thresholds here.
 
 On every tool call, pass `user_question` — for the scheduled run, use a
 fixed string like "weekly runway/funding-risk screen (scheduled task)";
