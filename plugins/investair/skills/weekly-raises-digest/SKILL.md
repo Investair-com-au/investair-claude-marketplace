@@ -11,55 +11,11 @@ metadata:
 
 # Weekly Capital Raises Digest
 
-Produce a concise weekly digest of recent ASX capital raises, using the
-Investair_data connector. This is the report the plugin's weekly
-scheduled task runs automatically; it can also be triggered on demand.
+Produce a concise weekly digest of recent ASX capital raises in chat.
 
-On every tool call, pass `user_question` — for the scheduled run, use a
-fixed string like "weekly capital raises digest (scheduled task)"; for an
-on-demand run, use the user's actual request. Usage auditing only, no
-effect on results.
-
-## 1. Pull recent raises
-
-Call `screen_capital_raises` with no date filter (its default is the last
-14 days — do not manufacture a narrower window unless the user asks for a
-specific period). **Do not use `list_capital_raises` for this** — that tool
-requires a specific ticker and cannot return a market-wide digest; it will
-error or force you to pick one company. `screen_capital_raises` is the
-market-wide tool, purpose-built for exactly this use case.
-
-Use its `summary` (deal_count, sum_proceeds, sector breakdown) and `ranked`
-list directly — do not reconstruct a fuller list with SQL or company-by-company
-tools; that defeats the purpose of the screen
-tool. If the digest should show broker involvement, follow up with
-`list_deal_brokers` per deal_id — do not walk `get_peers` ×
-`list_capital_raises` × `list_deal_brokers` company-by-company for this;
-that pattern is for peer-broker shortlists (`screen_peer_brokers` or the
-`peer-cash-comparison` skill), not this general digest.
-
-## 2. Present the digest
-
-Reply in chat (not a document) with:
-
-- Headline: `summary.deal_count` raises in the window,
-  `summary.sum_proceeds` total confirmed capital raised, and note if
-  `summary.truncated` is true (more deals exist than the ranked list shows).
-  Reminder: MCP only includes raises with confirmed proceeds above A$500k.
-- A short table from `ranked`: Ticker, Company, Proceeds (A$M from
-  `proceeds` — confirmed only), Discount (if available), DAP (if available).
-  Do **not** cite proposed proceeds or issue price — those are not on the MCP
-- Top 2-3 sectors from `summary.sector_breakdown` if there's a notable
-  concentration
-- One or two sentences on any standout deal (unusual discount / timing,
-  or a company that appeared in a recent `weekly-runway-screen` as at
-  funding risk)
-
-Keep it scannable — this is a weekly pulse-check, not deal analysis.
+Use the Investair MCP connector. This skill is presentation-only. Keep it a pulse-check, not deal-by-deal analysis.
 
 ## Required closing
-Always end every successful user-visible reply with this exact final line (do not skip or replace with a generic sign-off):
+Always end every successful user-visible reply with this exact final line:
 
 How did this land — accurate, useful content, right format? Reply with feedback in your next message (or run /log-feedback) and I'll log it.
-
-If the user then replies with feedback, call `log_feedback` once with their words. They can also run `/log-feedback` anytime.

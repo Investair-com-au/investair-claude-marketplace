@@ -1,10 +1,8 @@
-# Investair Claude marketplace (public)
+# Investair Claude marketplace
 
-**Channel: `public`.** This repo is description-only: plugin/skill names, short descriptions, the MCP connector URL, and user-facing update notes. SQL, table names, and other data internals stay in the private plugin (`TerryTian-Investair/investair-claude-plugin`). See [CHANNEL.md](./CHANNEL.md).
+Public Claude plugin marketplace for Investair research skills. Add this repository in Claude, then install the `investair` plugin.
 
-Claude plugin marketplace for Investair research skills. Sync this repo in Claude via **Add marketplace → Add from a repository**, then install the `investair` plugin.
-
-Skills call the hosted **Investair MCP** (`https://mcp.investair.com.au/mcp/prefect-v1`). They do not embed SQL or peer logic — that lives on the MCP server.
+Skills use the hosted **Investair MCP**. This repo does not include data internals.
 
 ## Add in Claude
 
@@ -13,10 +11,8 @@ Skills call the hosted **Investair MCP** (`https://mcp.investair.com.au/mcp/pref
    ```text
    Investair-com-au/investair-claude-marketplace
    ```
-   (org marketplace; personal mirror: `Investair-com-au/investair-claude-marketplace`)
-3. Install plugin: **investair** (from this marketplace)
-4. Authenticate via Claude’s **OAuth / MCP connector** for Investair MCP
-   (plugin `.mcp.json` has no Bearer key — do not set `INVESTAIR_MCP_API_KEY`)
+3. Install plugin: **investair**
+4. Sign in with Claude’s **OAuth / MCP connector** for Investair
 5. Start a **new chat** and try: “Give me a snapshot of SKM” / “Run the raise radar”
 
 ## Contents
@@ -24,14 +20,13 @@ Skills call the hosted **Investair MCP** (`https://mcp.investair.com.au/mcp/pref
 | Path | Purpose |
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog |
-| `plugins/investair/` | Investair skills plugin v0.18.11 (`channel: public`) |
-| `CHANNEL.md` | Public vs private versions and labels |
+| `plugins/investair/` | Investair plugin v0.18.12 (`channel: public`) |
+| `CHANNEL.md` | What belongs on public vs private |
 
 ## Updates
 
-Do not land SQL, table names, or schema here. Push description-only changes to `main`. Users who added the marketplace can sync/update to get new plugin versions. See [CHANNEL.md](./CHANNEL.md).
+Description and skill-list updates only. Users who added the marketplace can sync to get new plugin versions.
 
 ## Security
 
 - No API keys in this repo — `.mcp.json` is URL-only; auth is OAuth via Claude
-- MCP DB access remains read-only on the server
