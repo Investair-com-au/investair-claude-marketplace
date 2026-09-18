@@ -30,8 +30,8 @@ error or force you to pick one company. `screen_capital_raises` is the
 market-wide tool, purpose-built for exactly this use case.
 
 Use its `summary` (deal_count, sum_proceeds, sector breakdown) and `ranked`
-list directly — do not page `run_readonly_sql` or call company-by-company
-tools to reconstruct a fuller list; that defeats the purpose of the screen
+list directly — do not reconstruct a fuller list with SQL or company-by-company
+tools; that defeats the purpose of the screen
 tool. If the digest should show broker involvement, follow up with
 `list_deal_brokers` per deal_id — do not walk `get_peers` ×
 `list_capital_raises` × `list_deal_brokers` company-by-company for this;

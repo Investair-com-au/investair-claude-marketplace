@@ -1,4 +1,6 @@
-# Investair Claude marketplace
+# Investair Claude marketplace (public)
+
+**Channel: `public`.** This repo is description-only: plugin/skill names, short descriptions, the MCP connector URL, and user-facing update notes. SQL, table names, and other data internals stay in the private plugin (`TerryTian-Investair/investair-claude-plugin`). See [CHANNEL.md](./CHANNEL.md).
 
 Claude plugin marketplace for Investair research skills. Sync this repo in Claude via **Add marketplace → Add from a repository**, then install the `investair` plugin.
 
@@ -22,11 +24,12 @@ Skills call the hosted **Investair MCP** (`https://mcp.investair.com.au/mcp/pref
 | Path | Purpose |
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog |
-| `plugins/investair/` | Investair skills plugin v0.18.11 |
+| `plugins/investair/` | Investair skills plugin v0.18.11 (`channel: public`) |
+| `CHANNEL.md` | Public vs private versions and labels |
 
 ## Updates
 
-Push changes to `main` on this repo. Users who added the marketplace can sync/update to get new plugin versions.
+Do not land SQL, table names, or schema here. Push description-only changes to `main`. Users who added the marketplace can sync/update to get new plugin versions. See [CHANNEL.md](./CHANNEL.md).
 
 ## Security
 

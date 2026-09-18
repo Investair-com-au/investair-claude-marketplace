@@ -36,22 +36,11 @@ different resolution mechanism — do not treat them as interchangeable:
 **B. A peer set seeded from one company** — call `get_peers` on the seed ticker. Narrate why the set was selected from `peer_source` + `business_context` (plain business language only). MCP owns the peer cascade — do not redefine tiers here.
 
 **C. A commodity + geography description** (e.g. "ASX gold explorers in
-Côte d'Ivoire") — this is the case that needs real work, not just
-clarification. Resolve it like this:
+Côte d'Ivoire") — resolve it with Investair MCP domain tools such as
+`get_peers`, not SQL. Seed from 1-2 representative companies, union and
+dedupe, then show the ticker list to the user before pulling snapshots.
 
-1. If you haven't already this session, call `describe_table` (using
-   `list_allowed_tables` first if you don't know the table name) to find
-   the sector/sub-industry/commodity/country classification columns —
-   likely a GICS sector/sub-industry field plus commodity and country on
-   the company or projects table.
-2. Run a bounded `run_readonly_sql` query filtered on those columns to get
-   the candidate ticker list for the requested commodity/geography. Keep
-   it a targeted filter, not an unscoped "give me everything" pull — that
-   violates the connector's own guardrails.
-3. Supplement with `get_peers` seeded from 1-2 representative companies in that space (follow each response's `peer_source` / `business_context`). Union the results, dedupe.
-4. Show the resolved ticker list back to the user before pulling full
-   market/cashflow snapshots for every company — confirm scope while it's
-   still cheap to adjust, rather than after a large pull.
+Do not write SQL and do not name internal tables or schema.
 
 Do not silently default to "the whole market" for a vague request. If the
 user says "everything" or "the full sector," clarify the commodity/geography
