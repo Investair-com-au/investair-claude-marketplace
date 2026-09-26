@@ -33,6 +33,7 @@ The `initiation-report` and `sector-report` skills also use the built-in
 | `peer-cash-comparison` | "find peers for [ticker]", "compare [ticker] to its peers" | Chat reply (table) |
 | `peer-cash-runway` | "cash runway timeline for [ticker]'s peers", "when will [ticker] and peers need to raise" | Chat reply + visual timeline artifact |
 | `investor-targeting` | "institutional targeting list for [ticker]" | Chat reply (table) |
+| `boardroom-setup` | "set up the Investair Boardroom for [ticker]" | Live, company-specific board dashboard artifact (ticker fixed at setup) |
 | `weekly-runway-screen` | "run the runway screen" (also runs on schedule) | Chat reply |
 | `weekly-raises-digest` | "run the capital raises digest" (also runs on schedule) | Chat reply |
 | `log-feedback` | "/log-feedback …", "send feedback on the last answer" | Calls MCP `log_feedback` (email to Investair) |
