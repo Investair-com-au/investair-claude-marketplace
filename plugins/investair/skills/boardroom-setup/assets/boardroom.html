@@ -11,6 +11,7 @@
   --peer:#9AA8BA; --median:#153D60;
   --good:#16804A; --good-bg:#E4F4EA; --warn:#A35F00; --warn-bg:#FCF1DE; --crit:#C23434; --crit-bg:#FBE7E7;
   --focus:#F97316;
+  --hero-bg:#0A2342; --hero-ink:#FFFFFF; --hero-muted:#A9B8CC; --hero-line:rgba(255,255,255,.16); --hero-track:rgba(255,255,255,.14); --hero-hover:rgba(255,255,255,.08);
   --fd:"Montserrat",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --fb:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -22,6 +23,7 @@
     --bar:#06111F; --bar-ink:#FFFFFF; --bar-muted:#8FA2BC;
     --peer:#5C6F88; --median:#9CC3EE; --orange-ink:#FF9A52;
     --good:#4CC58A; --good-bg:#11301F; --warn:#F0B35A; --warn-bg:#35270F; --crit:#FF7B7B; --crit-bg:#3A1717;
+    --hero-bg:#123360; --hero-line:rgba(255,255,255,.18);
   }
 }
 :root[data-theme="dark"]{
@@ -31,6 +33,7 @@
   --bar:#06111F; --bar-ink:#FFFFFF; --bar-muted:#8FA2BC;
   --peer:#5C6F88; --median:#9CC3EE; --orange-ink:#FF9A52;
   --good:#4CC58A; --good-bg:#11301F; --warn:#F0B35A; --warn-bg:#35270F; --crit:#FF7B7B; --crit-bg:#3A1717;
+    --hero-bg:#123360; --hero-line:rgba(255,255,255,.18);
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:14px;line-height:1.5}
@@ -98,6 +101,53 @@ main{padding-block:22px 48px}
 .pill.warn{background:var(--warn-bg);color:var(--warn)}
 .pill.crit{background:var(--crit-bg);color:var(--crit)}
 .pill.neu{background:var(--surface-2);color:var(--ink-2)}
+
+/* runway hero */
+.rw{background:var(--hero-bg);color:var(--hero-ink);border-radius:12px;padding:22px 24px;display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,1.3fr);gap:20px 36px;border:1px solid var(--hero-line)}
+.rw-lbl{font-family:var(--fb);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--hero-muted);font-weight:600;margin:0 0 6px}
+.rw-val{font-family:var(--fd);font-weight:800;font-size:52px;line-height:1;letter-spacing:-.02em}
+.rw-unit{font-size:20px;font-weight:600;letter-spacing:0;margin-left:4px;color:var(--hero-muted)}
+.rw-sub{margin-top:10px;font-size:14px;color:var(--hero-ink)}
+.rw-sub b{color:var(--orange)}
+.rw-facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin:16px 0 0}
+.rw-facts dt{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--hero-muted)}
+.rw-facts dd{margin:2px 0 0;font-weight:600;font-size:14px}
+.rw-peers{align-self:center;min-width:0}
+.rw-strip{padding:26px 8px 0}
+.rw-track{position:relative;height:10px;border-radius:5px;background:var(--hero-track)}
+.rw-band{position:absolute;top:0;bottom:0}
+.rw-band.crit{background:color-mix(in srgb,#E5484D 55%,transparent);border-radius:5px 0 0 5px}
+.rw-band.warn{background:color-mix(in srgb,#F0A020 45%,transparent)}
+.rw-dot{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--hero-muted);border:2px solid var(--hero-bg)}
+.rw-med{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1.5px;background:var(--hero-ink);border-radius:2px}
+.rw-me{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--orange);border:3px solid var(--hero-bg);box-shadow:0 0 0 2px var(--orange)}
+.rw-me b{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-family:var(--fd);font-size:12px;color:var(--orange);white-space:nowrap}
+.rw-axis{position:relative;height:18px;margin:8px 8px 0;font-size:11px;color:var(--hero-muted)}
+.rw-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.rw-axis span:first-child{transform:none}.rw-axis span:last-child{transform:translateX(-100%)}
+.rw-rank{margin-top:10px;font-size:13px;color:var(--hero-muted)}
+.rw-rank b{color:var(--hero-ink);font-weight:600}
+.rw-key{margin-left:10px;white-space:nowrap}
+.rw-dot-k,.rw-med-k{display:inline-block;vertical-align:-1px;margin:0 4px 0 8px}
+.rw-dot-k{width:9px;height:9px;border-radius:50%;background:var(--hero-muted)}
+.rw-med-k{width:3px;height:12px;background:var(--hero-ink);border-radius:2px}
+.rw-fb{grid-column:1/-1;border-top:1px solid var(--hero-line);padding-top:16px;display:grid;gap:10px}
+.rw-fb-q{font-family:var(--fd);font-weight:700;font-size:15px}
+.rw-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--hero-line);border-radius:8px;overflow:hidden;max-width:720px}
+.rw-scale button{background:transparent;color:var(--hero-ink);border:0;padding:10px 6px;font-size:13px;font-weight:500;cursor:pointer;line-height:1.25}
+.rw-scale button+button{border-left:1px solid var(--hero-line)}
+.rw-scale button:hover{background:var(--hero-hover)}
+.rw-scale button[aria-checked="true"]{background:var(--orange);color:#1A0E03;font-weight:700}
+.rw-scale button[data-v="about_right"]{font-weight:600}
+.rw-scale button:disabled{cursor:default;opacity:.7}
+.rw-fb-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;min-height:22px;font-size:13px}
+.rw-send{background:var(--orange);color:#1A0E03}
+.rw-send:hover{background:#FF8A3D}
+.rw .link-btn{color:var(--hero-ink);text-decoration:underline}
+.rw-sent{color:var(--hero-ink)}
+.rw-err{color:#FF9B9B}
+.rw-fb-note{margin:0;font-size:12px;color:var(--hero-muted);max-width:92ch}
+@media (max-width:720px){.rw{grid-template-columns:1fr;padding:18px}.rw-val{font-size:42px}.rw-scale{grid-template-columns:repeat(5,minmax(0,1fr))}.rw-scale button{font-size:11.5px;padding:9px 2px}}
 
 /* feed */
 .feed{list-style:none;margin:0;padding:0;display:grid}
@@ -253,10 +303,34 @@ footer .wrap{display:grid;gap:6px}
 
   <!-- OVERVIEW -->
   <section class="panel" id="p-overview" role="tabpanel" aria-labelledby="t-overview">
+    <section class="rw" id="runway" aria-labelledby="rw-h">
+      <div class="rw-main">
+        <h2 class="rw-lbl" id="rw-h">Cash runway</h2>
+        <div class="rw-val num"><span id="rw-q">…</span><span class="rw-unit" id="rw-unit"></span></div>
+        <div class="rw-sub" id="rw-sub">Loading Investair's estimate…</div>
+        <dl class="rw-facts" id="rw-facts"></dl>
+      </div>
+      <div class="rw-peers">
+        <div class="rw-lbl">Against your peers</div>
+        <div id="rw-strip" class="rw-strip"></div>
+        <div class="rw-rank" id="rw-rank"></div>
+      </div>
+      <div class="rw-fb" id="rw-fb">
+        <div class="rw-fb-q" id="rw-fb-q">Is this estimate about right?</div>
+        <div class="rw-scale" role="radiogroup" aria-labelledby="rw-fb-q" id="rw-scale">
+          <button type="button" role="radio" aria-checked="false" data-v="much_too_low" id="rw-o1">Much too low</button>
+          <button type="button" role="radio" aria-checked="false" data-v="a_bit_low" id="rw-o2">A bit low</button>
+          <button type="button" role="radio" aria-checked="false" data-v="about_right" id="rw-o3">About right</button>
+          <button type="button" role="radio" aria-checked="false" data-v="a_bit_high" id="rw-o4">A bit high</button>
+          <button type="button" role="radio" aria-checked="false" data-v="much_too_high" id="rw-o5">Much too high</button>
+        </div>
+        <div id="rw-fb-act" class="rw-fb-act"></div>
+        <p class="rw-fb-note">"Too high" means the runway is overstated and cash will run out sooner. Your answer goes to Investair only when you press Send, and is used to calibrate its estimate. Only share a view consistent with what you have already disclosed to the market.</p>
+      </div>
+    </section>
     <div class="kpis" id="kpis">
       <div class="kpi"><span class="lbl">Share price, 3 months</span><span class="val">…</span><span class="cmp">Loading</span></div>
       <div class="kpi"><span class="lbl">Trading value vs 6 months ago</span><span class="val">…</span><span class="cmp">Loading</span></div>
-      <div class="kpi"><span class="lbl">Cash runway</span><span class="val">…</span><span class="cmp">Loading</span></div>
       <div class="kpi"><span class="lbl">Substantial holder notices, 90 days</span><span class="val">…</span><span class="cmp">Loading</span></div>
     </div>
     <div class="sec">
@@ -624,22 +698,105 @@ function renderOverview(){
     const pm = median(S.peers.map(t => { const r = S.data.adv[t]; return r && num(r.adv_6m) ? (num(r.adv_1m) / num(r.adv_6m) - 1) * 100 : null; }));
     kpi(k[1], pct(ch, 0), `${aud(o?.adv_1m)}/day now · peer median ${pct(pm, 0)}`, ch === null || pm === null ? null : ch >= pm ? ["good", "Interest rising vs peers"] : ["warn", "Interest lagging peers"]);
   } else if (S.errs.adv) kpi(k[1], "—", errText(S.errs.adv));
-  // runway
-  if (S.data.cash) {
-    const s = S.data.cash[own()]?.snapshot; const co = cashOut(s);
-    const qs = S.peers.map(t => num(S.data.cash[t]?.snapshot?.adjusted_estimated_quarters_funding_confirmed));
-    const pm = median(qs);
-    if (!co) kpi(k[2], "—", "Not on Investair's cash board");
-    else if (co.positive) kpi(k[2], "Cash-flow positive", `Peer median ${pm === null ? "—" : pm.toFixed(1) + " qtrs"}`, ["good", "No burn"]);
-    else kpi(k[2], co.q.toFixed(1) + " qtrs", `Cash-out about ${mfmt(co.date)} · peer median ${pm === null ? "—" : pm.toFixed(1) + " qtrs"}`, co.q < 2 ? ["crit", "Under 6 months"] : co.q < 4 ? ["warn", "Under 12 months"] : ["good", "Over 12 months"]);
-  } else if (S.errs.cash) kpi(k[2], "—", errText(S.errs.cash));
+  renderRunway();
   // ssh
   if (S.data.ssh) {
     const cut = S.today.getTime() - 90 * DAY; const ns = sshNotices().filter(n => n.date.getTime() >= cut);
     const mine = ns.filter(n => isOwn(n.ticker)).length;
-    kpi(k[3], String(mine), `On your register · ${ns.length - mine} across peers`, mine ? ["neu", "Review Register tab"] : null);
-  } else if (S.errs.ssh) kpi(k[3], "—", errText(S.errs.ssh));
+    kpi(k[2], String(mine), `On your register · ${ns.length - mine} across peers`, mine ? ["neu", "Review Register tab"] : null);
+  } else if (S.errs.ssh) kpi(k[2], "—", errText(S.errs.ssh));
   renderSince();
+}
+
+/* ---------- Overview: cash runway panel + estimate feedback ---------- */
+const RW_OPTS = { much_too_low: "Much too low", a_bit_low: "A bit low", about_right: "About right", a_bit_high: "A bit high", much_too_high: "Much too high" };
+const RW_SCORE = { much_too_low: 1, a_bit_low: 3, about_right: 5, a_bit_high: 3, much_too_high: 1 };
+function runwayEstimate(){
+  const s = S.data.cash?.[own()]?.snapshot; const co = cashOut(s);
+  if (!s || !co) return null;
+  return { q: co.q, positive: !!co.positive, cashOut: co.date ? co.date.toISOString().slice(0, 10) : null,
+    cash: num(s.adjusted_cash_today_aud), burnQtr: Math.abs(num(s.total_relevant_outgoings_aud) || 0),
+    reportDate: s.report_date, baseQuarter: s.base_quarter_end };
+}
+function renderRunway(){
+  const q = $("#rw-q"), unit = $("#rw-unit"), sub = $("#rw-sub"), facts = $("#rw-facts"), strip = $("#rw-strip");
+  if (!S.data.cash) {
+    if (S.errs.cash) { q.textContent = "—"; unit.textContent = ""; sub.textContent = errText(S.errs.cash); }
+    $("#rw-fb").hidden = true; return;
+  }
+  const e = runwayEstimate();
+  const status = !e ? null : e.positive ? ["good", "Cash-flow positive"] : e.q < 2 ? ["crit", "Under 6 months"] : e.q < 4 ? ["warn", "Under 12 months"] : ["good", "Over 12 months"];
+  if (!e) { q.textContent = "—"; unit.textContent = ""; sub.textContent = `${own()} is not on Investair's cash board yet.`; facts.innerHTML = ""; }
+  else if (e.positive) { q.textContent = "Positive"; unit.textContent = ""; sub.innerHTML = `Operating cash flow covers spending. <span class="pill good">No burn</span>`; }
+  else { q.textContent = e.q.toFixed(1); unit.textContent = " quarters";
+    sub.innerHTML = `Cash runs out about <b>${mfmt(new Date(e.cashOut))}</b> at last quarter's burn <span class="pill ${status[0]}">${status[1]}</span>`; }
+  if (e) facts.innerHTML = `<div><dt>Estimated cash</dt><dd class="num">${aud(e.cash)}</dd></div><div><dt>Burn per quarter</dt><dd class="num">${aud(e.burnQtr)}</dd></div><div><dt>Based on</dt><dd>${esc(dfmt(e.baseQuarter))} quarterly, rolled to ${esc(dfmt(e.reportDate))}</dd></div>`;
+  // peer strip: 0 to 16 quarters, peers as dots, median as tick, company as labelled marker
+  const MAXQ = 16;
+  const pts = all().map(t => { const c = cashOut(S.data.cash[t]?.snapshot); return c ? { t, q: c.positive ? MAXQ : Math.min(c.q, MAXQ), raw: c.positive ? "cash-flow positive" : c.q.toFixed(1) + " quarters" } : null; }).filter(Boolean);
+  const peerQ = pts.filter(p => !isOwn(p.t)).map(p => p.q); const pm = median(peerQ);
+  const X = v => (v / MAXQ * 100).toFixed(2) + "%";
+  const me = pts.find(p => isOwn(p.t));
+  strip.innerHTML = `<div class="rw-track" role="img" aria-label="${esc(own())} runway ${me ? me.raw : "unknown"} against peers; peer median ${pm === null ? "unknown" : pm.toFixed(1) + " quarters"}">
+      <span class="rw-band crit" style="left:0;width:${X(2)}"></span><span class="rw-band warn" style="left:${X(2)};width:${X(2)}"></span>
+      ${pts.filter(p => !isOwn(p.t)).map(p => `<span class="rw-dot" style="left:${X(p.q)}" title="${esc(p.t)}: ${esc(p.raw)}"></span>`).join("")}
+      ${pm !== null ? `<span class="rw-med" style="left:${X(pm)}" title="Peer median ${pm.toFixed(1)} quarters"></span>` : ""}
+      ${me ? `<span class="rw-me" style="left:${X(me.q)}"><b>${esc(own())}</b></span>` : ""}
+    </div>
+    <div class="rw-axis"><span style="left:0">Now</span><span style="left:${X(4)}">1 yr</span><span style="left:${X(8)}">2 yrs</span><span style="left:${X(12)}">3 yrs</span><span style="left:100%">4+ yrs</span></div>`;
+  const ranked = pts.slice().sort((a, b) => b.q - a.q);
+  $("#rw-rank").innerHTML = me ? `Longest runway: <b>${ranked.findIndex(p => isOwn(p.t)) + 1} of ${ranked.length}</b> · peer median <b>${pm === null ? "—" : pm.toFixed(1) + " quarters"}</b> <span class="rw-key"><i class="rw-dot-k"></i>peer <i class="rw-med-k"></i>median</span>` : "";
+  $("#rw-fb").hidden = !e || !S.mcp;
+  renderRunwayFeedback();
+}
+function renderRunwayFeedback(){
+  const sel = S.rwChoice || null;
+  document.querySelectorAll("#rw-scale button").forEach(b => { b.setAttribute("aria-checked", b.dataset.v === sel); b.tabIndex = (sel ? b.dataset.v === sel : b.dataset.v === "about_right") ? 0 : -1; b.disabled = S.rwSending; });
+  const act = $("#rw-fb-act"); const last = S.rwLast;
+  if (S.rwMsg) { act.innerHTML = S.rwMsg; const r = $("#rw-retry"); if (r) r.onclick = () => { S.rwMsg = ""; S.rwEditing = true; renderRunwayFeedback(); }; return; }
+  if (sel && (!last || last.choice !== sel || S.rwEditing)) {
+    act.innerHTML = `<button class="btn rw-send" type="button" id="rw-send" ${S.rwSending ? "disabled" : ""}>${S.rwSending ? "Sending…" : `Send "${esc(RW_OPTS[sel])}" to Investair`}</button><button class="link-btn rw-cancel" type="button" id="rw-cancel" ${S.rwSending ? "disabled" : ""}>Cancel</button>`;
+    $("#rw-send").onclick = sendRunwayFeedback;
+    $("#rw-cancel").onclick = () => { S.rwChoice = last ? last.choice : null; S.rwEditing = false; renderRunwayFeedback(); };
+  } else if (last) {
+    act.innerHTML = `<span class="rw-sent">Last response: <b>${esc(RW_OPTS[last.choice] || last.choice)}</b>, ${esc(dfmt(new Date(last.at)))}${last.q !== null && last.q !== undefined ? ` (estimate then ${Number(last.q).toFixed(1)} quarters)` : ""}.</span>`;
+  } else act.innerHTML = "";
+}
+async function sendRunwayFeedback(){
+  const choice = S.rwChoice; const e = runwayEstimate(); if (!choice || !e) return;
+  S.rwSending = true; S.rwMsg = ""; renderRunwayFeedback();
+  const est = e.positive ? "cash-flow positive" : `${e.q.toFixed(1)} quarters (cash-out about ${e.cashOut})`;
+  const rec = { choice, label: RW_OPTS[choice], ticker: own(), at: Date.now(), q: e.positive ? null : Number(e.q.toFixed(2)), cash: e.cash, burnQtr: e.burnQtr, reportDate: e.reportDate || null, baseQuarter: e.baseQuarter || null, sentToInvestair: false };
+  let sent = false, sendErr = null;
+  try {
+    await S.mcp.callTool(CFG.connector, "log_feedback", {
+      feedback_text: `Runway estimate feedback for ${own()} from the Investair Boardroom: "${RW_OPTS[choice]}". Investair estimate: ${est}; estimated cash ${aud(e.cash)}, burn ${aud(e.burnQtr)} per quarter, based on the ${e.baseQuarter} quarterly rolled to ${e.reportDate}.`,
+      score: RW_SCORE[choice], accuracy_rating: RW_OPTS[choice], related_tool: "get_cashflow_snapshots", related_ticker: own(),
+      original_user_question: `Is Investair's cash runway estimate for ${own()} about right?`, assistant_answer: `Investair estimate: ${est}.`,
+      user_question: `Boardroom runway feedback for ${own()}: ${RW_OPTS[choice]}`
+    }, { cache: false });
+    sent = true;
+  } catch (err) { sendErr = err; }
+  rec.sentToInvestair = sent;
+  let saved = false;
+  if (S.db) { try { await S.db.collection("runway_feedback").add(rec); saved = true; } catch {} }
+  S.rwSending = false; S.rwEditing = false;
+  if (sent) { S.rwLast = rec; S.rwMsg = `<span class="rw-sent"><b>Sent to Investair.</b> Thank you. You answered "${esc(RW_OPTS[choice])}"${saved ? "" : " (not saved on this page)"}. You can change your answer at any time.</span>`; setTimeout(() => { S.rwMsg = ""; renderRunwayFeedback(); }, 6000); }
+  else S.rwMsg = `<span class="rw-err">Not sent. ${esc(errText(sendErr))} </span><button class="link-btn" type="button" id="rw-retry">Try again</button>`;
+  renderRunwayFeedback();
+}
+function wireRunwayScale(){
+  const btns = [...document.querySelectorAll("#rw-scale button")];
+  btns.forEach((b, i) => {
+    b.addEventListener("click", () => { if (S.rwSending) return; S.rwChoice = b.dataset.v; S.rwEditing = true; S.rwMsg = ""; renderRunwayFeedback(); });
+    b.addEventListener("keydown", ev => { const d = ev.key === "ArrowRight" || ev.key === "ArrowDown" ? 1 : ev.key === "ArrowLeft" || ev.key === "ArrowUp" ? -1 : 0;
+      if (!d) return; ev.preventDefault(); const n = btns[(i + d + btns.length) % btns.length]; n.focus(); n.click(); });
+  });
+}
+async function loadRunwayFeedback(){
+  if (!S.db) return;
+  try { const snap = await S.db.collection("runway_feedback").orderBy("at", "desc").limit(1).get();
+    const d = snap.docs[0]?.data(); if (d && d.choice) { S.rwLast = d; if (!S.rwChoice) S.rwChoice = d.choice; renderRunwayFeedback(); } } catch {}
 }
 function kpi(el, val, cmp, pill){
   el.querySelector(".val").textContent = val;
@@ -1048,7 +1205,7 @@ async function exportSummary(){
 body{font-family:Inter,Arial,sans-serif;color:#0E1B2C;max-width:960px;margin:32px auto;padding:0 24px;font-size:13px;line-height:1.5}
 h1{font-family:Montserrat,Arial,sans-serif;font-size:22px;margin:0}h2{font-family:Montserrat,Arial,sans-serif;font-size:15px;margin:28px 0 8px;border-bottom:2px solid #0A2342;padding-bottom:4px}
 .brand{font-family:Montserrat,Arial,sans-serif;font-weight:800;letter-spacing:.28em;color:#0A2342}.brand b{color:#F97316}
-.ks{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.k{border:1px solid #DCE3EC;border-radius:8px;padding:10px}.l{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#65758B}.v{font-size:20px;font-weight:700}.c{font-size:11.5px;color:#3A4A60}
+.ks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.k{border:1px solid #DCE3EC;border-radius:8px;padding:10px}.l{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#65758B}.v{font-size:20px;font-weight:700}.c{font-size:11.5px;color:#3A4A60}
 table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px solid #DCE3EC;padding:5px 6px;text-align:left;vertical-align:top}th{font-size:10.5px;text-transform:uppercase;color:#65758B}
 .r{text-align:right}.up{color:#16804A}.dn{color:#C23434}.own td{background:#FFF1E7}.pill{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:9px;background:#EEF2F7}.tkr{font-weight:700}.note,.state{color:#65758B;font-size:11px}
 .feed{list-style:none;padding:0}.feed li{display:grid;grid-template-columns:70px 110px 1fr;gap:8px;border-top:1px solid #DCE3EC;padding:6px 0}.feed small{display:block;color:#65758B}
@@ -1058,6 +1215,7 @@ table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px
 <div class="brand">INVEST<b>AI</b>R · BOARDROOM</div>
 <h1>${esc(CFG.company || own())} (ASX:${esc(own())}) board summary</h1>
 <div class="note">Prepared ${today} from Investair data. Peer group: ${esc(S.peers.join(", "))}. Figures marked as estimates are calculated by Investair and are not company guidance or investment advice.</div>
+<h2>Cash runway</h2><p><b style="font-size:20px">${esc($("#rw-q").textContent + $("#rw-unit").textContent)}</b><br>${esc($("#rw-sub").textContent)}</p><div class="note">${esc([...document.querySelectorAll("#rw-facts > div")].map(d => d.querySelector("dt").textContent + ": " + d.querySelector("dd").textContent).join(" · "))}. ${esc($("#rw-rank").textContent.replace(/peer\s+median\s*$/, "").trim())}${S.rwLast ? `. Management's last view of this estimate: ${esc(RW_OPTS[S.rwLast.choice] || S.rwLast.choice)} (${esc(dfmt(new Date(S.rwLast.at)))})` : ""}.</div>
 <h2>Headline measures</h2><div class="ks">${kp}</div>
 <h2>Since last review</h2>${text($("#since"))}
 <h2>Market interest</h2><p>${text($("#adv-lede"))}</p><table>${text($("#adv-table"))}</table>
@@ -1112,6 +1270,7 @@ async function boot(){
   $("#btn-export").onclick = exportSummary;
   $("#btn-peers").onclick = openPeerEditor;
   $("#btn-nar").onclick = runNarrative;
+  wireRunwayScale();
   document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { S.week = Number(b.dataset.w); document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderPrice(); });
   let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (!$("#p-market").hidden) safe(renderPrice); }, 150); });
   renderNarrative();
@@ -1125,6 +1284,7 @@ async function boot(){
   renderNarrative();
   if (db) {
     try { const snap = await db.doc("config/peers").get(); const p = snap.exists ? snap.data()?.peers : null; if (Array.isArray(p) && p.length) { S.peers = p.filter(t => TICKER_RE.test(t) && t !== own()); renderPeerMeta(); } } catch {}
+    loadRunwayFeedback();
     db.doc("narrative/latest").onSnapshot(snap => { if (snap.exists) { S.narrative = snap.data(); renderNarrative(); } }, () => {});
   }
   if (!mcp) {
@@ -1133,6 +1293,7 @@ async function boot(){
     $("#price-chart").innerHTML = `<div class="state">Live data is needed for this chart.</div>`;
     $("#adv-table").innerHTML = `<tbody><tr><td class="state">Live data is needed for this table.</td></tr></tbody>`;
     [...$("#kpis").children].forEach(k => kpi(k, "—", "Live data needed"));
+    $("#rw-q").textContent = "—"; $("#rw-sub").textContent = "Live data is needed for the runway estimate."; $("#rw-fb").hidden = true;
     return;
   }
   loadAll(false);

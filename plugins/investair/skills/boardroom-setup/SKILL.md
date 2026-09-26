@@ -30,9 +30,13 @@ paraphrase it.
 
 ## What the page contains (for explaining it to the user)
 
-- **Overview**: headline tiles (3-month share price vs peer median, trading
-  value vs six months ago, cash runway, substantial holder notices) and "Since
-  you last looked", a feed of holder notices, raises, price-sensitive
+- **Overview**: a prominent cash runway panel (quarters, estimated cash-out
+  month, cash, burn, position against every peer) with a five-point "Is this
+  estimate about right?" control (much too low / a bit low / about right / a
+  bit high / much too high). A response is sent to Investair only when the
+  executive presses Send. Below it: headline tiles (3-month share price vs peer
+  median, trading value vs six months ago, substantial holder notices) and
+  "Since you last looked", a feed of holder notices, raises, price-sensitive
   announcements and large price moves since the viewer's previous visit.
 - **Market**: share price rebased to 100 against every peer and the peer
   median (3/6/12 months, announcement markers), returns table, and market
@@ -138,11 +142,12 @@ Publish with the Artifact tool:
 {"mcp": {"servers": [{"server": "<display name>", "tools": [
    "run_readonly_sql", "get_substantial_holders_batch", "get_cashflow_snapshots",
    "get_placement_capacity", "list_capital_raises", "screen_peer_brokers",
-   "list_announcements"]}]},
+   "list_announcements", "log_feedback"]}]},
  "db": {}, "sample": {}, "downloads": true}
 ```
 
-Do not add tools the page does not call. The artifact is private to the user
+Do not add tools the page does not call. `log_feedback` is used only by the
+runway estimate control, after the viewer presses Send. The artifact is private to the user
 until they share it from the page's Share menu. Declaring connectors means the
 page cannot be shared by public link, only with named people in the
 organisation.
@@ -184,6 +189,15 @@ announcements (including the company), and 3-5 recommendations.
 
 In the page, anyone with contributor access can press **Refresh analysis** to
 regenerate it with Claude. The new version is saved for everyone.
+
+## Reading runway estimate responses
+
+Each response sent from the runway control is emailed to Investair through
+`log_feedback` and also stored in the artifact's database, collection
+`runway_feedback` (fields: `choice`, `label`, `ticker`, `at` epoch ms, `q`
+quarters shown, `cash`, `burnQtr`, `reportDate`, `baseQuarter`,
+`sentToInvestair`). Read them with `ArtifactData` `list` on the artifact URL.
+"Too high" means the company thinks Investair overstates its runway.
 
 ## 7. Hand over
 
