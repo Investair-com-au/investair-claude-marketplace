@@ -48,7 +48,7 @@ paraphrase it.
   prime-broker flags.
 - **Capital**: a six-months-back, six-months-forward funding timeline (raises
   sourced from the deal book, cash-out and raise windows calculated), funding
-  position (cash, burn, runway, LR 7.1 headroom, last raise), and broker
+  position (cash, burn, runway, last raise, and LR 7.1 headroom when the connector offers it), and broker
   profiles with a transparent fit score.
 - **Peers & messaging**: themes, business-quality signals and points for the
   board to consider, written by Claude from announcement summaries, with every
@@ -141,12 +141,15 @@ Publish with the Artifact tool:
 ```json
 {"mcp": {"servers": [{"server": "<display name>", "tools": [
    "run_readonly_sql", "get_substantial_holders_batch", "get_cashflow_snapshots",
-   "get_placement_capacity", "list_capital_raises", "screen_peer_brokers",
+   "list_capital_raises", "screen_peer_brokers",
    "list_announcements", "log_feedback"]}]},
  "db": {}, "sample": {}, "downloads": true}
 ```
 
-Do not add tools the page does not call. `log_feedback` is used only by the
+Do not add tools the page does not call. If the connector offers
+`get_placement_capacity`, add it to `tools` and the funding table shows LR 7.1
+headroom; without it the page hides that column. Check the publish result for
+warnings about tools the connector does not have, and remove any it names. `log_feedback` is used only by the
 runway estimate control, after the viewer presses Send. The artifact is private to the user
 until they share it from the page's Share menu. Declaring connectors means the
 page cannot be shared by public link, only with named people in the

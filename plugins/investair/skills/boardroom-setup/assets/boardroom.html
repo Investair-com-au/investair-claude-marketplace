@@ -407,9 +407,9 @@ footer .wrap{display:grid;gap:6px}
       <p class="note">Cash-out is Investair's estimated cash divided by the last quarter's burn, using confirmed proceeds only. The raise window is the three to six months before cash-out, when companies usually go to market. Both are estimates, not company guidance.</p>
     </div>
     <div class="sec">
-      <div class="sec-h"><h2>Funding position</h2><span class="sub">Cash, burn, runway and placement headroom</span></div>
+      <div class="sec-h"><h2>Funding position</h2><span class="sub">Cash, burn, runway and last raise</span></div>
       <div class="tw" id="funding"><div class="state">Loading…</div></div>
-      <p class="note">Estimated cash rolls the last quarterly report forward at the reported burn, plus confirmed post-quarter raises. Headroom is Listing Rule 7.1 capacity (15% of shares on issue less the last 12 months' use) at the latest close. It excludes 7.1A and is not legal advice.</p>
+      <p class="note">Estimated cash rolls the last quarterly report forward at the reported burn, plus confirmed post-quarter raises.<span id="funding-cap-note"> Headroom is Listing Rule 7.1 capacity (15% of shares on issue less the last 12 months' use) at the latest close. It excludes 7.1A and is not legal advice.</span></p>
     </div>
     <div class="sec">
       <div class="sec-h"><h2>Brokers raising capital for your peers</h2><span class="sub" id="brk-sub"></span></div>
@@ -620,14 +620,15 @@ async function loadAll(fresh = false){
     catch (e) { S.errs[k] = e; }
     renderFor(k);
   }));
-  const errs = Object.values(S.errs);
-  const pageErr = errs.length === keys.length && errs.every(e => e?.code === errs[0]?.code) ? errs[0] : errs.find(e => PAGE_LEVEL.has(e?.code));
+  // Placement capacity is optional: some Investair connectors don't offer it, and the page simply omits that column.
+  const errs = Object.entries(S.errs).filter(([k]) => k !== "capacity").map(([, e]) => e);
+  const pageErr = errs.length === keys.length - 1 && errs.every(e => e?.code === errs[0]?.code) ? errs[0] : errs.find(e => PAGE_LEVEL.has(e?.code));
   $("#page-banner").innerHTML = pageErr ? `<div class="banner crit" role="alert"><div><b>Live data unavailable.</b> ${esc(errText(pageErr))}</div></div>` : "";
   $("#btn-refresh").disabled = false;
   const asof = S.data.adv ? Object.values(S.data.adv).map(r => r.last_date).sort().pop() : null;
   $("#co-asof").textContent = asof ? dfmt(asof) : "—";
   if (asof) S.today = pd(asof);
-  $("#co-status").textContent = errs.length ? `${errs.length} of ${keys.length} data sets could not load` : "";
+  $("#co-status").textContent = errs.length ? `${errs.length} of ${keys.length - 1} data sets could not load` : "";
   $("#foot-upd").textContent = "Last refreshed " + new Date().toLocaleString("en-AU", { dateStyle: "medium", timeStyle: "short" });
 }
 function renderFor(k){
@@ -1029,13 +1030,15 @@ function renderFunding(){
   const rows = all().map(t => { const s = S.data.cash[t]?.snapshot; const c = S.data.capacity?.[t]; const last = (S.data.raises?.[t] || [])[0]; return { t, s, c, last, co: cashOut(s) }; });
   rows.sort((a, b) => (isOwn(b.t) - isOwn(a.t)) || ((a.co?.positive ? 99 : a.co?.q ?? 98) - (b.co?.positive ? 99 : b.co?.q ?? 98)));
   const capPill = c => !c ? "—" : `${aud(c.lr_7_1_capacity_remaining_aud)} <span class="pill ${c.capacity_status === "available" ? "good" : c.capacity_status === "constrained" ? "warn" : c.capacity_status === "exhausted" ? "crit" : "neu"}">${esc(c.capacity_status || "unknown")}</span>`;
-  el.innerHTML = `<table><thead><tr><th>Company</th><th class="r">Market cap</th><th class="r">Est. cash</th><th class="r">Burn / quarter</th><th class="r">Runway</th><th>Est. cash-out</th><th class="r">7.1 headroom</th><th>Last raise</th></tr></thead><tbody>
+  const hasCap = !!S.data.capacity;
+  $("#funding-cap-note").hidden = !hasCap;
+  el.innerHTML = `<table><thead><tr><th>Company</th><th class="r">Market cap</th><th class="r">Est. cash</th><th class="r">Burn / quarter</th><th class="r">Runway</th><th>Est. cash-out</th>${hasCap ? '<th class="r">7.1 headroom</th>' : ""}<th>Last raise</th></tr></thead><tbody>
   ${rows.map(r => { const s = r.s; const q = r.co?.q;
     return `<tr class="${isOwn(r.t) ? "own" : ""}"><td><span class="tkr${isOwn(r.t) ? " own" : ""}">${esc(r.t)}</span></td>
     <td class="r">${aud(s?.market_cap ?? S.data.adv?.[r.t]?.mcap)}</td><td class="r">${aud(s?.adjusted_cash_today_aud)}</td>
     <td class="r">${s ? aud(Math.abs(num(s.total_relevant_outgoings_aud) || 0)) : "—"}</td>
     <td class="r">${!r.co ? "—" : r.co.positive ? '<span class="pill good">Positive</span>' : `<span class="pill ${q < 2 ? "crit" : q < 4 ? "warn" : "good"}">${q.toFixed(1)} qtrs</span>`}</td>
-    <td>${r.co && !r.co.positive ? mfmt(r.co.date) : "—"}</td><td class="r">${capPill(r.c)}</td>
+    <td>${r.co && !r.co.positive ? mfmt(r.co.date) : "—"}</td>${hasCap ? `<td class="r">${capPill(r.c)}</td>` : ""}
     <td>${r.last ? `${dfmt(r.last.pricing_benchmark_date || r.last.filing_date)} · ${aud(r.last.proceeds)}${num(r.last.discount_pct_best) !== null ? ` · ${pct(r.last.discount_pct_best)}` : ""}` : S.errs.raises ? "—" : "None found"}</td></tr>`; }).join("")}</tbody></table>`;
 }
 
