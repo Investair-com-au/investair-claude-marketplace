@@ -6,8 +6,7 @@
   },
   "metadata": {
     "description": "Public Investair Claude marketplace — skill descriptions and MCP link only.",
-    "version": "1.0.0",
-    "channel": "public"
+    "version": "1.0.0"
   },
   "plugins": [
     {
@@ -15,7 +14,6 @@
       "source": "./plugins/investair",
       "description": "ASX research skills over Investair MCP: snapshots, peers, initiation and sector reports, investor targeting, weekly digests, and feedback.",
       "version": "0.18.12",
-      "channel": "public",
       "author": {
         "name": "Stuart Frith"
       },
