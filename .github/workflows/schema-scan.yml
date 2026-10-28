@@ -1,0 +1,28 @@
+name: Schema scan
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  schema-scan:
+    name: No data-model identifiers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # This channel is descriptions only, so the schema-introspection tool
+      # names are blocked here too. CHANNEL.md is excluded because it
+      # documents the forbidden patterns.
+      - name: Fail on SQL, table names, data-lake paths or schema tools
+        run: |
+          PATTERN='(ASX_Market|Cashflow|Placement|Broker|Feed_Public|ATM_Screening)\.[A-Za-z_]+|\bSELECT\b|\bFROM[[:space:]]+[A-Z][A-Za-z_]*\.|s3://|databricks|describe_table|list_allowed_tables|run_readonly_sql'
+          if grep -rInE "$PATTERN" . \
+               --exclude-dir=.git \
+               --exclude-dir=.github \
+               --exclude=CHANNEL.md; then
+            echo "::error::Data-model identifiers found. This is the public description-only marketplace - SQL, table names, data-lake paths and schema tools must stay in the private plugin. See CHANNEL.md."
+            exit 1
+          fi
+          echo "Clean: no data-model identifiers."
