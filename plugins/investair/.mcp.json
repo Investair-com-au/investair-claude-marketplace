@@ -2,7 +2,7 @@
   "mcpServers": {
     "Investair_data": {
       "type": "http",
-      "url": "https://mcp.investair.com.au/mcp/prefect-v1"
+      "url": "https://mcp.investair.com.au/mcp/customer-v1"
     }
   }
 }
