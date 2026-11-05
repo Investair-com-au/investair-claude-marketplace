@@ -115,7 +115,40 @@ Offer these as separate text inputs. Store results as `SECTORS` (comma-
 separated strings, may be empty) and `HOUSE_STOCKS` (space-separated ASX
 codes, may be empty).
 
-## 5. Install and pin the three artifacts
+## 5. Write firm config to the pipeline artifact
+
+Write the firm's configuration to the Broker Sweet Spot Pipeline's shared
+database so the artifact can personalise its display and use the coverage
+filters when generating the pipeline.
+
+Load `ArtifactData` via `ToolSearch("select:ArtifactData")` if not already
+loaded, then call it:
+
+```
+ArtifactData({
+  action: "set",
+  url: "https://claude.ai/artifact/2boZ3B3WbBXUgZUrcRipNy",
+  collection: "config",
+  doc_id: "data",
+  data: {
+    firm_name: FIRM_NAME,
+    sectors: SECTORS_ARRAY,
+    house_stocks: HOUSE_STOCKS_ARRAY
+  }
+})
+```
+
+Where:
+- `SECTORS_ARRAY` is a JSON array of strings (split SECTORS on commas,
+  trim whitespace, drop empties). Empty list `[]` if the user left it blank.
+- `HOUSE_STOCKS_ARRAY` is a JSON array of ASX codes (split HOUSE_STOCKS on
+  spaces and/or commas, trim, uppercase). Empty list `[]` if blank.
+
+If the write succeeds, continue. If it fails with a version conflict error,
+re-read the doc (`action: "get"`, same url/collection/doc_id) and retry the
+set with the returned `version` as `if_version`.
+
+## 6. Install and pin the three artifacts
 
 For each of the three artifact URLs below, run in order:
 
@@ -129,11 +162,11 @@ After each `pin` call, confirm it succeeded (the result will say so). If a
 pin fails, tell the user and continue with the remaining artifacts rather
 than stopping.
 
-## 6. Schedule the pipeline (CoWork only)
+## 7. Schedule the pipeline (CoWork only)
 
 Skip this step if step 1 found you are not in CoWork.
 
-### 6a. Find the active workspace registry
+### 7a. Find the active workspace registry
 
 Locate `scheduled-tasks.json` for the current CoWork session. It lives at:
 
@@ -155,7 +188,7 @@ find ~/Library/Application\ Support/Claude/local-agent-mode-sessions \
   | head -1
 ```
 
-### 6b. Write the task SKILL.md
+### 7b. Write the task SKILL.md
 
 Create the directory and task file:
 
@@ -165,7 +198,7 @@ Create the directory and task file:
 
 The body of this file is the prompt that runs each Monday morning.
 Write it as follows (substituting the actual values for FIRM_NAME,
-SECTORS, and HOUSE_STOCKS gathered in steps 3–4):
+SECTORS, and HOUSE_STOCKS gathered in steps 3–4 and written to the db in step 5):
 
 ```markdown
 ---
@@ -199,7 +232,7 @@ Where:
 - `{HOUSE_STOCKS_LINE}` → `- House stocks: {HOUSE_STOCKS}` if non-empty,
   else omit the line
 
-### 6c. Register in scheduled-tasks.json
+### 7c. Register in scheduled-tasks.json
 
 Get the current epoch milliseconds with:
 
@@ -231,7 +264,7 @@ After editing, validate the JSON parses correctly:
 python3 -m json.tool <path-to-scheduled-tasks.json> > /dev/null && echo OK
 ```
 
-## 7. Confirm
+## 8. Confirm
 
 Reply to the user with a concise summary of what was done:
 
