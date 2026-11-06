@@ -93,24 +93,73 @@ If **no** existing artifacts are found, proceed directly.
 Use `AskUserQuestion` with these questions in one call:
 
 **Question 1** — Firm name:
-> Which firm are you setting up for? (e.g. Argonaut, Canaccord, Euroz
-> Hartleys, Petra Capital)
+> Which firm are you setting up for? (The display name that will appear in
+> the artifact masthead.)
 
-**Question 2** — Broker canonical name:
-> What is the broker's **Investair canonical name** — the name exactly as
-> it appears in Investair's broker deal data? (e.g. Argonaut, MST
-> Financial, Euroz Hartleys). This is used by the pipeline to derive your
-> firm's sweet spot from your deal history. If unsure, use your firm's
-> trading name as it would appear in a placement announcement.
+**Question 2** — Broker name for Investair lookup:
+> What is your firm's name as it would appear in a placement announcement
+> on the ASX? We'll look it up in Investair's deal data to find the exact
+> canonical name used there.
 
 **Question 3** — Investair connector name:
 > What is the Investair connector named in claude.ai Settings → Connectors?
 > Leave blank for the default: `Investair_data`
 
 Store answers as:
-- `FIRM_NAME` — firm display name (e.g. "Argonaut")
-- `BROKER_CANONICAL` — Investair canonical name (e.g. "Argonaut")
+- `FIRM_NAME` — firm display name
+- `BROKER_INPUT` — the raw name the user typed (used for the lookup below)
 - `SERVER` — connector display name (default `"Investair_data"` if blank)
+
+## 4b. Look up and confirm the broker canonical name
+
+Using the Investair_data connector, validate the user's input against
+Investair's broker deal data. The goal is to find the exact string stored
+as `broker_canonical_name` in `Broker.deal_broker_map`.
+
+Try the following candidate names **in order**, stopping at the first that
+returns a non-empty result. For each candidate, run:
+
+```sql
+SELECT broker_canonical_id, COUNT(*) AS deals
+FROM Broker.deal_broker_map
+WHERE broker_canonical_name = '<CANDIDATE>'
+GROUP BY broker_canonical_id
+ORDER BY deals DESC
+LIMIT 1
+```
+
+Candidates to try (generate them from BROKER_INPUT):
+1. BROKER_INPUT as typed
+2. Title-cased version (e.g. "mst financial" → "MST Financial")
+3. Uppercased abbreviation if input looks like initials (e.g. "mst" → "MST")
+4. BROKER_INPUT with trailing legal suffixes stripped one at a time:
+   "Securities", "Capital", "Limited", "Ltd", "Financial", "Group",
+   "Advisory", "Stockbroking", "Partners", "Broking", "Equities",
+   "Funds Management", "Asset Management", "Investments", "Corp", "Inc"
+5. Stripped version title-cased
+6. FIRM_NAME if it differs from BROKER_INPUT (try both as-typed and
+   title-cased)
+
+For each candidate that **returns a result** (non-zero rows), confirm with
+the user before proceeding:
+
+> I found a broker matching **"[candidate]"** in Investair's deal data
+> ([N] deals). Is that your firm?
+
+- **Yes** → set `BROKER_CANONICAL = candidate`. Proceed to step 5.
+- **No** → continue trying the next candidate.
+
+If **no candidate matches**, tell the user:
+
+> I couldn't find your broker in Investair's deal data with any variation
+> of that name. The pipeline will show an error when it loads if the name
+> isn't right. You can proceed now and correct it later under the
+> pipeline's Customise screen, or stop to check your Investair canonical
+> name with the Investair team.
+
+Then ask: proceed with the unvalidated name, or stop?
+- If proceed → `BROKER_CANONICAL = BROKER_INPUT` (as typed).
+- If stop → end the skill.
 
 ## 5. Ask: coverage (optional)
 
