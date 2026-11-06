@@ -90,11 +90,22 @@ If **no** existing artifacts are found, proceed directly.
 
 ## 4. Ask: firm details
 
+**IMPORTANT — no memory pre-population**: Do NOT use memory, prior session
+context, or previous /broker-setup runs to suggest or pre-populate firm
+names. Every call to this skill is a fresh setup for a different broker.
+Broker names from past runs are confidential and must never appear as
+suggested options. Ask Question 1 and Question 2 as plain free-text
+questions only — no pre-suggested options, no "Other", no "Something else"
+with prefilled names.
+
+Do not save any broker names, firm names, or canonical names to memory
+during or after this skill run.
+
 Use `AskUserQuestion` with these questions in one call:
 
 **Question 1** — Firm name:
-> Which firm are you setting up for? (The display name that will appear in
-> the artifact masthead.)
+> Which firm are you setting up for? (Type the display name — it will
+> appear in the artifact masthead.)
 
 **Question 2** — Broker name for Investair lookup:
 > What is your firm's name as it would appear in a placement announcement
