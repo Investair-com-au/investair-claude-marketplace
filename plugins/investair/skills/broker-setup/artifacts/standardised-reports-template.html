@@ -1,0 +1,679 @@
+<!-- Investair Standardised Reports TEMPLATE (company reports: Roadshow Plan & Narrative, Investor Targets, Initiation-style Report, Board Pack: Peer Benchmark, Placement Terms Benchmark; sector and list reports: Sector Report, Raise Pipeline, Broker League Table, Register Movers, Catalyst Calendar). No firm, broker or stock is embedded; the install skill fills these slots before publishing a copy, and every slot can be left as is. TITLE: in <title>, replace "Investair Standardised Reports Template" with "Investair Standardised Reports" (or "<Firm> Standardised Reports"). OWNER: in the masthead, replace the text between the OWNER_START and OWNER_END comment markers (default "Internal") with e.g. "Prepared for <Firm> · Internal". FOCUS: in the masthead, put " · focus text" (e.g. " · WA gold explorers") between the FOCUS_START and FOCUS_END comment markers; the Sector Report uses it as the list name. SERVER: in the script, replace "Investair_data" between the SERVER_START and SERVER_END markers with the Investair connector's display name if it differs. SECTOR: in the script, put an Investair sub-industry name (e.g. "Gold", "Copper", "Biotechnology") between the quotes inside the SECTOR_START and SECTOR_END markers to preselect it for the Sector Report; leave "" to default to My list. COVERAGE: in the script, replace [] between the COVERAGE_START and COVERAGE_END markers with [["TICKER","Company name"],...] (max 25); the first ticker pre-fills the Ticker box. Left blank, the Ticker box and My list start empty for the user to fill. Publish without a doctype/html/head/body skeleton. Declare mcp (Investair_data: get_market_snapshot, get_cashflow_snapshot, get_peers, get_substantial_holders, get_substantial_holders_batch, list_announcements, list_capital_raises, list_deal_brokers, screen_peer_brokers, get_company_projects, run_readonly_sql), sample, db, user, downloads. -->
+<title>Investair Standardised Reports Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Investair brand: tokens from the Investair Style Guide (investair.com.au production CSS).
+   Layout: full-width navy masthead band with the wordmark, light content area, white cards with the amber rule, navy footer band.
+   Single deliberate light look with navy bands (the brand's own two grounds). */
+:root{
+  color-scheme: light;
+  --brand-navy:#0a2342; --brand-orange:#ff6b35; --brand-amber:#e8760a; --brand-teal:#1a7f8e;
+  --brand-gray:#f5f7fa; --surface-page:#f9fafb; --surface:#ffffff;
+  --ink:#0a2342; --ink-body:#4a5568; --ink-muted:#64748b; --ink-navy-body:#d1d5db; --ink-navy-muted:#9ca3af;
+  --border:#e2e8f0; --border-card:#e5e7eb; --danger:#ef4444;
+  --accent-tint:rgba(232,118,10,.18); --teal-tint:rgba(26,127,142,.1); --danger-tint:rgba(239,68,68,.08);
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05); --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+  --radius-md:6px; --radius-lg:8px; --radius-xl:12px;
+  --display:Montserrat,"Helvetica Neue",Arial,sans-serif; --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--surface-page);color:var(--ink-body);font-family:var(--body);font-size:15px;line-height:1.5}
+
+/* Navy masthead band */
+.ia-top{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:20px 28px}
+.ia-top .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-logo-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ia-logo{height:44px;width:auto;display:block}
+.ia-owner{font:600 12px/16px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-brand{font:600 13px/18px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-title{font:700 32px/1.2 var(--display);color:#fff;margin:0;text-wrap:balance}
+.mh-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mh-badge{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.mh-date{font:500 12.5px/16px var(--body);color:var(--ink-navy-muted)}
+.mh-note{font:400 15px/23px var(--body);color:var(--ink-navy-body);max-width:74ch;margin:4px 0 0}
+.mh-note b{color:#fff;font-weight:600}
+
+/* Content */
+.page{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:24px 40px}
+.ss-strip{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ss-label{font:600 12px/16px var(--body);color:var(--ink-muted);margin-right:4px;text-transform:uppercase;letter-spacing:.1em}
+.ss-chip{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.ss-chip.bz{background:var(--brand-navy);color:#fff}
+.ss-chip.cu{background:var(--brand-teal);color:#fff}
+.ss-chip.out{background:var(--surface);color:var(--ink);border:1px solid var(--border-card)}
+
+.sec-head{font:700 13px/18px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:28px 0 12px;display:flex;align-items:center;gap:10px}
+.sec-head::before{content:"";width:18px;height:4px;border-radius:2px;background:var(--brand-amber)}
+.sec-head .n{color:var(--ink)}
+.sec-rule{flex:1;height:1px;background:var(--border)}
+
+.deal-stack{display:flex;flex-direction:column;gap:14px}
+.deal{background:var(--surface);border:1px solid var(--border-card);border-left:4px solid var(--brand-amber);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.deal-top{padding:18px 22px 12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.deal-ticker{font:700 30px/1 var(--display);color:var(--ink);letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.deal-name{font:500 14px/20px var(--body);color:var(--ink-muted);margin-top:6px}
+.deal-badge{font:600 12px/16px var(--body);padding:6px 11px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy);align-self:flex-start;white-space:nowrap}
+.deal-badge.bz{background:var(--brand-navy);color:#fff}
+.deal-badge.cu{background:var(--brand-teal);color:#fff}
+.deal-badge.nt{background:var(--brand-gray);color:var(--ink);border:1px solid var(--border-card)}
+.flag{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/16px var(--body);padding:3px 9px;border-radius:var(--radius-md);color:var(--ink);border:1px solid var(--border-card);background:var(--surface)}
+.flag.urgent{border-color:var(--danger);background:var(--danger-tint)}
+.flag.urgent::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.flag.ok{border-color:var(--brand-teal);background:var(--teal-tint)}
+.flags{padding:0 22px 16px;display:flex;gap:8px;flex-wrap:wrap}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--brand-gray)}
+.metric{padding:12px 16px;border-right:1px solid var(--border)}
+.metric:last-child{border-right:none}
+.m-lbl{font:600 11px/14px var(--body);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.m-val{font:700 18px/24px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+
+.deal-tl{padding:12px 22px 14px}
+.tl-note{font-size:14px;line-height:22px;color:var(--ink-body);margin-bottom:10px}
+.tl-note .k{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.inf{color:var(--ink);font-weight:600;background:var(--accent-tint);padding:0 4px;border-radius:3px}
+.tl-track{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;height:10px;border-radius:2px;overflow:hidden}
+.tl-fill{background:var(--border)}
+.tl-fill.on{background:var(--brand-amber)}
+.tl-fill.on.bz{background:var(--brand-navy)}
+.tl-fill.on.cu{background:var(--brand-teal)}
+.tl-fill.on.nt{background:var(--ink-muted)}
+.tl-fill.on.zone,.tl-fill.on.zone.bz,.tl-fill.on.zone.cu,.tl-fill.on.zone.nt{background:var(--danger)}
+.tl-scale{position:relative;height:14px;font:500 10.5px/14px var(--body);color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.tl-scale span{position:absolute;top:0;transform:translateX(-50%)}
+.tl-scale span:first-child{transform:none}
+.tl-scale span:last-child{transform:translateX(-100%)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-muted);margin:4px 0 0}
+.legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+.watch-stack .deal{opacity:.9}
+.watch-stack .metric{padding:10px 14px}
+.watch-stack .m-val{font-size:16px}
+.watch-stack .deal-ticker{font-size:24px}
+
+.ex-wrap{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);overflow-x:auto;box-shadow:var(--shadow-sm)}
+.ex-table{width:100%;border-collapse:collapse}
+.ex-table th{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--brand-navy);text-align:left;padding:10px 14px;white-space:nowrap}
+.ex-table td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-tk{font:700 13px/18px var(--display);color:var(--ink)}
+.ex-wk,.ex-mc{font:500 12.5px/18px var(--body);white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ex-mc{color:var(--ink-muted)}
+.ex-rs{font-size:13px;color:var(--ink-body);min-width:220px}
+
+.method{margin-top:20px;font-size:13px;line-height:20px;color:var(--ink-muted);max-width:82ch}
+
+/* Navy footer band */
+.ia-foot{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:28px}
+.ia-foot .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-foot .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ia-foot img{height:32px;width:auto}
+.ia-foot .tag{font-size:14px;color:var(--ink-navy-body)}
+.ia-foot .legal{border-top:1px solid rgba(255,255,255,.12);padding-top:12px;font-size:12.5px;color:var(--ink-navy-muted)}
+
+:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+
+@media (max-width:640px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(-n+2){border-bottom:1px solid var(--border)}
+  .deal-ticker{font-size:24px}
+  .mh-title{font-size:26px}
+  .deal-top,.deal-tl,.flags{padding-inline:16px}
+}
+
+</style>
+
+<style>
+.desk-bar{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:16px 18px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.desk-bar label{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);display:block;margin-bottom:4px}
+.desk-bar input,.desk-bar select{font:600 15px/20px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;background:#fff;min-width:0}
+.desk-bar input{width:110px;text-transform:uppercase;font-family:var(--display)}
+.desk-bar select{max-width:100%}
+.desk-hint{font-size:13px;color:var(--ink-muted);flex:1 1 220px}
+.btn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.rbtn{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--border-card);border-top:4px solid var(--brand-amber);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rbtn:hover{box-shadow:var(--shadow-lg)}
+.rbtn:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+.rbtn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.rbtn b{font:700 15px/20px var(--display);color:var(--ink)}
+.rbtn span{font-size:13px;line-height:19px;color:var(--ink-body)}
+.rbtn.role{border-top-color:var(--brand-teal)}
+.res{margin-top:8px;background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.res-head{background:var(--brand-navy);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.res-head h2{font:700 15px/20px var(--display);margin:0;color:#fff}
+.res-acts{display:flex;gap:8px;flex-wrap:wrap}
+.res-acts button{font:600 12px/16px var(--body);border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:var(--radius-md);padding:6px 10px;cursor:pointer}
+.res-acts button.pri{background:var(--brand-amber);border-color:var(--brand-amber);color:var(--brand-navy)}
+.res-acts button[disabled]{opacity:.45;cursor:not-allowed}
+.res-status{padding:10px 18px;font-size:13px;color:var(--ink-muted);border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.res-status.err{color:#b91c1c;background:var(--danger-tint)}
+.spin{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--brand-amber);border-radius:50%;animation:sp 0.8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.md{padding:18px 22px 22px;color:var(--ink-body);font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.md h1,.md h2,.md h3{font-family:var(--display);color:var(--ink);line-height:1.3;margin:18px 0 8px}
+.md h1{font-size:22px}.md h2{font-size:18px;border-bottom:2px solid var(--brand-amber);padding-bottom:4px}.md h3{font-size:15px}
+.md p{margin:8px 0}.md ul,.md ol{padding-left:22px;margin:8px 0}
+.md .tw{overflow-x:auto;margin:10px 0;border:1px solid var(--border-card);border-radius:var(--radius-md)}
+.md table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.md th{background:var(--brand-navy);color:#fff;text-align:left;font:600 11.5px/15px var(--body);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;white-space:nowrap}
+.md td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.md code{background:var(--brand-gray);padding:0 4px;border-radius:3px}
+.md hr{border:0;border-top:1px solid var(--border);margin:16px 0}
+.empty{padding:28px 22px;color:var(--ink-muted);font-size:14px}
+.notice{margin-top:12px;padding:12px 16px;border-radius:var(--radius-md);background:var(--danger-tint);border:1px solid var(--danger);color:var(--ink);font-size:14px;display:none}
+.listbox{margin-top:12px;background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:10px 16px;font-size:14px}
+.listbox summary{cursor:pointer;font:600 13px/18px var(--body);color:var(--ink)}
+.listbox textarea{width:100%;min-height:70px;margin-top:10px;font:600 14px/20px var(--display);text-transform:uppercase;border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;color:var(--ink)}
+.listbox .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.listbox button{font:600 12px/16px var(--body);border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:var(--radius-md);padding:7px 12px;cursor:pointer}
+.listbox button.pri{background:var(--brand-amber);border-color:var(--brand-amber);color:var(--brand-navy)}
+.listbox .msg{font-size:13px;color:var(--ink-muted)}
+</style>
+
+<header class="ia-top"><div class="inner">
+  <div class="ia-logo-row"><img class="ia-logo" id="logoTop" src="data:image/png;base64,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" alt="Investair — Capital Markets Intelligence"><span class="ia-owner"><!--OWNER_START-->Internal<!--OWNER_END--></span></div>
+  <div class="mh-brand" id="mhBrand">Standardised reports<!--FOCUS_START--><!--FOCUS_END--></div>
+  <h1 class="mh-title">Investair Standardised Reports</h1>
+  <div class="mh-meta"><span class="mh-badge">Live Investair data · On demand</span><span class="mh-date" id="today"></span></div>
+  <p class="mh-note">Pick a company, then choose a report. Each one pulls <b>live Investair data</b> through your own connector and writes it up in Investair house style, ready to copy, save as Markdown or download as a branded Word file.</p>
+</div></header>
+
+<main class="page">
+  <div class="desk-bar">
+    <div><label for="tk">Ticker</label><input id="tk" value="" placeholder="e.g. BHP" maxlength="6" autocomplete="off" spellcheck="false"></div>
+    <div><label for="pick">Coverage</label><select id="pick"></select></div>
+    <div><label for="sec">Sector and list reports on</label><select id="sec"><option value="">My list</option></select></div>
+    <div><label for="band">Size</label><select id="band"><option value="">Any size</option><option value="s">Under A$50m</option><option value="m">A$50m–A$300m</option><option value="l">Over A$300m</option></select></div>
+    <div class="desk-hint">Reports take about 30–90 seconds. Figures come from Investair; narrative is AI-written, so check the source announcement before relying on a number.</div>
+  </div>
+  <div class="notice" id="notice"></div>
+  <details class="listbox" id="listBox"><summary>My list of companies <span id="listCount" class="msg"></span></summary>
+    <textarea id="listTa" aria-label="ASX codes, separated by spaces or commas" spellcheck="false"></textarea>
+    <div class="row"><button class="pri" id="listSave">Check and save list</button><button id="listReset">Reset to the list from setup</button><span class="msg" id="listMsg">Add or remove ASX codes. Each new code is checked against Investair before it is saved. Saved for you only.</span></div>
+  </details>
+
+  <div class="sec-head"><span class="n">Company reports · for the ticker above</span><span class="sec-rule"></span></div>
+  <div class="btn-grid" id="grid"></div>
+  <div class="sec-head"><span class="n">Sector and list reports · for the sector or list chosen above</span><span class="sec-rule"></span></div>
+  <div class="btn-grid" id="grid2"></div>
+
+  <div class="sec-head"><span class="n">Result</span><span class="sec-rule"></span></div>
+  <section class="res" aria-live="polite">
+    <div class="res-head"><h2 id="resTitle">No report yet</h2>
+      <div class="res-acts">
+        <button id="bCopy" disabled>Copy</button>
+        <button id="bMd" disabled>Save as Markdown</button>
+        <button id="bDocx" class="pri" disabled>Download Word</button>
+        <button id="bStop" style="display:none">Stop</button>
+      </div></div>
+    <div class="res-status" id="status" style="display:none"></div>
+    <div class="md" id="out"><div class="empty">Choose a report above to generate it here.</div></div>
+  </section>
+  <p class="method">Sector and list reports run on your list, or on the Investair sub-industry you choose (the Sector Report, Register Movers and Catalyst Calendar use its 25 largest companies by market value; the Raise Pipeline and Broker League Table screen the whole sub-industry). Announcement reactions compare the close on the next trading day with the close before the announcement, and volume with the 30-day average; they are not adjusted for market moves. Data: Investair connector (market, cash flow, raises, brokers, substantial holders, announcements, peers), called with the viewer's own access. Runway in quarters is Investair's confirmed estimate. Substantial holder notices with a prime-broker clause are treated as lending or collateral, not buying. Nothing here is financial advice.</p>
+</main>
+
+<footer class="ia-foot"><div class="inner">
+  <div class="row"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAACCCAYAAACenxtwAABErklEQVR42u2dd5xVxdnHvzPn3H63sTRBRMAC0lHBhgoIig0UWxJjNCbGJO9roiYmpmmKiYmJGrtvLEmsiaCC2GlSRZQqSlNAKdIWtt52zsz7x7l32WXv3QYLC8z34/mA3HtPmZkzv3meeWYeQQ601pYQwgX47IttJwdCoasFeoyUHGVLgW1ZQkqBwWAwGAyHK65SOI4i6biOq/UCKeTTpVtjL/Tp06FCay0AIYRQ2X4rsgivwPuF/mLzjj6WHfiVJbmkuE3ELzWARgojvAaDwWAwZFBKgxTEEprS8qpPHeX+pWuHgn/uadDWRNb8nzvuuEMKIbQQQq/9atcvgsHwgk5tI1e2L4r4bXClQBvxNRgMBoNhDzGVAgkqEhCqU9tIrw5t85/esK3y9dUbdnQRQrjTp2s7pwWstRZCCL1xow47VtkzR3TIv1QqjSWFC1imeA0Gg8FgaJxBnD7sr0oqN1ZVVF7Vo2uH2dOnT7eHDRvm1BLgjNv5o02bQu2tyOQjOxQME5ACbLK4qQ0Gg8FgMDSIo8HetitWGauovPjoLu2m1XRHy7T4SimFbitCz9YQX58RX4PBYDAYmo0twG1bEIoEIqGJazfsHCiEcLXWErw5YCmEcFd9sf32zkcUXVJDfA0Gg8FgMOwdlhS4HYoiUdtvTdiwobQY4A6tpdBai3Wby3uGgnJxh6KIlRZlY/kaDAaDwbDvcDTYazftfLFH5zZf01pbUgihtU79rkNRxJ/+khFfg8FgMBj2LbYAp12b/KvWbtpxnhDCFWs37BwYCvnf79Am7DMCbDAYDAZDi+ECcu2mkg/Xr1p6mq21+k5xm7A//YFZbmQwGAwGQ8tgAaqoIO9kju1/vrRsOUZqDXtsymEwGAwGg2Gfo/MjPhDqRun32Z3TPmfjejYYDAaDoYWtYK00PtseJm1LIMz2kgaDwWAw7B8FloKAzxeUtmWmfQ0Gg8Fg2K8ibIGUZubXYDAYDIb9ii0l0kz9GgwGg8GwnxHCRD4bDAaDwXAgMAJsMBgMBoMRYIPBYDAYjAAbDAaDwWAwAmwwGAwGgxFgg8FgMBgMRoANBoPBYDACbDAYDAaDwQiwwWAwGAxGgA0Gg8FgMBgBNhgMBoPBCLDBYDAYDEaADQaDwWAwGAE2GAwGg8EIsMFgMBgMBiPABoPBYDAYATYYDAaDwWAE2GAwGAwGI8AGg8FgMBiMABsMBoPBcMCwTREYDC2P1jp9AGg0IKo/FQgBCIH3hzAFZjAYAT4gXRWuq9CN+KZlWYj9dC0AKSRSNv2KWmtcpRp+HmnRlL63secVCCxr3zo7tFK4uuGSE0JgSdlidbK3SCmRLSB4WmuU8p7DtiyEEE0Q1t1lIBAI6f12b+5SKYXSutW85c19l9KNzzuaUiLS2k/dV2PuTQMSGvFeNPYdbwqCdHuSAjPUO7CI0oq4zo8ETEk0umvENFpDg+JpWTU7fEXJjp1s+mob23eWUVEVw3EUQkr8fj+RcIj8/CjFbYpoUxAlEsr+Pjqu22IDBsPhieO6zRgkG/YFZZWJVmQBaw1C4FSW8ORzk9mZ0NiSLJaQAK1wrSBXf+1Sjiz0Z37aAtfKjNYFsViSs847j6G9j0QphWzk6FUIwdpPlvDCWx/gDwbRWmUZj2oSrmTcuIvp2bkApXW9naxWGiEFG9cs56mXZ2IHg+gso2QhBG4qSaTdUXz/mvMJ7oN+W6WvvXrJAl5480P84VzXlqSScdoffTw3XD4c2WAleUMbN17OG+/OozylsSS0lNEmhSCZdDnxtCH0OrJNdV3tXRNWaKQnvk6cWbPf57Upc5m/8FM++3IzpeVVxOIJ3JRb3QaREttnEwj4CQaDFBYU0LlTe47u0plePY+hb6/unHBcD47qVIxtWc19rfhg7jxWbdyJ32cfUEtYCEEqmaLHCX04tU/XppW7ViAEetNc3LcfAV80bW3mtvXQKbDbYo39AyIcoOmdRdMKWm/+ALV0OvhC2e9NSHBiUNwX68Tzcw7pM33Msvdn8IfHJxOMRlDNsISFENi2TSQcpqiogCM6tufoLkdwbI+j6XZk++o2pZVCC2EGd/uZViPAGo1AkKzYxu9+/zc2lWrv7nSdFgXKgUARp448nyML/SitsZrQcBp9rQyWBeVlHDtjFQsn/oVwIy1hpTxL6NOP5vHLn9wNxUXguHU7CaEgYdN90On07FyAVhqshsUqGhQ8+uCjbC5L16TKUVa+NvQdPJgRvdqilMaSYi/qCSSah+9/mAeemQ2FUXCzdAy2BTtK+ebv7+ZGwFV7WoXZByuJ0k3c+IOfNlwne93yBexI8Kf//ptelw3GVRrban65ZDpMQYqXnn+J+54Yzwcfr/XE1u8n4PdhWZJwOFxbcLRGaY3WiqrKSspKy/js88+Z6bjes/v8tCkuoke3rgzs14fv33g1A45u2+Agrfq+NFhC89C99/HMxMVQGAZHHcAex4LtO7n813dxap+u1e9I491PAjXvUdSs5yESBuU2pEAQTyCOvQDr5LPSIt4C7uj0efUX03BfvB2iOe5NWlBVhejzDU+Ac9yPTg+SNq5dxX//NT5H39FM/H4KCgro3v1ohg09hSvGjGRIn6MRmffUWMOHnwDvfl8siooKKbE0IdvrQPZ8oYRySPgL8EnRsteq8d7bbfJZPW8GT72+mJsuGpB2MzauofoDAXzFRUSLClFuXQG2hKIsYeP3Ne58QkocpSk48gS+M+5s7npuLkVFUZw9hFADPtti5/adjH99Fuf0uiQ9Km9eB6S193JWfrWat+avItilE0Eri5UqBEKlSBR15gdXj9498t+HdbL3OiAoJUHIv/evgE6L767Nn/ODm3/HC29/hAiGiEajSCHSAqs9sc1hxQjhzdNblkUwGKie89VaE6ssZ8niRSx4azbdTjrNE2ClkU0YMETzothtCikoCNdpJ/sTy7Io0xANB5ra+Lw508RG1CdzoKiDJ+YNWfPSBrkDtWgC1slnt4z1W6thhSAagUhRbgGWAkLRRp3O5w/gLy4ikrXvaK6xrknFq1i6eDGL5i/gwcf/zegLzuePv/o+vTsXGhE+nAXYm0NzcVyNI3IJsIvjuvvAOGrgWrUarSRgp7jvgSe5+twHKfI13pultcZxvXvOJsBaKBxXNMndKtNCeslFw/nr8zOIOyrrC6+0xvYJ3n5rKrt+dAmFPtlsL5zX6cP0d6ey5qtyokVFpLKMyqVlUVVWwcBzR3NS1zy0bpzLvql1spdDPa8+9tIdm7F8t639lIu+dhPzV22noLgNWrm4SqEa3SlSbe7rPe7JsmyCAT+q2NfsAYNSqroNHkgB1njzjqqpFZuxMFe+jt66GUJtwHUa8+DgC6LXvIveVoJo16bl3NCZ+1SO9y7mss6V490Xe9t3NB9pWYTDYWRUoByXSS8+z8zZH/D0P+5h7CnH4O6lp8zQyHowRdD4DiwYibLuozk8MmEuQkiUcg9cxUmJBvqfNpSTj+tILJ7M6pLUShMMhVi/fAnvLvwCjWhmVKUGaSFIMX7yTJQVQOQYAkk0rvIxbswobDwP9aH4KntCKUiVb+Wb3/0J81eXUFScj+M4uA0ITCYquvpo4DoZAW1Nkcz71zUmAY1a+CpoH42fm9BgBaBiPe6Sd3aL5GFOdZtyXBRQ0LYNse3rueqam3lvxVYsSYNt2GAEeL/iaggGBA8/9BSbKz3L54C1USFwXYUMFXPZeaegYrEcVqYGaaPjpYyfNB2RFsimD+w1loBta5YxZcFqAuFgViEXQpBKxMnvcgyXjhiYHiwcmiNppTVSCh697wHe/uALCttESaZyW2WWJbEty3NLZyxSx61ecpT53LKsQ7bMmm1VCgG7PkatWgD+cKMtyGqz2yfRi1/24iQOxbIVAivddmodjYyad1IOwUg+Tsk6fnj7/VS4Aik0RoKNALeifkARCIf56pMPue+5aQgh0AfSChbe6zH24lEURy0Srs5qSSmlCYZ9TJ86nY2VCmk1feCQWfP79ptT2bgzQcCWWV3mUkpiVXHOGH42xxX70cptschKy7Kw9/Jo7r3p9DzZri8/5f5n38VfVIDjODmtXSmgrKyc0pJSqhIpfD4/0UiYvGiYUNAPSlFWWk5pyS7KdpZSFUuCEN497oP5OClli5WNaM65ZZMWvHvteNkr6NIyb+63qQLuj6A3zEGt/9zr9tQhZAULgXJSlO0spWxXzaOMsvJKYokUQsgG53UdJ0W0oIDls6fy4vRPEULiusZb0JKYnbCaagUrCEVsnnj8KW68/Ey6FfoaHZG6zwU4bYF36XMSwwd246X3vyQ/6q/jOtJaEQgE2fb5CibPWcH3Rp3gzV02dnMOrZHSAreK8W/ORviDud142kX78rhizMi0cIsWamSastJSzy3RrJbvRUHHkk7z2oHW2MBbk99k7bYY+cUB3Czz4UJIXCdBQtmcc955XHjOafQ7viud2rUhGgkigEQiQemuUjZv3cbq1Z+z+ONVLFq2klXrNlJaEfeiVvNC3sYzzWxmFeUVOCW72KGSDUdBC89qtMNhgn67zpz0noOLRKyKVDxV/bv6y92CHTupqEo03nwVFug4avFksEL1BF7lugENwobUdtTCichuN8MhYtsJIXCdFHnFHRl97glI7aTXeHjvfWVFBV98uYnP1m0k4QryoqF6lzNpJMKNMX7SNL5zTi8sYwMbAW5VVrBW+INhdn6+nL889SaP3TrGC46wrAPx+qGUi7CCXHnRWYyf9QSIIFBXCLSwEE45L0+awvdGnYAlGv9iKa2Q0mL90g+ZtfQLguFo1pdYSEkiVkmnnidz/qk9AL3voynTQXgpO8If7/kVPdsHUbrpXkUhBKmUS/+Tj/Ws6SaeQEgLUEydvRAsPyKbKAiBdpOIUFuefOgurh01MPcJux7JAGD0yLMBSCXiLP9kBVNnzGXyu7P58OPVuDsrSDVxwOE9luBHt/2Ui75Zis9n1SuomUGmJeGFp57ildkrCEeCWecDLSmpqqji3Mu/xvXnD2rU+vjMOuCjjz+hehDZoPUqLPTGOah1n4K/nrW/OhNsILJb0f4Aavkk9IU3IQKyZYOx9lcPICXJWBVHnjCICU/ckfU7saoKli5cyN1/e4xX56yqV4SV1vgDNh8v/ZiSFLTZi6BNgxHglrGCXUUkGuC5p/7F/3xjJH06hA6YFWylA3hGnj+Sbn97ng1VLv4sqzOUUoQiAebNnMWK7d+jZ9tAE9aSCiQwafK7lFQqCtqIrEsSpRAk4g7njR5Ju4DAdd3Gr/FsovWrpI/zLxhN//b7psybsgmHTq871/EdfPr5Vwi/L2tUryUFZaUpfvrrW7h21EDPRV0ddCVI/7d7f2itq7ef9AWCDBg4gAEDB3Drzd9j8UcLefwf4ymO+MghMbnGKwCcOPhkTmximSybOomXpjmIaHbLUgiBk0xxXN+BXHLB8JYpd+0Vklo8AWIpiAqyhpZrDf6QF2HspOoqhlbgC8O2xagVH2H1HwzabZk1wfvfDEY5DnFX4cP1Bts13slQOMqQM87klZP7MuaSbzN54UaiYX/2ICutsW2bXVu/4osdcdp0DFbvm2BoAS+mKYLmWMEaOxCkYtMa/vTYq56lc4AiK4WUuEqT37knF5zem2RlPKvVqbXG5w9SvvFzXpm2OC3KujEPi2VJdHwnL7/7ATIYyvGsAu2msPLaceXFZ2VuriVrgdLSUhzXJZFyaiyxadrRvKhi7zdVJTvYsqsK25bUCVdJz8vZhe24cNjJnsUhvflPS3r7IMu0GEspkFJWz2lblqwV+ayxGHDiyTz62J+59py+nrg3cW/v2suQ6j/iSa88Y0mnYdMn7YJ2XJdEMtn4cm9UEEJ67W9qO2rpFPBHslu/0oJYOfLk7yGP6wvxqhz7LEvQMdTCCTRpFHOQiLBlefO8NQ8hhLfuN5mCQBG3//AqbCeGytH167RXIh6vZFdZrHpsYzACfKDbdy0cVxHNDzHhueeYv64US8gDF7af3vz9yrHn4CeFm6NnUQgskeLV16bg4G221dAdK6UQwMfz5/DByq8IhfxZO08v+KqKnicN4cxe7UCrFo/kPWBBWOnHT8ZixFJO7nNojbRtbx61if29J8xecJNI14OrVLMDsg7KIKy0m1R/9jZ685fgC2Tb9cWzZGUYOeQ6ZN9hoBLZS1spCITRq95C76pIzy3rw6DvEti2N/XQq29vOrWJkHRUvWMrrTWOYwKwjAC3BveOUp64ij071wCJHV9w10P/SSv0gWmwmTXBQ84+m/7di4nFU1k7T6UUoXCIJe/P46P15QgpG7REMiPlV16bSlVKYOdYmiCFxklJxl40iqAAR+lD32mVcSXnEl+fj2TJNuYsWoUlJcr1lhwp3fTlHVLKw3B3Iu951cKXwZXZRzBCQKoKjjgJ0ekI5DHDEPk5tkdFgxWEsjWoZdO9/z9c1gQLT4jD+XkUhgK4SuVsuzrthg6H/Kb/NwJ8AAtHCOLxFENOO4VuxWGSydqjRlcp8vKjvPHSS0z9dBuWPDBWsEivCbbzjuDSkSfhVuVYE6w1li9AYvsGJrz1fg3rOfco2LIEqdKNTJy+CCsczi7YQuAkE4Q6duXy8wZXC0ZL4zbT7bx37ufdxlUoGiEa8OGqXMu/BKGA5k+/u5s3PliDz2djWd66TFHj/l1XVc//Gmp4daSAytWoFXMhkMP9LASkksjeFyGEhjb9Ed36QDKW3Q2tAUujFk1Izy8fXnObynVx0l6t7E3b26gnkteGjsXhrN4/gxHg/SNsUuJWVtLr5KH8+OrhpMrLkTWDirRGWD50xRb+8PdnUenMRgemIr3rjhszivwQpHLsPqU02D6Y/MYUqpQXKJTrjjPu5w/ee4+P15cQCmTPpGOl1/4OOfNM+h0RbtG1vzW7ioKCAmzLIuCz9+sa4EwtB4s60KV9Hq7jZg0m0lphBYKUbf6csZdfz9gbf89zk2ezdnMJCmrN+XqBWbqWIB/eApxe+7t8IrqkBGw7h/vZAV8xst956ZFRwPu7ipM9GlqBP4xeNwO1caMXp3A4lHU6pmDnlm1sLauqdklnG8ynkkm6dO/GkfkWaLXXWcIMuTFR0I0YopRWuXzrR9fxl8cnsr7KJVgjSYDrKqL5Ud577VUmffdyxp7Y+YBsZp5ZE3zsiacytE8X3li6lbywr45FnnFDr1z0ITM/2cq5fdrnzpCU3v5v/GvTSWqbEJpsq2aFVigZ4vKxIxGA02Jrf3d3vFIlmfTqJFZ3DJFydJNG6VIIkinF4NNP4bhOhU1PRSgErquxffmc3K8H7y6Ziwhn3x5RK4UvGASVYuJL45k4/hWK27fjmO5d6d2rBwP69qLv8d3oeUxXOhbn10o5qJSL1gJpycMsBlWn256DWvQaiEDWskVISFZA5xHIo47BW35nIXtdgMi/D510s2iwBumHqq9Qi19HHnlDy2VI2u8am4mk13X+zXE1Ab/F1Kkz2VqWIr+NINvW0lKCk4Rhw07HjzeVZFsYjAAfMDOYRKwSf/4R3Hrd+Xz/7gmE2hbWSA2m0dJGJnbyp/v+yQXP/gqLA+BOFALlukg7yuUXnMHrC56DSIC6a4I9q12VbmP867M4r8+4rBmSamY+emPOcnzhUI6tJyWJRBXtuvdhzJm9Ad2y7met0UJiuzF+84vfNG8jDlvAzhT3vvwcx108sFmpCIVnw3LphcP52/MzcZHkigHQSoGQ5BcWAJqq8lIWLPiQ+XPf96YlQ2Hati2ie7ejObH/CZx5+kmcflJfOhVHq5/Z1frwmQPOrP3dugD12ZLcW08KIOUgT7gwnY5Tg9BQ1BfRvR966YcQitT9rdbg96GWvYo+97sI38FfrkII/EKAsGuNOTIDS8uClR/N4jePvEogmpd1Bz8hJG4iRqhTd64fd2bLv8sGI8CNwZJeKP813/kWj/93Gh9vTRHyyWp3rHJdIvl5fPDuG7z43pV886xjD8gWbpmcyBdcMIrOfx/Pdkfhy+JhU1oTCNq88/ZUSm4eRxt/3cX2mcxHM96dVp35yM0yZJZSEK9KMmbUCDpHvEAjuV82JRHkFxQ0yzK0LUGpSO1VKkLL8ur/xGHnctEpzzL+/S8pLAiSyhU5qnV1+Vm2TcTnq07CoJSidGcJ73+1hXkz5/DQo0/ToVNnhg49lauvuJCLz+yHlQ4GFPIwsIbTIeN6yQSoiOfIrStApyDYHtnv3N0WcVq8Zb/RqMVzgGh2gfeFYfMC9JqPEb36eiJ9kIqNSMdgbCopw+cmq9cBa62oqKjgiy83MG3qDJ54/nW2VSlC/ixTSULgs2DnjgS33/k/9O0YMWkJjQC3lgbuzdGF2x7Nz28Yy1W3P41oU0hNH47GwqdL+fP9TzFu6J8Iiv2/3ayQAldD22P6cu4px/PUOysIFITqDAa00gSCQb78ZClvf7iWq07rlk6MLmu46SwEDi9Nfq+ezEcClIMIt+HKscPRgBJyvwUWuM1Oz7YvUhEK0AptR/jL729l9pj/ZXtCEfHLBtP9ZdyCtV5E24fP50cKgUZTumMr459/kfEvvcqpZ5zBr277PucPORatFPqQFmGv7aHKcJe87Qll1uArCclyxFHDkEce5XkfxG4vhOx5PqLgHnTcTa+321NwLHB34S58BdmrLwfr1pTKdQmEIqxbMpdBZ162x3N6639Ly8pxky6BvKgXx6H2THdpgXLYuaWMcd+/iTuvH4Fym7BVraHZmBJuAo6rGXf11Zzeqz2VsVSttYxKuYTz8lg+aypPvbUUKWUz0/7tnVXoWQo2V148HEslyB6f62VIIlHKhHSGpJoC2+jMR1IQq6qiR79BnDPgSIRW1Vb4YfHySIlSim4DTuelR35Jga6itDKJbdtNDvCqufGG6ypsn4/8okLyI37enzmNCy+5llvufxklpSfCh2rckFKARq+bht7wGfiD2YOkBJByEb0v9HqxjKhkgqoKeiGOGQjJquxhvFpDIIRe8Tq6Iu6J/sFaqELgOg6lpWWUlpXXOCqIJVKEIxEK2hTgs+puvqOUoqy0lPKk4H9+/Sue+8sN+A8XT4sR4INttJnCjrbjFz+8Ah2vqLPTk9ICv53ivr8/ya4U+KwDkaDBu+aZI4fT68hCYkknx5pgTTDsZ8a0GXxZ4dbKkLQ789GUejMfWUKQSmouvHAUeZaXP/RwC5j01vcqzrhgHFNfup8hPYop3V5CPOWkU8LJZkWR6rTL2lWavPx88gKa+359Bzf86UVv/bZWh+iyJW84qBZOgBQ5di8RoJIQOgLZd+Ru4d09ggQkst9oIEnOaGg7BDs/QS2fU+N3B6sGC2zbrnNYlty9o1qWBhMKRxl27mhee/mfPHjbVQS0Qgtplh4ZAW6lna3WjL7sSkYOPIqKykSt6GFvv+Uony+YzaMvv4+07APwIkocpQkWH83YYQNwKmNZdx3SWhEIhtixdiWvzfzE6/TS1oeUFqgqJrw5J3fmIyFwnQT+4s5cccHpdTvB/VEfBygVYZ2XyPLStvU/9Szee+sZ7v/N9XRvn0fZzl2UlVaSctzqnaiaI8iu6+JiUdg+n6fu+RuPvbGkWvgPKXR6Hja+AbV8Zu6tJ4WEZBWiy+nITkfguZ9FrbYJaTd0YRE4ubbUFCBS3prgGr87aIsvEwW9x5FNrLVS2KF8fvTTm5n23N1cMORYUinHiK8R4Nbt6tFKIQIF/PJH38BOxVB7iI6rIRjQPPTQk2yq8Ead+7ublOlO67JLRhH2KRwtcjiiJVLFePm1qd7+BMJzg0oB65d+yMyl6wmGA7m3nqyMMfDU0xl8dD5aqf2cRN5LR1hasqvJx46du3BKdjU7FWH2wYBnaQTyivnRLT/mwynP8fwDv+Cyc4fQLj9ERXk6129pBYlkqlYC9UYNBLTCxSLgd/jjPY+zI67TwYGHkgB7D6NXvIbe9hX4fLndzw6IPhd5f9+zfWbc0NFjkceelNsNrRQEIujPpqC3bj/o1wSLTKKP9FGfUAspcWJl3HPX3Zz1tZ/zwWfb8fnsQ29Q18oxQVjN6mg1Qy8Yy8WnjWfC/A21cvBqpQiEI2z6eAH3PTeNe7430ktXuD8FOL01Zb9TzmDI8R15b3Up0ZCddU1wMBzk/Vmz+GTrjfRuHySVcvFLeG3ylPozH6FwtZ9xY0ZhAY7eT41pH6Qj9FIRKgYN7p72bIh9V+7pudxom/Z87eqr+NrVV7F9y2YWLV3B/I+WsXDZCj5euY4NX22nsjIOUmIHA4QCfm93rHriBpTrEoxE2PDxQl6Zs5LvjOjpzRcfKsEy6SAqd+GrgB9yBv4lIdQRq/dZXsyDVnVHucoBaSP7jML94B3IGQsRgIovcRe/jT3qGwftmmBv72a3Vhv3PETewDBXwKFWLjPffp2Ry1bywr/v5/xBXU30sxHgVt1LeJu/W2F++eNreONrd+BSOwevqyAUtnnisae47bqRRAL2/h1YZ7amDBZx2XmnMn3ZK4hwAXuuCfYyJAUo3bSWV6YspPfXT0NaFjq+kwnv5M58JIQkmYhTcNSxXDJiQFp89q/1uy/TEe7LnX4yHV9GiIWUtO1wBCNHHsHIkcMAqCwvY+Wqz1ny8afM/WAxcxYsY8XaTWjpIy8SbDhhulPFlBkf8J0RPat3QDv4rd90FPOuJejVH0Egx9pfKSFWiejzdcQRHTPD4izf8/5NDPoG4o170SWVYGcJtNKAT6KXvAIjvuElQj4IPQeW7aOwIFhrsFZWVk5paQxfJELIb+cc3BUUtyG+fR1XfetWpk1+gpO6FnjLEKXxRRsBboVIy9vzeeCI87lq+H95euoqCvJD1ctPtFb4Q2F2rVnGvc+9xyWd8rKsY2zhexReRzPm4lHc+dgkyl2NncWmUAgs6TBx8hRu+9pp+KVm2fw5fLByM6FIAUplX/tbWZXgnOHDOKbIh1KuN2+8f3sdLx1hcR5urp28GmGxttSWmRkhzgx0lPKCpqSQRPLyGXTiAAadOIDrvvU1qsp2MmPGbB58/FneWrCaaDTibd6R3WZD2oKVK9fgALakyZmWWquIIEAtfQVdVg6R4uzvTCZ4qvQTnGdvSP9O5iipdMJl1/Y26Mgl/P4IeuNc1Lo1yB7HHFRrgqVlUVVeSu8zL2DqU7/Ap718wMlEnA1fbmDmrDk89vQEVm4uJz8azLo/gZNyCEYLqNi0kutv/Stz/vMHwkKhtTDzwUaAW6cVLLSLxs/Pbv42E977CSnlTahnXnPXVQSjAf79xD9pd+VgwkHfXq47bbq4KA2de5/IiBN78OKcdeRHA9m3poyEWTr/fd7/bBdDjylk/MQpVKUEBSL71pNoF+3P44qxI7xzaHFAggkyQVhC6H3mRm5pMc4IstYapb1E5+H8Is6/+CLOHz2c//3+zTw08SPy88JZLRYvU41k+44dlDtQdEgosE6nBoyhFr0OVij3XKzWYPvRmz5Ar5/duNMH8rxld1nPqUHYkNqBWjQR2eNWDro1wWkLuDg/WqMZRGnfri2DBg3gm+PO5ZvX/4Q3F2/MLcJOiryiIpZOmcyfnzmH3197Nq7r1mq3hhbop00RNH/kqZTm+CHDufb8k6gqq6qVJF1rjR0MsnPDKh749+v4QrmtmpYaJCjlokWAKy86G5FKZLcUtMay/SR3bGDitEUIt4yJ0z7KmflISEkiFuPIXv0YPaQHoA/r+aLqVJVNFOSaUdFaa1KpFPgi/PGOmziqwCbh5ljSpb0pgFQsQSIFh0RWea1AaPTGWaj1K8Afqn9JkNbgi0CkTeMOKesXVa3BH0Atn4SOOd73D7JgLK01Ka3RyvHSXaa9LqlUiuIjj+HFf95DvyNCVMVzJ0pxXE04avPg/Y+xakciPYg3ObqMALdaO1ihkfzk5m/TLqJJuHVSBmNJ2LJle+4ljS1pIUov+nnEeefQo2OEWMrN2qm7Gixb8970Wbzz5hRWbNhJ0J8985EUgkTcYfT5Iyn2e5b+4eym8vL0eoOd5m68IoTAZ3vlndfpaPp2a0cikT2ns9eIvCjWQ2aKTqfX/i6aAAm3cRF1Wnku6sYcjTmXLwzblqBWLCCzy9lB1x/tEQUtpcTn8+E4DvlHHMvDv7sRmaios3Jjd3+l8AXDlK77hHuefN2LjVAmKtoIcKvtfC2UUnTpcxrfu+R04mUVtazgao+ZbR8QO0UIb646r9NxXHhGH1KVsazWqlYugXCEzxbP4dY/PYMMRhA51v5qN4mV34ErLzwzYxIfhjWfTrbhJnn6ny8w+5ONSGl5ZZveQGNvLIeGfquUJhQJ4+VL1wd9WSIlpLahlk31LNsDIn4SiKMWvVxjoHNoYNsWrqs44+LLuHL4CVSWV9Xpp3ZbwYpwXoD/PPsCK7bF05u+GCvYCHArLkCt4aabrufIIpt4ltR4BzS3q1aA4Iqx5+AXDm6OnkVIi2RVGavWb8by+bLesxTe2t/eJw/hjJ5tQasDGimplPI2qXBV849mjvCVBizJpP8+z9ARV3H1T+5lxqI11et7ZXrNeGZrSZVjU4TMfHDK8XYs2/H5ShZ/tpVAIHvMgBACx3Fp374tEYlnoRzMYpEuf736TfRXG8Dnr8f9K7zo5r056ruPQBi9+i30zrL0nPShIjxermmNn9v+52oiMoWrczQarfEFQpR/sYr7n3m7etMOgxHg1tm009sCtusxgJu+NpxEWQWWbD2BC5k1wYPPOpuBPdoSi6dyzgEJYeH32TkHDFJoHEcy9uJzCQgvV6g4gJ1KNC+KZVn4fd5carOOvZy/LigogFQVz/3zX4y8+FqGXn4zDz73Fms2liBqzPPKzOYI6bk5N702M+Mu9Pl8JMu3cdMv7uWrSghYIuceFMqF4447Bok3fSAOgS5ILXoFXKuehxGgHagsaf5RVVqPaavBCkLZ56il07z/14eO8EhLopWmz9CRXDK0J5XlsZyBi66rCUX9vPjMC6zZmTRzwS3pnTBFsO+s4Bt+cD3/mDCT9ZUuAavuBj0HRKaEwHEVdrQD40YOZv7DbyGD+Tk2B9E5B/2ZlGfhTt247NyTqsV9/1v0mXzAVfzslp/RLs+H4+omr+UVCNxUgnCH7tz3ux9SlDa8mjqf7bouSIuigiiplMOcGTOYPXU6RR07ctKgfgw9ZSCnDuzF8cccRbuifIL+2okatOuwdcsW3ps5hwcef445yzeQFw3ntMyFVmCHOfPU/ukaO4jlN7P1ZPlK1Ip5EMjlfk6Lr78Nsv8l6SVFokltBiEgsQO1YhbeumGdVYOxNGrxBKwzx3JoBTd4+xdoGeDmG69iwnt34BKibr7w9DLKYIjSdZ/y92fe5cGbLvD6CxMRbQS4tVrBrqso6HQct37rPG68+2VCbQtQjtsq7i+zJvjSMSP541NvkVA6VxdUryVdURVj2IVn0qdDCH1A1v7u7kykSvHu21OaP8oREhKVhLqfxJ9+80Nv46W9GBS4rosGonlRhIB4+S7efesd3n39LWQwSJuiQtq3K6ZDuyLywkF8tkUymWD7tu2s+3ITm7fsRPgD3vKjHNsBehugVNG2R19Gn3I8B33C9Mza3+UT0SU7c6/9lRKqyhH9b8S+5g97ccEkqXsGojdsBn8WV3dmTfD6magNG5Bdjty9QcghYgUrrRk0/DwuOu05/jtvfdalidVWcNjH8/9+nluuGcXRBV6QoDQLg40At8rGLb3gmWu+ex2PvDiVT7Y7hHytw3UjhbcmuMegUxjaryuTF31FXsTXpOUzQrsoGebysaO8rXi1OMCNR5BfkL8XngGJk/BRUBDdp4ZOZhcry7bJL8hDpJNcVJSXsWvnTj75xPE6/vQGEsK28Pt85BcWoLXKKb4Ati2pKElxwzevpHNUHuTrNNNrf0mhFr0GMljPkFCBCCP7X7Q7srmpgz/lguXH6jMCZ93/QSDo7Wi35z1JH8S2oBZNRna5sXqQcKhYwVq5YIW45cYrmTjn9yhRnxUcpuSzj3nwhWnc+/1zjRXcEn2zKYJ91LSFN8cSKj6Kn393DE5lBaK1WCci8+JFuOLCM9DJWJNG9UJIEvE47Y85gYuG9qS1rP31ArD29lB7WbQih3GncV0vCEtpjW3bhEIB8vOi5BfkkV9YQH5BlGg4hM+2vMjpegZEts9Hxc4Sug05m19cd66XFEQexJ2h9oLH9Jb5qM+XQSCUfcmLkJCKQXEf5HGDPOG1fE0PvrK8+WXR9yII+nJ7TrQGnw+17FV0Uh80O2I1FittBQ8ZdT6jh3SnoiKeey5YaUJhm2eefo4vypzqzX0MRoBbqRUsUFpz+TVXc+rx7aiMpVrNfqoZ19HoC0bRpU2QhNP49buWFMRjKc459xw6hb00eMYT5ZFKOdXBVvXVtbcxgsZVmQjsdHS0UvVGyXsBWjaVu0oIdzqeZx7+Ne3DAoU4uNcBpx9ZL5kAVfHcQicEJOPInqMRIZ9nyTan8aUHnKLzacgjj4FkPPt5MmuCt3yIXrMUz0d+KEUBp6OarQi3fu8KfE683nXB/mCY7auX8vB/3ktHRLvmpT/UBXjPBeW5jv13rcafSyuFndeBX/zgclS8EiGt/fo8ufsfb01wcbc+nHdqTxJV8fQ2jo24L+0gI224cswwNKBbeE6sseW1r4696czatS1EV1VQUrKLqngShEhHPnuC3JzzV++UZVso12HX1h0c1Wcwr//3YU4/tl2z975upvMEb5uMHEezbkN7Vqkqx106BXzR9MlklkODXeC5n9Nl3ty68sQ7guw7Ety4Z0lnu6b0g67EXTQx/VPdjEJr4GjCc+zrdpzJa37G6IsYeWJXKisT2Ok81XseSgtCYZt/Pf08mypV+rdGOA9hAdakUk6jjr2fXm34WjrlVCdZaHTjVpoLrriKEf07U7arAuW6jbpOi68X1gqNxZVjhkOyikSq4ftyXE1paRnd+53I8P6dEC2+9rfx9b9PDsdpVmduCQCLe+77GzNefZCbr7+EPt2PwE0mvLy/u8qoiiVxXIVIi3JjDikFruNQUV5B6Y5d+KNF/OC2nzL3tUc5o2eH/Z4qTmvPWM15NKfJZtb+rpqE/uxjL8I5Vg6JitpHMgblW6G4L6JHb6o37Wj+eMn7o+9F4NdQWQbJyrrXjZd578qSF9G7ypu2JlgrcFMNH8ppZPkr3Ibe0ZRTKxVhYwYIWinw5XHrDeMgVk7CUVnPnUwmkT4/Wz5ewAMvzNg9nWXYJ7S6ICwhLIqKCmhra4J2lqkaIRDKIeHPx2eJFr2WZVn4BeSFg01s3C4yWMivf3wNS295GF9efj2NVmAJhT9h47dbdk5PpremPGPEcM7o918+3dFwoJhtWZRKyZWXnU9UetGRLRmH0WD977PrSJyE3wuU2otmFIjkcdaI4Zw1YjipRBXLPl7B/A+X8v7CT1i28jM2bN7OrrJKUvFk4+4rEKS4uA0nDTmOUSPO5IqLh3Nc5zZp3TpU9t32ClxvXo3oeiqE8rIvPxIWxEqRJ12L8EsvaGpvcvVm3NAdBmMNvgy1YUP2aOiMFRuPoTetQhSe2Pg1anbIi+aOFOWI6La8rTZDeY26ZZ8/SJviQsKFBVmXDkrLIuaDwrxwk4rCSueuHnbRJYw96w1mrCzJmjM84z2LBH1MenkSN3/9LDqEZbOW7BmyNLPSirjOjwRaj/2rFRUVVY3YYEAQiYax98Iaa8y1tNb4AwHCQX9TTw5CUF5ejqtFgw4nDUQiYXz7KR9pvKqKeMptlOtKA3l5UaRo+YDQxtf/vrG2hbTIi4Sb3ZnsTjUosPeoOyeVZMuWbaz9YiMbN29j4+atbCspZVd5JYmEZx3btk04EqG4TSFHdu5It6M6c/yx3ejSvrD6PK7rIqVs8WmKPZoum778ks0lFdi2zKlRjqNof0QnurQvaHqnfDCk/WtqxLWb8OaX62296WjrQMOi6aSSVFQl6q17rTWWz9c0Q6EGqWSCyliy3msI4e37Ho7mEbCN8u4LyioTrU+ADyVabZa4QyKBbCss1j3SDFp7M5jSGkepFs1ZbN4kgynbAyvArXIdcGPnQveFRdC4azUvMbWgaftA7y8LB9H0/anFfhSB/b139r4O6JN7PIdSOpO+oTEtDSEFMj1v3BoGFI197pYRgJYUiBa6dmPar6DR527Z/lC0zj7qMKFVCvD+rOQWjz5upQ22Nb9Ih8pLnnkOyxIH7f23fF2Ivfy8FV57H5fZ4dpHHQ6YdcAGg8FgMBgBNhgMBoPBCLDBYDAYDAYjwAaDwWAwGAE2GAwGg8FgBNhgMBgMBiPABoPBYDAYjAAbDAaDwWAE2GAwGAwGgxFgg8FgMBiMABsMBoPBYAT4QJLZBH4/78lf9z6UwnUVev89OK7r1puft/Hll6NM929F7pPnaVXtshXfn+uqrPlcG92eD7H6MhhaO60qGUMmlVvNpOOuq5CWPCAJs4SUNJSPZp/mahECax9kwMm2ufoB2XB9Hz1Pa2Ffl+G+TmreUPrDBtvzIVZfBoOxgJvQGwkhsKTEdRwqq+KodKfSUB+l0iP7+kb/Nb+ntU5/P7s1oNLnefvVV7noB/fyZblbPUDY83wibVmo+iyPzPVcldWqz5y3ZONavnvrPby+6Mta99EUkokku8oqiSedPf49kfXf91VZNuZ5HMdt0KOw+/qq3raSub1cZZrtfHtj1ynXpbS8knjKrdcCVUpXl0m9bULpavHds/xyPUN2yzRjlae456+P8tunp+5W9z3a83tvv811v/gHmyprt+fMn9vXr+bSb/+a8fPX1dv+9qx71ci2Um+d1jwv4KrG1Vntd6vhGq6/LA2Gw1CAddoUKN3+Fb+88z4Gjv4BJ4z8Pv0vuJnfPjWFuCanS1prkFJiWRJLinpzcWa+J4RIf18i6nnF23XsyMl9uhO0M0OA3UMBV3nne/i+R3nozU+QUmTtYHRmYGFlrk2dK2Y6jsqdO3jmpXf5+IudWQW/PjKd+H/+9Qy9zr6ecbc9lS43IFXJ92/6DccMv5F7X1mYs9Pfm7Js6Hm01ti2Ve+ASmld4/oy6/UzbUVSzrd//BdWl3llmk0ENNQ6n2iGBKt0nW5YsYRBI67n4TeX5yw/y5JIKarLRMrsuVaVUggpWPnBLK6785l0+WUTG13rGaSoL3er4t13ZzJ5zoo6Apz5zarly/nnq7PYldDV5VMTfyjCif2O54jCUL1W+551L2XuIXJj6rROmwIsmamz+vuN2u+WqEdYm1KWBsPhIsDpl8CNlfGDH9/F315ZxJhxF/LAnd9j3Ond+d0df+H7f5uMEAKtVZ0OVghYsXwFL0x6j7kff5HVp5d50T5buZLXZy2nKh5j6vT3mfLBKtz0K17zXcycolOXLgwfcgIRn6ilvxqNFC7vvTeL/3tlNq+/M4uZS9Yh9khunekgdm3bwitvzOS1mUupSHmnyfbyS9umTVE+IX/zZwYqK6tIKMXSxcv4aO0uhID1K1cwd/lGVCpJeVUyR/fUtLJcs2Ilb879lNJdO3l31hIqHep06tK2KS7Kx5fuHNd8+ikvvjmfsoSq812tQQrB+s8/54WJ03lv8Vrv+jXmXbXWoKFi5w4ef/Q/TJ61hOfGv8NnW8pB1C1TASxetIwXJ73He4s+r67A5nS7ruOwY2cZVbk8CNrlvZnzWfj5NmJlJUx6Zy5L125Lt9s9xVCwZsVK7v6/SUyfu5iXpiykyhVZ3guBQDF//kKenzSLVZtK0+fLfgv5+VEKosGczxAIhSgujGLnULVANJ+zTxtA17bRWu9BzZoVwivTCe9+yM7KOPPmfcT7n27KOmBsTJ3WeT9nf4KrHGbNXsDUBatwqDOeqNFeBcnKMt6ZNo9Xpy1kV1x5wore67I0GPYHB3wO2FUay5Ismf8+4+eu47d//R0/v3QgAGNGnsLg/icQi3ZMj15FLbeaFC53/fav3Dv5U4YO6sGiJU9w1Xeu48/fHY5SCpmeS1ZKY1mCdya9zq3/Xshlo09kw9ovWLD8C77x3et45OYLETUm5DLfn/jCC9z4j8Usn/dPTmhjpwUVNAKJy1tvTOeruCS1YjnTF53Amf2P9qwbIaqvP2/KW4z76VP0GtCbsk1f8ucuvXn5gZtoF5J15wD3QRCMcl06Hd2NdsR47b1lnN5tKFOmf0C0UxfyS3fgKJ3V5d7Usnxr4iTufGUN5/Rvy7zPksye1I+IvUeHpjXJZIpINMquDWs46/KfMfKa6xk7SqCURsjd5S2l4NUXXuTWR6cwqP+xrFnxPKeeP4aHbr4QMt/VGiElsdIdvPDGfAKhAG+/M5Ohp/ShR4c875xi9/P8+U8P8tT0z+jdoyPLl62g64lDeflvNxCxQQvRpLl7IQQ+n40l6gqld64kv//jQ5S2OY5+HS2mzF5GGRGefvgOxp7cxWvnaYtYSsmaT5Yzbdkm/JEoz7/xIWcPHUTYyswLexKikxXccts9vL26nP5di7jj/he4667buOLUo6vLbE8vSHOCsDIDxa2ff8pZl/yc3z98H7eP7Vdd114dgZSapx55gh8//Da9eh7DxLdmMG3qXIZe/i1O+eWYPb7fyDqt2aZefY1fjl/Jty7sz6w5S/j0ixK+88Pv8sD/nofWCiFktfseKfhq7Squ+t+/slVHKRAxbr47xLMP/4LTjy32LG8hqi3fppalwXDYuKABVq1ej8gr4syBPXBdRTLl4irN+ReMYNxZvdOdpage/0op0G6Ko4/vzSN/uY1X/+83fOO0LvzzP++w0/VcTXvqWEFhHq6T4NTh5zHtpfu45eK+/Pu5SazYnkTIuu6rUCRCcXH+HhaDQGgFws9dP7+OPBVj3LXXcse1Z3kBY2mhynQWBAv46c3f4c2n7+DRn17C+9NnMXvFlgbcZc1HOQ5WKJ/hJ3Vn+syFIDTvzP2UU04ZSL6tswhw88qyTZsiKkt3cMLQ81j48u/o6Pe+ULMf01pjBwKUbvqM7972d0655Ov887YxBKUnaBlPgJSC5K7N/Or+lxg0/DxeuP+n3PvDc3n6ieeZt6487d73xNd1Fe2OPo7f3XAuOytc/u+hOxnVtxNuuhPNnE/HSnjqvzM4+ZxzefmxXzH3pT9yzTl9vPM0M/IpaxS02P2Xju0K+HLzDv73lh+yZMKdFCS28993PvI+TReglBJXw3mXXsqYQUcQ6dKTV+69gXYBVe2FcF3vHj+YPoNHXl/GL2+/iecevJ3Rx4f59b0vktQgxb6PyJa2j/Zti4gE7DrP7dXRV9z3r7c45dwLmD/hbn58UX8qky5tCyM5vt9wndakqE0h8YpddOl7GvMmP8TXTz2SlybNYEeqdhtU6WJ/9PHn+Gi7nzdf+hvzXvo9p3YJ8d6Hq0m7Q9KDkgNTlgbDQWEBV7/86c6zcXFH3neF5Sc/JHnimf/w7PMW2zbtoCDYnqqEpihct5NNJZJECttxzinHobXm9JN68afXVvHlV6Wc0LZdxlPVoMWQIZ5IovECnPbsTHQ6PrptYZTlC6czZvpchBOjsCBKrCpeyzW2LxFCE0sJzh1+Ms/M+C8zFyxl1XaHbw8bwMdvTs7iVm5eWTrJJHakiKsuOoPi/OyDCaU0+WGbRx75N5t2xHnyB0MAnfZ6iFrW1+YvNhLDZvXCeQy9bC4+W9KxOI91G7Zx+tF5tctKa+IJJ+1yj6F0tJalqrRGBIu44esjuPuFZzn2nTcYMKAPN11/KQUBWX3NfVzwVFZWcXyf0xhwZAEoyTFHFFCVrmuRRcxTrkK7LklX4c8SfPzJ6i+J5gV57O+P8PB9CpWMEQ4m2BrTHBmW+zyKOqcHJn2hki3b2B5zuPTk3iilGXBSP7oVheq45ZtVp0AqmSCQ14aLhg0k4Bf0P74Lkz/fRNwFfGm3s85YqwmWrtpA7/6D6BoGrYt5/sm7avQn8sCWpcFwMAhwps336tkdWfkq0xes5IzuJ5NZDfHsv15ko9WRW75xNj68tyTjEv18yYd87ccP8p3bb+Pua4fy29t/yzPLXcKh7G+SkIJUKknK9TrqeDwBQhDw++p1Pdb3mRCCYDCIJQWuq6s7LCEEwqngf37yF9bn9WL207ezas47jPzRM4TCoWZdr3EDGUk8nuCEAf3o3fYl7rz/BfKPOpbTenYgFk/VcbU1tyw1Gr9to10Hre2c91JREWPMty4nuHEhv/zDPxg98Y8U+yHtRayu/1A4QFVVnEvHjuV3Xx9c/bm0vXPXCvQSAiG8ZTXRSAgpBG4N0ZBCgPBx6203Me6yi5nz0Se8/tYMzv/mr3j7pXs5rXtBtUu4aRpbv9taCFntZibleoKR4xqZerZ8PvzpIKw9CQcsYq7NH+76OYO7RKrnTwNBUcfbsLs9NvwMzf3cZ1tIBPGE146U61CVdOr8pll1msaSEsdNorW/2luxhwMqPbSV+GxJLJbwvFIC1qxZS0yE6Nuj416XpcFwWLigpeVZLH0GD+GaET35w+/v5/aHXmXiu+9z510PcO1vnmb5hl1I2D0yT/9RVVmFgyQa9LF40WJmLPuSVKySVetKvHmfOteySZbv4PHn3mTR8jU8MWEmbTsdRc8u+Z4rVtQVp5Tj5LSAhRAox+HjZZ/y2caS6o6oelzvpqiIpciLhtmwbj0vvrmApFKs/vxLko6q21lqTSrl7N0csFLE43Gi4TxGnXQU06ctZPDpg8kL2VQmUt78WW0lbVZZKqVIOo43/5mj0xZoquIpBp1yMnfdfh2xdUv47dPTvO+no4szgTDtjurGid2LmTh5Ol9s2cVrL01g7I8eYmuVd+U6nhEhqCovZ/b8pWwvj2f60+qAnortG7nsul/y+scljLlwONdeMASnqpzyuNNs93Mq5dQS+jpeAcfBcdzqgZnjODjZlhjp3X/Z/OUG5n/6pWfl7X40AAYPGUgwVsKLr89jy/Yd/PwXf+H2f0zBmw5X2a9fz5KmhtpzrvYnhBc/XtS5M8e1j/Cf8W+xYOlqHv3XZDaUpQjsEdXV3DrdfX+iOo4i5bh1W5WrAR/nDR3Asnnzeea9FSyYN5tTL7yJJ6Z86p3LVXtVlgbDYSHAXnQi4Itw3z2/4DdXn8abr73Jj377GC/PW8dv//Bznvz5WCx09byqtDwro+egE7nl6rN44YmnuOuF+fzy9hs5PlLBPU++gQtIUdt9nEqlKG5/BEXs4n9+9jfWJAv4+2++TceQRGVxQQVDIYoLoliirqWjtSbQpiPXXHwa77/7DvePn+e50auDsDQEivjZ/15B4ouPufbXT3PSyNH8aExfnnx6Aqt3JJFS1urs9kUUdDAUojg/TAoYceaJdO1xFOcN7QM6RWFhAZGgr84AqDllmatsap3btmlXXEhVaSmhdt2587ujePU/k1i6qQJpSa+M0lHCwh/l73+6md6Rci6/8ffcM2Eho0edTqc8G610tYUi02LQ78QTOX9QJ/7ytyeZ8clX6WUlKi3EmkhRO0afejxPPf4UZ1/xM27/51x+/csfMrxXMVo33fq10hHd4XrqJj8/r0YUsqAgP4/8sD/rwATg0guHU5Tcys1/eoHtcY1Ii1KmXXTvdxJP//F6Fk15g0u+90eWlUguPedEL/BLi+zXjwTrbxv11FnO9ieEVwfBQh6+5xaOD5XxrZ8/ynZfEb06F1GVcOp+vwl1uuf9ZfQ8FA7RpiBSp5Oy0quZvnn9N7njmlO5549/5/rfvsi4a6/hd9eelZ5SkdVemOaUpcGwX9SvtCKu8yOBVnAru+eDtOtQlXAIhYONGiGUV1SRFw0DkIjHUcImVCOQxHUVliX59yOPcMuzy1k8/WHaqTja5ydo575CMpEgllLkRUL1uqjKK2IEQwF8OXYiSsTjaDvgrSdWDuUxh2gkWMedqVyXiqo4gWCQgK95OxIlEgkSjiYvEkRoTUUsQSQcRKAor4hj+/31CnxDZdmUsqn5PH7bW6+7q7QCXzBUJ9Cn5iRcaVkFkbzcy2V2n9+hMu4QCQdz14/rsLMiTjgSqWOpNcmz4LqUp58lmKNuKiur0NImGvIDmorKGMLy1Rn01CQei6OkRTjgy/lGaDdFaWWKwvxwvfdY+/pNb88Ntz+XeXMXsrHSYuzIQbhfreGoYTfz3V/9mj98Y3D1e9bcOs3cXzQSwhKQiCdIOIpoNFRvPxCPxXCwiYZ8DfYujS1Lg6GlKatMtCYBbs5WlN7o1XvHdXo5Qd1XNdMx/OPee7nhicUsm/kkfdr60m6vvVuC0FAYVc3zu0rVerbWRePKskXvwFvrUl2e9ZVXYwKp9vx9ayv/Jj+D1qi0F2B/482Zax7460P85t/zOH3wCWxetw77iOP47wM/pmuh31ueJ5pfp80oQFxNtTfDWwIoc86Dt5ayNBhapQDX7Jiq3dOicd+vnn/NLLoXdT9ft2YNi9eXMmLoIKK+jLdM7HUnmdmdSdT7PLvvqb5z7osI3T3Lo1bZNBBI1FBZNqdsan6n0eXZiLrPtJP6ztfUtrSv67mh6zb+O+yTcmuo/Ottm+nB5uerP+PDFRvIL27LmYN7E7Yb3te6KXVafX3tBfs17rkbF8DYlO8aDIelABsMhlbqJ8kitGYJj8HQPAG2D6cH1kp5QS4HKLuSwXCw4wWwq+olvLIel6/BYKifw0qAG5Ne0GAw1I9stXEMBsNB9i6ZIjAYDAaDwQiwwWAwGAyHiQCbfFwGg8FgMOxnNNJRRoANBoPBYNifKAWyOoGAwWAwGAyG/YLjushEyom7xgo2GAwGg2G/oLXGcTXSddzp6ZRprikWg8FgMBhaWH+BZMrZIJXmsbLKFGD2pjAYDAaDoYVRSgiUy6ty/eolb+wqrfggLcDGCjYYDAaDoYWsX0DuKKlM4uNJOWzYMAeh7yiPuwIwk8EGg8FgMLQMLiCq4omJ3ToULZZaa6tbp+K3tm3f9aL2tqZ0TBkZDAaDwbDPrV+xZWdlUgh9h9ZayDtBa61lcZ79ww1by9amRdi4og0Gg8Fg2Hc4DliVlbE7unVq+ymk02drraUQQq3asHVgXjg8s31hJCoFLpjcBQaDwWAw7CUpDb4vNu18+ejObcZprS1ASQAhhNJaW8cd2X5RojI2ZntprFJ74mvc0QaDwWAwNA+dEd8NW8umSbfoaq21AJQQQlcnYxBCuNOnT7eP7tJu2s6y8vO+KqncyO45YWXK0WAwGAyGRuO6SosU+L7cUjbBciouOuooEUvrrYY9siENGzbMmT5d2z27dphdGUucunF71RsJhZ3+njJCbDAYDAZDvRZvZoNnq6Q8EdvyVfntXTsWXNa5c+eqO+64Q2bEF3JsvqG1toQQLsCGLRXfEpKfFeSFe4UCApRGSrNnh8FgMBgMGZTWgEAJ2FFSmXQVLztO4g9djyhennY7U1N8cwpwWoQloIUQevPmzZGEiHxdoq6VUgz225ZtWxLLkmb7LIPBYDActuauUhrHdbWjNEqzXmsxMZ5ynj2mU+GHexq0e/L/ZHY5T4dYPCkAAAAASUVORK5CYII=" alt="Investair"><span class="tag">Capital markets intelligence for ASX-listed companies.</span></div>
+  <div class="legal">Data: Investair · Internal use only · <span id="footDate"></span>. General information only, not financial advice.</div>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* Investair-branded .docx builder: Markdown → WordprocessingML, zipped with JSZip. */
+function iaBuildDocx(JSZip, mdText, title, logoBytes, meta) {
+  const NAVY = "0A2342", AMBER = "E8760A", BODY = "4A5568", MUTED = "64748B";
+  const x = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const runs = (text, base) => {
+    base = base || "";
+    const out = [];
+    const parts = String(text).replace(/`([^`]+)`/g, "$1").split(/(\*\*[^*]+\*\*)/g);
+    for (const p of parts) {
+      if (!p) continue;
+      const bold = /^\*\*[^*]+\*\*$/.test(p);
+      const t = bold ? p.slice(2, -2) : p.replace(/(^|[^*])\*([^*]+)\*/g, "$1$2");
+      out.push(`<w:r><w:rPr>${base}${bold ? "<w:b/>" : ""}</w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`);
+    }
+    return out.join("");
+  };
+  // Parse markdown into blocks
+  const lines = mdText.replace(/\r/g, "").split("\n");
+  const blocks = [];
+  for (let i = 0; i < lines.length;) {
+    const l = lines[i];
+    if (/^\s*\|/.test(l) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+      const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+      const rows = [cells(l)]; i += 2;
+      while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+      blocks.push({ t: "table", rows }); continue;
+    }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)/))) { blocks.push({ t: "h", lvl: Math.min(m[1].length, 3), text: m[2] }); i++; continue; }
+    if ((m = l.match(/^\s*([-*]|\d+\.)\s+(.*)/))) { blocks.push({ t: "li", ord: /\d/.test(m[1]), text: m[2] }); i++; continue; }
+    if (/^\s*(---|\*\*\*)\s*$/.test(l)) { blocks.push({ t: "hr" }); i++; continue; }
+    if (l.trim()) {
+      const p = [l]; i++;
+      while (i < lines.length && lines[i].trim() && !/^(#|\s*[-*|]\s|\s*\d+\.\s|\s*(---|\*\*\*)\s*$)/.test(lines[i])) { p.push(lines[i]); i++; }
+      blocks.push({ t: "p", text: p.join(" ") }); continue;
+    }
+    i++;
+  }
+  // Body XML
+  const body = [];
+  if (logoBytes) {
+    const cx = 1737360, cy = Math.round(1737360 * 130 / 480);
+    body.push(`<w:p><w:pPr><w:spacing w:after="120"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Investair logo" descr="Investair — Capital Markets Intelligence"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
+  }
+  body.push(`<w:p><w:pPr><w:pStyle w:val="Eyebrow"/></w:pPr>${runs((meta && meta.eyebrow) || "Investair research desk")}</w:p>`);
+  body.push(`<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr>${runs(title)}</w:p>`);
+  if (meta && meta.sub) body.push(`<w:p><w:pPr><w:pStyle w:val="Subtitle"/></w:pPr>${runs(meta.sub)}</w:p>`);
+  let skippedFirstH1 = false;
+  for (const b of blocks) {
+    if (b.t === "h") {
+      if (b.lvl === 1 && !skippedFirstH1) { skippedFirstH1 = true; continue; }
+      body.push(`<w:p><w:pPr><w:pStyle w:val="Heading${b.lvl}"/></w:pPr>${runs(b.text)}</w:p>`);
+    } else if (b.t === "p") {
+      body.push(`<w:p>${runs(b.text)}</w:p>`);
+    } else if (b.t === "li") {
+      body.push(`<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${b.ord ? 2 : 1}"/></w:numPr></w:pPr>${runs(b.text)}</w:p>`);
+    } else if (b.t === "hr") {
+      body.push(`<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="8" w:space="1" w:color="${AMBER}"/></w:pBdr></w:pPr></w:p>`);
+    } else if (b.t === "table") {
+      const n = Math.max(...b.rows.map(r => r.length));
+      const w = Math.floor(9360 / n);
+      const tr = (r, head) => `<w:tr>${head ? "<w:trPr><w:tblHeader/></w:trPr>" : ""}${Array.from({ length: n }, (_, k) =>
+        `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${head ? `<w:shd w:val="clear" w:color="auto" w:fill="${NAVY}"/>` : ""}</w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>${runs(r[k] || "", head ? `<w:b/><w:color w:val="FFFFFF"/><w:sz w:val="17"/>` : `<w:sz w:val="18"/>`)}</w:p></w:tc>`).join("")}</w:tr>`;
+      body.push(`<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders><w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:insideH w:val="single" w:sz="4" w:color="E2E8F0"/></w:tblBorders><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${Array.from({ length: n }, () => `<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${b.rows.map((r, k) => tr(r, k === 0)).join("")}</w:tbl><w:p/>`);
+    }
+  }
+  body.push(`<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="8" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:before="240"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="${NAVY}"/></w:rPr><w:t xml:space="preserve">INVESTAIR</w:t></w:r><w:r><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="18"/></w:rPr><w:t xml:space="preserve"> · Capital markets intelligence for ASX-listed companies · investair.com.au. General information only, not financial advice.</w:t></w:r></w:p>`);
+
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body.join("")}<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+
+  const font = (f) => `<w:rFonts w:ascii="${f}" w:hAnsi="${f}" w:cs="${f}"/>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr>${font("Inter")}<w:color w:val="${BODY}"/><w:sz w:val="21"/><w:lang w:val="en-AU"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="300" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="44"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="12" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:after="240"/></w:pPr><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="19"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Eyebrow"><w:name w:val="Eyebrow"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="40"/></w:pPr><w:rPr><w:b/><w:caps/><w:color w:val="${AMBER}"/><w:spacing w:val="20"/><w:sz w:val="18"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="32"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:pBdr><w:left w:val="single" w:sz="24" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:before="280" w:after="100"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="26"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="22"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="360"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Footer"><w:name w:val="footer"/><w:basedOn w:val="Normal"/><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="16"/></w:rPr></w:style>
+</w:styles>`;
+
+  const numbering = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="260"/></w:pPr><w:rPr><w:color w:val="${AMBER}"/></w:rPr></w:lvl></w:abstractNum>
+<w:abstractNum w:abstractNumId="1"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="300"/></w:pPr></w:lvl></w:abstractNum>
+<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num>
+</w:numbering>`;
+
+  const footer = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="Footer"/><w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr><w:r><w:rPr><w:b/><w:color w:val="${NAVY}"/></w:rPr><w:t xml:space="preserve">INVESTAIR</w:t></w:r><w:r><w:t xml:space="preserve"> · Capital Markets Intelligence · ${x((meta && meta.footer) || "")}</w:t></w:r><w:r><w:tab/><w:t xml:space="preserve">Page </w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>`;
+
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
+  zip.file("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`);
+  zip.file("docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(title)}</dc:title><dc:creator>Investair</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().slice(0, 19)}Z</dcterms:created></cp:coreProperties>`);
+  zip.file("word/_rels/document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdNum" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>${logoBytes ? `<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/investair-logo.png"/>` : ""}</Relationships>`);
+  zip.file("word/document.xml", doc);
+  zip.file("word/styles.xml", styles);
+  zip.file("word/numbering.xml", numbering);
+  zip.file("word/footer1.xml", footer);
+  if (logoBytes) zip.file("word/media/investair-logo.png", logoBytes);
+  return zip.generateAsync({ type: "uint8array", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+if (typeof module !== "undefined") module.exports = { iaBuildDocx };
+
+</script>
+<script>
+(() => {
+const SERVER = /*SERVER_START*/"Investair_data"/*SERVER_END*/;
+const DEFAULT_COVERAGE = /*COVERAGE_START*/[]/*COVERAGE_END*/;
+const DEFAULT_SECTOR = /*SECTOR_START*/""/*SECTOR_END*/;
+const BANDS = { s: ["Under A$50m", null, 50000000], m: ["A$50m–A$300m", 50000000, 300000000], l: ["Over A$300m", 300000000, null] };
+const sqlStr = v => String(v).replace(/[^A-Za-z0-9 &,.\-]/g, "");
+const LIST_NAME = ((document.getElementById("mhBrand") || {}).textContent || "").replace(/^\s*Standardised reports\s*·?\s*/i, "").trim();
+let COVERAGE = DEFAULT_COVERAGE.slice();
+const $ = id => document.getElementById(id);
+const todayISO = () => new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+const todayLong = () => new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" });
+$("today").textContent = "Today " + todayLong(); $("footDate").textContent = todayLong();
+const renderPick = () => { $("pick").innerHTML = '<option value="">' + (COVERAGE.length ? "Pick from my list…" : "My list is empty: add codes below") + '</option>' + COVERAGE.map(([t, n]) => `<option value="${t}">${t}${n ? " — " + n : ""}</option>`).join(""); $("listTa").value = COVERAGE.map(c => c[0]).join(" "); $("listCount").textContent = "(" + COVERAGE.length + " companies)"; if (!$("tk").value && COVERAGE.length) $("tk").value = COVERAGE[0][0]; };
+renderPick();
+$("pick").onchange = e => { if (e.target.value) $("tk").value = e.target.value; };
+
+const STYLE = `House style: answer first (2–3 sentence takeaway), then 2–4 clearly separated sections, short plain sentences, Australian spelling, A$ with sensible precision (A$12.4m). Attribute figures to Investair ("According to Investair's data…") and give as-of dates; every section heading names the data window it covers. Never invent figures, holders, dates, drill results, resources or catalysts; prefix inferences with "Inferred:" and say what they rest on. Treat substantial-holder notices with a prime-broker clause as stock lending/collateral, not directional buying, and say so. Collapse subsidiaries of one group into one line. Output GitHub-flavoured Markdown only (headings, bullets, pipe tables). Start with a level-1 heading that is a specific descriptive title naming the company and report. End with: "This report is general information only and does not take into account any person's objectives, financial situation or needs. It is not financial advice. Data from Investair as at <date> and public sources; accuracy not guaranteed."`;
+
+// ---------- data helpers ----------
+let mcp = null, sample = null, downloads = null, ctrl = null, current = null;
+const trim = (o, n = 24000) => { let s; try { s = JSON.stringify(o); } catch { s = String(o); } return s.length > n ? s.slice(0, n) + "…[truncated]" : s; };
+const slim = p => { if (!p || typeof p !== "object") return p; const t = p.tool_response !== undefined ? { tool_response: p.tool_response } : { ...p }; if (p.evidence) t.evidence = { as_of: p.evidence.as_of, caveats: p.evidence.caveats }; if (p.noticed_issuer_status) t.noticed_issuer_status = p.noticed_issuer_status; return t; };
+async function call(tool, input, label, signal) {
+  try {
+    const r = await mcp.callTool(SERVER, tool, input, signal ? { signal } : undefined);
+    return { label, data: slim(r && r.payload) };
+  } catch (e) {
+    if (e && e.code === "cancelled") throw e;
+    return { label, data: { error: (e && (e.message || e.code)) || "failed" } };
+  }
+}
+const peersOf = res => { const tr = res && res.data && (res.data.tool_response || res.data); const ps = (tr && tr.peers) || []; return ps.map(p => String(p.peer_ticker || p.ticker || "").toUpperCase()).filter(Boolean); };
+const sqlTk = t => t.replace(/[^A-Z0-9]/g, "");
+
+// ---------- sector universe ----------
+let UNIV = { sector: "", label: "", band: "", n: 0 };
+function scope() { const sec = $("sec").value, band = BANDS[$("band").value] || null; return { sec, band, label: sec ? sec + (band ? ", " + band[0] : "") : (LIST_NAME || "My list"), list: COVERAGE.map(c => c[0]).slice(0, 25) }; }
+const inList = L => L.map(t => `'${sqlTk(String(t).toUpperCase())}'`).join(",");
+function whereFor(a, sc) { if (!sc.sec) return `${a}.asx_code IN (${inList(sc.list) || "''"})`; const b = sc.band; return `${a}.sub_industry='${sqlStr(sc.sec)}'` + (b && b[1] != null ? ` AND ${a}.market_cap >= ${b[1]}` : "") + (b && b[2] != null ? ` AND ${a}.market_cap < ${b[2]}` : ""); }
+function scopeText() { const sc = scope(); return sc.sec ? `the ${sc.sec} sector (companies Investair classes in the ${sc.sec} sub-industry${sc.band ? ", market value " + sc.band[0] : ""})` : `the companies on the user's list${LIST_NAME ? ' ("' + LIST_NAME + '")' : ""}`; }
+async function universe(q, s) {
+  const sc = scope();
+  if (!sc.sec) { UNIV = { sector: "", label: sc.label, band: "", n: sc.list.length }; return sc.list; }
+  const r = await call("run_readonly_sql", { sql: `SELECT c.asx_code, c.company_name FROM Cashflow.cashflow_daily c WHERE c.report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND ${whereFor("c", sc)} AND c.market_cap IS NOT NULL ORDER BY c.market_cap DESC LIMIT 25`, user_question: q }, "Sector members (25 largest by market value)", s);
+  const L = rowsOf(r).map(x => String(x.asx_code).toUpperCase()).filter(Boolean);
+  UNIV = { sector: sc.sec, label: sc.label, band: sc.band ? sc.band[0] : "", n: L.length };
+  return L;
+}
+const livePeers = pe => { const ds = new Set((((((pe && pe.data && pe.data.tool_response) || {}).noticed_issuer_status || {}).companies) || []).filter(x => x.listing_status === "delisted").map(x => String(x.query_asx_code).toUpperCase())); return peersOf(pe).filter(x => !ds.has(x)); };
+const TBM = "ASX_Market.ASX_DailyMarketInformation";
+const lookP = d => `(SELECT x.close_price FROM ${TBM} x WHERE x.ticker=t.ticker AND x.info_date<=DATE_SUB(t.info_date, INTERVAL ${d}) ORDER BY x.info_date DESC LIMIT 1)`;
+const lookS = d => `(SELECT x.shares_outstanding FROM ${TBM} x WHERE x.ticker=t.ticker AND x.info_date<=DATE_SUB(t.info_date, INTERVAL ${d}) ORDER BY x.info_date DESC LIMIT 1)`;
+const perfSql = inAll => `SELECT t.ticker, t.company_name, ROUND(t.market_cap/1e6,1) AS mcap_m, t.close_price, ${lookP("3 MONTH")} AS close_3m_ago, ${lookP("12 MONTH")} AS close_12m_ago, t.shares_outstanding AS shares_now, ${lookS("3 MONTH")} AS shares_3m_ago, ${lookS("12 MONTH")} AS shares_12m_ago, CAST(t.info_date AS CHAR) AS as_of FROM ${TBM} t WHERE t.info_date=(SELECT MAX(info_date) FROM ${TBM}) AND t.ticker IN (${inAll})`;
+const cashSql = inAll => `SELECT asx_code, company_name, ROUND(market_cap/1e6,1) AS mcap_m, ROUND(adjusted_cash_confirmed_aud/1e6,2) AS adj_cash_m, ROUND(total_relevant_outgoings_aud/1e6,2) AS burn_q_m, ROUND(adjusted_estimated_quarters_funding_confirmed,2) AS runway_q, runway_publishable, CAST(base_quarter_end AS CHAR) AS base_quarter_end FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${inAll})`;
+const jtxt = v => { try { const a = typeof v === "string" ? JSON.parse(v) : v; return Array.isArray(a) ? a.join("; ") : String(v || ""); } catch { return String(v || ""); } };
+const annRows = an => (((an && an.data && an.data.tool_response) || {}).announcements || []).map(x => ({ id: x.feed_id, t: String(x.primary_stock || x.ticker || "").toUpperCase(), d: String(x.date || "").slice(0, 10), ps: x.price_sensitive === 1 || x.price_sensitive === true || x.price_sensitive === "1", cls: jtxt(x.report_classification), title: String(x.title || "").replace(/\s+/g, " ").trim(), prev: String(x.short_preview || "").replace(/\s+/g, " ").trim() })).filter(x => x.t && x.d);
+async function reactions(anns, q, s) {
+  const seen = new Set(), ev = [];
+  anns.filter(a => a.ps).sort((x, y) => y.d.localeCompare(x.d)).forEach(a => { const k = a.t + "|" + a.d; if (!seen.has(k) && ev.length < 90) { seen.add(k); ev.push(a); } });
+  const out = new Map();
+  for (let i = 0; i < ev.length; i += 30) {
+    const ch = ev.slice(i, i + 30);
+    const cond = ch.map(a => `(t.ticker='${sqlTk(a.t)}' AND t.info_date='${a.d.replace(/[^0-9-]/g, "")}')`).join(" OR ");
+    const r = await call("run_readonly_sql", { sql: `SELECT t.ticker, CAST(t.info_date AS CHAR) AS d, ROUND((SELECT x.close_price FROM ${TBM} x WHERE x.ticker = t.ticker AND x.info_date > t.info_date ORDER BY x.info_date ASC LIMIT 1) / NULLIF((SELECT x.close_price FROM ${TBM} x WHERE x.ticker = t.ticker AND x.info_date < t.info_date ORDER BY x.info_date DESC LIMIT 1),0) * 100 - 100, 1) AS move_2d_pct, ROUND((t.volume + (SELECT x.volume FROM ${TBM} x WHERE x.ticker = t.ticker AND x.info_date > t.info_date ORDER BY x.info_date ASC LIMIT 1)) / 2 / NULLIF((SELECT AVG(x.volume) FROM ${TBM} x WHERE x.ticker = t.ticker AND x.info_date < t.info_date AND x.info_date >= DATE_SUB(t.info_date, INTERVAL 30 DAY)),0), 2) AS vol_ratio FROM ${TBM} t WHERE t.ticker IN (${inList([...new Set(ch.map(a => a.t))])}) AND (${cond})`, user_question: q }, "Announcement reactions", s);
+    rowsOf(r).forEach(x => out.set(String(x.ticker).toUpperCase() + "|" + String(x.d).slice(0, 10), { mv: x.move_2d_pct == null ? null : Number(x.move_2d_pct), vr: x.vol_ratio == null ? null : Number(x.vol_ratio) }));
+  }
+  const events = ev.map(a => ({ ...a, ...(out.get(a.t + "|" + a.d) || {}) })).filter(a => a.mv != null);
+  const by = {}; events.forEach(e => { (by[e.t] = by[e.t] || []).push(e); });
+  const avg = a => a.length ? Math.round(a.reduce((x, y) => x + y, 0) / a.length * 10) / 10 : null;
+  const per = Object.keys(by).map(t => { const e = by[t], vr = e.filter(x => x.vr != null); return { ticker: t, ps_announcements_measured: e.length, avg_abs_move_2d_pct: avg(e.map(x => Math.abs(x.mv))), avg_move_2d_pct: avg(e.map(x => x.mv)), positive_reception_share_pct: Math.round(e.filter(x => x.mv >= 4).length / e.length * 100), negative_reception_share_pct: Math.round(e.filter(x => x.mv <= -4).length / e.length * 100), avg_volume_vs_normal: avg(vr.map(x => x.vr)), high_volume_share_pct: vr.length ? Math.round(vr.filter(x => x.vr >= 1.5).length / vr.length * 100) : null }; });
+  return { label: "Announcement market reaction, computed by the page: two-day price move (close on the next trading day against the close before the announcement day) and volume against the 30-day average (price-sensitive announcements, last 180 days; not adjusted for market moves)", data: { per_company: per, events: events.map(e => `${e.t} | ${e.d} | ${e.cls} | ${e.title} | move ${e.mv}% | volume ${e.vr == null ? "n/a" : e.vr + "x"}`) }, max: 40000 };
+}
+const rowsOf = r => (r && r.data && (r.data.rows || (r.data.tool_response && r.data.tool_response.rows))) || [];
+async function loadSectors() {
+  const r = await call("run_readonly_sql", { sql: "SELECT sub_industry, COUNT(*) AS n FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND sub_industry IS NOT NULL AND sub_industry <> '' AND sub_industry <> 'Not Classified' GROUP BY sub_industry HAVING COUNT(*) >= 5 ORDER BY n DESC", user_question: "Standardised Reports: list sectors for the Sector Report" }, "Sectors");
+  const rows = rowsOf(r); if (!rows.length) return;
+  $("sec").innerHTML = '<option value="">My list</option>' + rows.map(x => `<option value="${String(x.sub_industry).replace(/"/g, "&quot;")}">${String(x.sub_industry).replace(/</g, "&lt;")} (${x.n})</option>`).join("");
+  if (DEFAULT_SECTOR && rows.some(x => x.sub_industry === DEFAULT_SECTOR)) $("sec").value = DEFAULT_SECTOR;
+}
+
+// ---------- reports ----------
+const REPORTS = [
+  { id: "roadshow", name: "Roadshow Plan & Narrative", blurb: "A one-page story plus a meeting plan: who to see, in what order, and what to say to each.",
+    brief: T => `Write a roadshow plan and narrative for ${T}. Part 1, Narrative (one page): 1) Investment thesis in 3 bullets. 2) Assets and milestones achieved. 3) Funding position (cash, burn, runway, recent raises). 4) Catalysts for the next 6–12 months, only those the company has stated (label inferred timing). 5) How it compares with its closest peers. Part 2, Roadshow plan: 1) Audience: up to 10 institutions to prioritise, taken from holders of the peers that are not substantial holders in ${T} (name, peer positions held, recent direction, why they fit), plus ${T}'s existing supporters to keep warm. Exclude prime-broker or lending notices. 2) Brokers: the brokers most active with the peer set and the incumbents on ${T}'s own deals, from the data. 3) Suggested sequence: existing supporters first, then the strongest-fit targets; label the ordering as inferred. 4) Message: one line per group on what to emphasise, tied to the data. 5) Five questions investors are likely to ask, each with a short evidence-based answer. Do not invent meetings, dates or contacts; this is a plan, not a schedule.`,
+    fetch: async (T, q, s) => { const [m, c, p, a, r, h, pe, ob] = await Promise.all([
+      call("get_market_snapshot", { ticker: T, user_question: q }, "Market snapshot", s),
+      call("get_cashflow_snapshot", { asx_code: T, user_question: q }, "Cash flow and runway", s),
+      call("get_company_projects", { ticker: T, user_question: q }, "Projects", s),
+      call("list_announcements", { ticker: T, days_back: 120, limit: 40, user_question: q }, "Announcements (120 days)", s),
+      call("list_capital_raises", { asx_code: T, limit: 10, include_related_announcements: false, user_question: q }, "Capital raises", s),
+      call("get_substantial_holders", { ticker: T, limit: 25, user_question: q }, "Substantial holders (365 days)", s),
+      call("get_peers", { target_ticker: T, top_n: 12, user_question: q }, "Peers", s),
+      call("list_deal_brokers", { asx_code: T, limit: 30, user_question: q }, "Brokers on own deals", s)]);
+      const ds = new Set((((((pe.data && pe.data.tool_response) || {}).noticed_issuer_status || {}).companies) || []).filter(x => x.listing_status === "delisted").map(x => String(x.query_asx_code).toUpperCase()));
+      const pk = peersOf(pe).filter(x => !ds.has(x)).slice(0, 12);
+      const [hb, pb, pc] = await Promise.all([
+        pk.length ? call("get_substantial_holders_batch", { tickers: [T, ...pk], days_back: 540, limit_per_ticker: 12, user_question: q }, "Substantial holders, company and peers (540 days)", s) : null,
+        call("screen_peer_brokers", { target_ticker: T, broker_top_n: 10, peer_top_n: 15, user_question: q }, "Peer-set broker screen", s),
+        pk.length ? call("run_readonly_sql", { sql: `SELECT asx_code, company_name, ROUND(market_cap/1e6,1) mcap_m, ROUND(adjusted_cash_confirmed_aud/1e6,1) cash_m, ROUND(total_relevant_outgoings_aud/1e6,2) burn_q_m, ROUND(adjusted_estimated_quarters_funding_confirmed,2) runway_q, base_quarter_end FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${[T, ...pk].map(x => `'${sqlTk(x)}'`).join(",")})`, user_question: q }, "Peer cash and runway", s) : null]);
+      return [m, c, p, a, r, h, pe, ob, hb, pb, pc].filter(Boolean); } },
+
+  { id: "targets", name: "Investor Targets", blurb: "Institutions holding peers but not this company, ranked, from substantial holder data.",
+    brief: T => `Build an institutional investor target list for ${T}. Using the substantial-holder notices across ${T} and its peers: rank up to 12 institutions (funds, family offices) that hold one or more peers but are not substantial holders in ${T}. For each give: name, peer positions held (ticker and %), recent direction (buying, selling or new), and one line on why they fit. Exclude prime-broker/lending notices and index-fund rebalance noise. Then list current ${T} substantial holders as "existing supporters". Use a table for the ranked list. Say once that this is a statutory-disclosure proxy (holdings of 5% or more), not a complete fund register.`,
+    fetch: async (T, q, s) => { const pe = await call("get_peers", { target_ticker: T, top_n: 15, user_question: q }, "Peers", s);
+      const pk = peersOf(pe).slice(0, 15);
+      const hb = await call("get_substantial_holders_batch", { tickers: [T, ...pk], days_back: 540, limit_per_ticker: 15, user_question: q }, "Substantial holders, company and peers (540 days)", s);
+      return [pe, hb]; } },
+
+  { id: "initiation", name: "Initiation-style Report", blurb: "Two-page initiation-style write-up: highlights, valuation framework, projects, catalysts and risks.",
+    brief: T => `Write a two-page initiation-style report on ${T}: 1) Investment highlights (3–4 bullets, each backed by a figure from the data). 2) Valuation framework: market cap, adjusted cash, enterprise value (market cap less adjusted cash, shown as a calculation), and how it compares with the peers provided. 3) Projects or products (flagship first). 4) Funding: cash, quarterly burn, runway, raises in the last 12 months. 5) Catalysts the company has stated in announcements, with inferred timing labelled. 6) Key risks, each tied to evidence in the data. 7) Register: top holders and recent changes. Close with a one-line note that the full initiation report is available in chat. This is a summary, not a recommendation: no price target and no rating.`,
+    fetch: async (T, q, s) => { const [m, h2, c, p, a, r, h, pe] = await Promise.all([
+      call("get_market_snapshot", { ticker: T, user_question: q }, "Market snapshot", s),
+      call("run_readonly_sql", { sql: `SELECT info_date, close_price, volume, ROUND(market_cap/1e6,1) mcap_m FROM ASX_Market.ASX_DailyMarketInformation WHERE ticker='${sqlTk(T)}' AND info_date >= DATE_SUB(CURDATE(), INTERVAL 380 DAY) AND DAYOFWEEK(info_date)=6 ORDER BY info_date DESC LIMIT 60`, user_question: q }, "Weekly (Friday) closes, about 12 months, newest first", s),
+      call("get_cashflow_snapshot", { asx_code: T, user_question: q }, "Cash flow and runway", s),
+      call("get_company_projects", { ticker: T, user_question: q }, "Projects", s),
+      call("list_announcements", { ticker: T, days_back: 180, limit: 50, user_question: q }, "Announcements (180 days)", s),
+      call("list_capital_raises", { asx_code: T, limit: 10, include_related_announcements: false, user_question: q }, "Capital raises", s),
+      call("get_substantial_holders", { ticker: T, limit: 25, user_question: q }, "Substantial holders (365 days)", s),
+      call("get_peers", { target_ticker: T, top_n: 8, user_question: q }, "Peers", s)]);
+      const pk = peersOf(pe).slice(0, 8);
+      const pc = pk.length ? await call("run_readonly_sql", { sql: `SELECT asx_code, company_name, ROUND(market_cap/1e6,1) mcap_m, ROUND(adjusted_cash_confirmed_aud/1e6,1) cash_m, ROUND(total_relevant_outgoings_aud/1e6,2) burn_q_m, ROUND(adjusted_estimated_quarters_funding_confirmed,2) runway_q, base_quarter_end FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${pk.map(t => `'${sqlTk(t)}'`).join(",")})`, user_question: q }, "Peer cash and runway", s) : null;
+      return [m, h2, c, p, a, r, h, pe, pc].filter(Boolean); } },
+  { id: "sector", list: true, name: "Sector Report", blurb: "Weekly-style report on your list or a chosen sector (top 25 by market value): lead, catalysts, universe table, newsflow, placements and holders. Plain Markdown to paste into an email.",
+    brief: () => `Write a weekly sector report on ${UNIV.sector ? "the " + UNIV.sector + " sector: the " + UNIV.n + " largest ASX companies by market value that Investair classes in the " + UNIV.sector + " sub-industry" + (UNIV.band ? " (" + UNIV.band + ")" : "") + " (the \"universe\")" : "the companies on the user's list (the \"universe\")" + (LIST_NAME ? ", which the user calls \"" + LIST_NAME + "\"" : "")}, as plain Markdown that can be pasted into an email: headings, bullet lists and simple pipe tables only, no HTML, nested formatting, footnotes or callout boxes, short plain sentences. Use exactly this order.\n1. Title "<sector or list name> Weekly — <date>" and a one-line data note (as-of date of end-of-day prices, which can lag a day or two; the report is general information, not advice).\n2. Lead: three sentences on what matters this week, answer first.\n3. "Catalysts and dates": the next two weeks, then further out. Only catalysts the companies themselves have stated in announcements, plus next quarterly due dates; label any timing you infer as "Inferred:".\n4. "Sector context": a short paragraph on the picture across the universe, drawn only from the announcements, placements and register changes in the data (the page cannot search the web, so do not cite outside news). Say so in one clause.\n5. "Universe": one table with ticker, company, market cap, price change over about 7 days and over about 3 months (computed from the close prices provided; if a ticker's earliest price row is less than about 95 days before its 91-day lookback, write "since listing" for that ticker), the day's volume against its 60-day average, adjusted cash, quarterly outgoings and runway in quarters (one decimal). Put market cap and its two change columns side by side. State the end-of-day as-of date once under the table. Flag any runway under 2 quarters and any stale base quarter.\n6. "Newsflow": grouped by company for the last 7 days, price-sensitive items flagged; name every company with no announcements.\n7. "Placements": a table of the last 12 months with date, ticker, discount (a negative number is a discount), size as a percentage of market cap, and share price against DAP at 30 and 90 days; leave a performance cell blank where it has not matured; exclude executive and employee share issues (the use-of-funds text says when an issue is an executive or employee allocation); flag anything filed in the last 7 days.\n8. "Substantial shareholders": a table of notices in the last 30 days with a one-phrase read per line: buying or selling, lending or collateral (prime-broker clause), or index-related. Collapse subsidiaries of one group into one line.\n9. A footer saying how the universe was built (the user's list) and that this is not investment advice.\n10. A final line exactly: Powered by [Investair](https://www.investair.com.au)\nIf an Investair summary reads as obviously misattributed to the company, say so rather than repeating it. Never invent a figure, date or catalyst.`,
+    fetch: async (T, q, s) => { const L = await universe(q, s); if (!L.length) return [];
+      const inL = L.map(t => `'${sqlTk(t)}'`).join(","), TB = "ASX_Market.ASX_DailyMarketInformation";
+      const lk = (col, d) => `(SELECT x.${col} FROM ${TB} x WHERE x.ticker = d.ticker AND x.info_date <= DATE_SUB(d.info_date, INTERVAL ${d} DAY) ORDER BY x.info_date DESC LIMIT 1)`;
+      return Promise.all([
+        call("run_readonly_sql", { sql: `SELECT d.ticker, d.company_name, d.close_price, d.market_cap, d.volume, CAST(d.info_date AS CHAR) AS info_date, ${lk("close_price", 7)} AS close_7d_ago, ${lk("market_cap", 7)} AS mcap_7d_ago, ${lk("close_price", 91)} AS close_91d_ago, ${lk("market_cap", 91)} AS mcap_91d_ago, CAST((SELECT MIN(e.info_date) FROM ${TB} e WHERE e.ticker = d.ticker) AS CHAR) AS earliest_row, (SELECT ROUND(AVG(v.volume)) FROM ${TB} v WHERE v.ticker = d.ticker AND v.info_date > DATE_SUB(d.info_date, INTERVAL 60 DAY)) AS avg_volume_60d FROM ${TB} d WHERE d.ticker IN (${inL}) AND d.info_date = (SELECT MAX(info_date) FROM ${TB})`, user_question: q }, "Price, volume and market cap with 7-day and 91-day lookbacks", s),
+        call("run_readonly_sql", { sql: `SELECT asx_code, company_name, ROUND(adjusted_cash_today_aud/1e6,2) AS adj_cash_m, ROUND(total_relevant_outgoings_aud/1e6,2) AS outgoings_q_m, ROUND(adjusted_estimated_quarters_funding_confirmed,2) AS runway_q, runway_publishable, positive_cashflow_transition_flag, CAST(base_quarter_end AS CHAR) AS base_quarter_end, CAST(report_date AS CHAR) AS report_date FROM Cashflow.cashflow_daily WHERE report_date = (SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${inL})`, user_question: q }, "Cash and runway", s),
+        call("list_announcements", { tickers: L, days_back: 30, limit: 80, user_question: q }, "Announcements (30 days; newsflow covers the last 7)", s),
+        call("run_readonly_sql", { sql: `SELECT asx_code, CAST(filing_date AS CHAR) AS filing_date, COALESCE(discount_pct_actual, discount_pct) AS discount_pct, raise_vs_market_cap_pct, dap_performance_post_30d_pct AS dap_30d_pct, dap_performance_post_90d_pct AS dap_90d_pct, broker_involved, use_of_funds_same_day FROM Placement.deals_daily WHERE asx_code IN (${inL}) AND filing_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) ORDER BY filing_date DESC LIMIT 60`, user_question: q }, "Placements, last 12 months", s),
+        call("get_substantial_holders_batch", { tickers: L, days_back: 30, limit_per_ticker: 8, user_question: q }, "Substantial holders (30 days)", s)]); } }  ,
+  { id: "board", name: "Board Pack: Peer Benchmark", blurb: "For the board: position against peers, how the market reacts to its announcements against peers, messaging considerations and a peer catalyst calendar.",
+    brief: T => `Write a board pack for the directors of ${T}, benchmarking it against its closest peers. Use exactly these sections.\n1) Headline: three sentences, answer first.\n2) Position against peers: one table of ${T} and each peer with market value, adjusted cash, quarterly burn, confirmed runway (quarters, one decimal), and share price change over 3 and 12 months (computed from the closes provided; leave a period blank where shares on issue changed more than threefold). One line on where ${T} ranks on each.\n3) Market engagement with announcements (last 180 days): using the reaction data computed by the page, compare ${T} with the peers on number of price-sensitive announcements, average absolute two-day price move, share of announcements with a positive reception (+4% or more over two days), average volume against normal, and share of high-volume events (1.5x normal or more). Then say which kinds of announcement (from the classification and title) drew the strongest price and volume response, for ${T} and for the peers, and name ${T}'s best and worst received announcements with their figures. Say plainly that a price move around an announcement is an association, not proof the announcement caused it, and that market-wide moves are not adjusted for.\n4) Messaging considerations for the board: 3 to 5 considerations comparing ${T}'s announcement cadence, mix and framing with peers whose announcements drew stronger engagement (for example how often material progress is reported as a price-sensitive update, whether titles state a quantified result, whether results are bundled or released separately, and timing around quarterly reports). Tie each to evidence in the data, phrase each as a consideration for the board rather than an instruction, and say where the evidence is thin. Do not draft announcement wording and do not suggest anything that could conflict with continuous disclosure obligations.\n5) Peer catalyst calendar: a table, sorted by date, of milestones that ${T} and each peer have stated in their announcements for roughly the next six months (date or window, company, catalyst, source announcement and date), plus each company's next quarterly report due date (one month after the quarter end following its latest base quarter). Mark timing you infer as "Inferred:".\n6) Capital markets: raises in the last 12 months by ${T} and the peers (date, discount, size as a percentage of market value, share price against DAP at 90 days) (in the placement data a negative discount figure is a discount to the last close; a positive one is a premium, labelled "check terms") and substantial holder changes on ${T}'s register in the last 180 days, with prime-broker notices treated as lending or collateral.\n7) Five questions the board may want to ask management, each tied to the evidence above.`,
+    fetch: async (T, q, s) => {
+      const [m, c, pe, own] = await Promise.all([
+        call("get_market_snapshot", { ticker: T, user_question: q }, "Market snapshot", s),
+        call("get_cashflow_snapshot", { asx_code: T, user_question: q }, "Cash flow and runway", s),
+        call("get_peers", { target_ticker: T, top_n: 8, user_question: q }, "Peers", s),
+        call("list_capital_raises", { asx_code: T, limit: 10, include_related_announcements: false, user_question: q }, "Own capital raises", s)]);
+      const pk = livePeers(pe).slice(0, 8), all = [T, ...pk], inAll = inList(all);
+      const [an, pc, ret, pl, hb] = await Promise.all([
+        call("list_announcements", { tickers: all, days_back: 180, limit: 150, user_question: q }, "Announcements", s),
+        call("run_readonly_sql", { sql: cashSql(inAll), user_question: q }, "Cash and runway, company and peers", s),
+        call("run_readonly_sql", { sql: perfSql(inAll), user_question: q }, "Share price change, company and peers", s),
+        pk.length ? call("run_readonly_sql", { sql: `SELECT asx_code, CAST(filing_date AS CHAR) AS filing_date, COALESCE(discount_pct_actual, discount_pct) AS discount_pct, ROUND(raise_vs_market_cap_pct,1) AS size_pct, ROUND(dap_performance_post_90d_pct,1) AS dap_90d_pct FROM Placement.deals_daily WHERE asx_code IN (${inAll}) AND filing_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) ORDER BY filing_date DESC LIMIT 60`, user_question: q }, "Placements, company and peers (12 months)", s) : null,
+        call("get_substantial_holders_batch", { tickers: all, days_back: 180, limit_per_ticker: 8, user_question: q }, "Substantial holders, company and peers (180 days)", s)]);
+      const anns = annRows(an);
+      const react = await reactions(anns, q, s);
+      return [m, c, pe, own, pc, ret, pl, hb, react, { label: "Announcements, company and peers (180 days): ticker | date | price sensitive | type | title | summary", data: anns.map(a => `${a.t} | ${a.d} | ${a.ps ? "PS" : "-"} | ${a.cls} | ${a.title} | ${a.prev.slice(0, 220)}`), max: 60000 }].filter(Boolean); } },
+
+  { id: "terms", name: "Placement Terms Benchmark", blurb: "What a raise is likely to cost: own raises, peer discounts and sizes, after-market results and the brokers active with peers.",
+    brief: T => `Benchmark placement terms for ${T}. Sections: 1) Funding need: adjusted cash, quarterly burn and confirmed runway in weeks (quarters x 13), and any raise already announced. 2) ${T}'s own raises in the last 18 months: date, type, discount, size as a percentage of market value, brokers, and share price against DAP at 30 and 90 days. 3) Peer placements in the last 12 months: median and range of discount and size, median 30 and 90-day result against DAP and how many finished above DAP, plus a table of the ten most recent. 4) Brokers: the brokers most active with the peer set, and the incumbents on ${T}'s own deals. 5) A raise at peer medians: indicative size (median size x ${T}'s market value) and discount, both labelled "Inferred:". Present evidence; recommend no terms. A negative discount figure in the placement data means a discount to the last close; a price above the last close is labelled "check terms".`,
+    fetch: async (T, q, s) => {
+      const [c, own, br, pe, sp] = await Promise.all([
+        call("get_cashflow_snapshot", { asx_code: T, user_question: q }, "Cash flow and runway", s),
+        call("list_capital_raises", { asx_code: T, limit: 15, include_related_announcements: false, user_question: q }, "Own capital raises", s),
+        call("list_deal_brokers", { asx_code: T, limit: 30, user_question: q }, "Brokers on own deals", s),
+        call("get_peers", { target_ticker: T, top_n: 12, user_question: q }, "Peers", s),
+        call("screen_peer_brokers", { target_ticker: T, broker_top_n: 10, peer_top_n: 15, user_question: q }, "Peer-set broker screen", s)]);
+      const pk = livePeers(pe).slice(0, 12);
+      const pl = pk.length ? await call("run_readonly_sql", { sql: `SELECT asx_code, CAST(filing_date AS CHAR) AS filing_date, issue_types, COALESCE(discount_pct_actual, discount_pct) AS discount_pct, ROUND(raise_vs_market_cap_pct,1) AS size_pct, ROUND(dap_performance_post_30d_pct,1) AS dap_30d_pct, ROUND(dap_performance_post_90d_pct,1) AS dap_90d_pct, broker_involved FROM Placement.deals_daily WHERE asx_code IN (${inList(pk)}) AND filing_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) ORDER BY filing_date DESC LIMIT 60`, user_question: q }, "Peer placements (12 months)", s) : null;
+      return [c, own, br, pe, sp, pl].filter(Boolean); } },
+
+  { id: "pipeline", list: true, name: "Raise Pipeline", blurb: "Who in the sector or list runs out of cash within 26 weeks, with last raise, incumbent broker and likely cornerstones.",
+    brief: () => `Write a raise pipeline for ${scopeText()}. Use Investair's confirmed runway in weeks (quarters x 13). Group the companies: "Under 4 weeks" (urgent), "Active window, 4 to 10 weeks", "Approaching, 10 to 26 weeks". For each company give runway in weeks, adjusted cash, quarterly burn, market value, last raise (date and brokers over 18 months), whether there is an incumbent broker or no broker disclosed (open mandate), and the largest substantial holders (excluding prime-broker or lending notices). Raise check: if the last raise was filed after the company's base quarter end, or a placement, entitlement, share purchase plan, trading halt, takeover, scheme or loan appears in the last 45 days of announcements, move it to a final "Recently funded or in a transaction — check" table with the reason and date. Then give an indicative raise size and discount at the scope's 12-month placement medians, labelled "Inferred:". Open with a three-sentence summary naming the most urgent companies. Cash-out dates are estimates; say which quarterly report will confirm or override them.`,
+    fetch: async (T, q, s) => {
+      const sc = scope(); if (!sc.sec && !sc.list.length) return [];
+      const scr = await call("run_readonly_sql", { sql: `SELECT c.asx_code, c.company_name, c.sub_industry, ROUND(c.market_cap/1e6,1) AS mcap_m, ROUND(c.adjusted_cash_confirmed_aud/1e6,2) AS cash_m, ROUND(c.total_relevant_outgoings_aud/1e6,2) AS burn_q_m, ROUND(c.adjusted_estimated_quarters_funding_confirmed*13,1) AS runway_wks, CAST(c.base_quarter_end AS CHAR) AS base_quarter_end FROM Cashflow.cashflow_daily c WHERE c.report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND c.runway_publishable=1 AND c.adjusted_estimated_quarters_funding_confirmed <= 2 AND ${whereFor("c", sc)} ORDER BY c.adjusted_estimated_quarters_funding_confirmed ASC LIMIT 25`, user_question: q }, "Runway screen (under 26 weeks)", s);
+      const L = rowsOf(scr).map(x => String(x.asx_code).toUpperCase()); if (!L.length) return [{ label: "Runway screen (under 26 weeks)", data: { rows: [], note: "No company in scope has under 26 weeks of confirmed runway." } }];
+      const inL = inList(L);
+      const [lr, med, hb, an] = await Promise.all([
+        call("run_readonly_sql", { sql: `SELECT d.asx_code, COUNT(DISTINCT d.deal_id) AS deals_18m, CAST(MAX(d.filing_date) AS CHAR) AS last_raise, GROUP_CONCAT(DISTINCT b.broker_canonical_name) AS brokers_18m FROM Placement.deals_daily d LEFT JOIN Broker.deal_broker_map b ON b.deal_id = d.deal_id WHERE d.asx_code IN (${inL}) AND d.filing_date >= DATE_SUB(CURDATE(), INTERVAL 18 MONTH) GROUP BY d.asx_code`, user_question: q }, "Raises and brokers (18 months)", s),
+        call("run_readonly_sql", { sql: `SELECT COUNT(*) AS deals, ROUND(AVG(d.raise_vs_market_cap_pct),1) AS avg_size_pct, ROUND(AVG(d.discount_positive_pct),1) AS avg_discount_pct FROM Placement.deals_daily d WHERE ${whereFor("d", sc)} AND d.filing_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)`, user_question: q }, "Scope placement averages (12 months)", s),
+        call("get_substantial_holders_batch", { tickers: L, days_back: 540, limit_per_ticker: 5, user_question: q }, "Substantial holders (540 days)", s),
+        call("list_announcements", { tickers: L, days_back: 45, limit: 120, user_question: q }, "Announcements (45 days, raise check)", s)]);
+      return [scr, lr, med, hb, { label: "Announcements (45 days, raise check): ticker | date | title", data: annRows(an).map(a => `${a.t} | ${a.d} | ${a.title}`), max: 30000 }]; } },
+
+  { id: "league", list: true, name: "Broker League Table", blurb: "Who led raises in the sector or list over 12 months: deals, discounts, sizes and how the stocks traded afterwards.",
+    brief: () => `Write a broker league table for ${scopeText()}, covering placements filed in the last 12 months. Open with the total deals and issuers in scope. One table ranked by deal count: broker, deals, issuers, average discount, average size as a percentage of market value, average share price against DAP at 30 and 90 days, and how many matured deals finished above DAP at 90 days. Flag brokers with fewer than three deals as a small sample. Then three short reads: for a CFO choosing a broker, for a broker benchmarking its position, and on which brokers' deals held up best after market. A deal can list several brokers, so counts overlap. Present evidence; rank, do not recommend.`,
+    fetch: async (T, q, s) => {
+      const sc = scope(); if (!sc.sec && !sc.list.length) return [];
+      return Promise.all([
+        call("run_readonly_sql", { sql: `SELECT b.broker_canonical_name AS broker, COUNT(DISTINCT d.deal_id) AS deals, COUNT(DISTINCT d.asx_code) AS issuers, ROUND(AVG(d.discount_positive_pct),1) AS avg_discount_pct, ROUND(AVG(d.raise_vs_market_cap_pct),1) AS avg_size_pct, ROUND(AVG(d.dap_performance_post_30d_pct),1) AS avg_dap_30d_pct, ROUND(AVG(d.dap_performance_post_90d_pct),1) AS avg_dap_90d_pct, SUM(d.dap_performance_post_90d_pct IS NOT NULL) AS matured_90d, SUM(d.dap_performance_post_90d_pct > 0) AS above_dap_90d FROM Placement.deals_daily d JOIN Broker.deal_broker_map b ON b.deal_id = d.deal_id WHERE ${whereFor("d", sc)} AND d.filing_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND b.broker_canonical_name IS NOT NULL GROUP BY b.broker_canonical_name ORDER BY deals DESC LIMIT 20`, user_question: q }, "Broker league (12 months)", s),
+        call("run_readonly_sql", { sql: `SELECT COUNT(DISTINCT d.deal_id) AS deals, COUNT(DISTINCT d.asx_code) AS issuers, SUM(d.broker_involved IS NULL OR d.broker_involved = '') AS deals_no_broker_disclosed FROM Placement.deals_daily d WHERE ${whereFor("d", sc)} AND d.filing_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)`, user_question: q }, "Scope totals (12 months)", s)]); } },
+
+  { id: "movers", list: true, name: "Register Movers", blurb: "Net buyers and sellers among substantial holders over 90 days, and funds building positions across several names.",
+    brief: () => `Write a register movers report for ${scopeText()}, from substantial holder notices over the last 90 days. Sections: 1) Summary: three sentences, answer first. 2) Net accumulators: institutions that became substantial or increased, with company, old and new voting power and date. 3) Net sellers: decreases and ceased holdings. 4) Thematic holders: any institution with notices on two or more companies in scope, and its direction. 5) Lending and index noise: list prime-broker notices separately as lending or collateral, and treat index-fund commencements and cessations around rebalance dates as index-related. 6) What it means for investor targeting: two or three lines. Collapse subsidiaries of one group into one line. This covers holdings of 5% or more only.`,
+    fetch: async (T, q, s) => { const L = await universe(q, s); if (!L.length) return [];
+      return [await call("get_substantial_holders_batch", { tickers: L, days_back: 90, limit_per_ticker: 10, user_question: q }, "Substantial holders (90 days)", s)]; } },
+
+  { id: "calendar", list: true, name: "Catalyst Calendar", blurb: "Milestones the companies themselves have stated for the next six months, plus quarterly report due dates.",
+    brief: () => `Build a catalyst calendar for ${scopeText()} from the companies' own announcements over the last 120 days. One table sorted by date: date or window, company, catalyst (drill results, study, permit, approval, offtake, production, trial result, product launch, AGM or similar), source announcement and date, and confidence ("Stated date", "Stated window" or "Inferred:" with what it rests on). Add each company's next quarterly report due date (one month after the quarter end that follows its latest base quarter). Then a short list of catalysts already delivered, where a later announcement shows it. Leave out anything the companies did not say themselves. Open with three sentences on the busiest weeks and the most material catalysts.`,
+    fetch: async (T, q, s) => { const L = await universe(q, s); if (!L.length) return [];
+      const [an, cf] = await Promise.all([
+        call("list_announcements", { tickers: L, days_back: 120, limit: 150, user_question: q }, "Announcements (120 days)", s),
+        call("run_readonly_sql", { sql: `SELECT asx_code, company_name, CAST(base_quarter_end AS CHAR) AS base_quarter_end, document_type FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${inList(L)})`, user_question: q }, "Latest base quarter (for report due dates)", s)]);
+      return [cf, { label: "Announcements (120 days): ticker | date | price sensitive | title | summary", data: annRows(an).map(a => `${a.t} | ${a.d} | ${a.ps ? "PS" : "-"} | ${a.title} | ${a.prev.slice(0, 260)}`), max: 70000 }]; } }
+
+];
+
+const rbtn = r => `<button class="rbtn${r.list ? " role" : ""}" data-id="${r.id}"><b>${r.name}</b><span>${r.blurb}</span></button>`;
+$("grid").innerHTML = REPORTS.filter(r => !r.list).map(rbtn).join("");
+$("grid2").innerHTML = REPORTS.filter(r => r.list).map(rbtn).join("");
+const buttons = () => [...document.querySelectorAll(".rbtn")];
+const setBusy = b => { buttons().forEach(x => x.disabled = b || !mcp || !sample); $("bStop").style.display = b ? "" : "none"; };
+const status = (msg, err, spin) => { const el = $("status"); el.style.display = msg ? "" : "none"; el.className = "res-status" + (err ? " err" : ""); el.innerHTML = (spin ? '<span class="spin"></span>' : "") + `<span></span>`; el.lastChild.textContent = msg || ""; };
+const setActs = on => ["bCopy", "bMd", "bDocx"].forEach(id => $(id).disabled = !on);
+
+// ---------- markdown render (safe) ----------
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+function md(src) {
+  const L = src.replace(/\r/g, "").split("\n"); let h = "", i = 0;
+  const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+  while (i < L.length) {
+    const l = L[i];
+    if (/^\s*\|/.test(l) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}/.test(L[i + 1])) {
+      const hd = cells(l); i += 2; let rows = "";
+      while (i < L.length && /^\s*\|/.test(L[i])) { rows += "<tr>" + cells(L[i]).map(c => `<td>${inl(c)}</td>`).join("") + "</tr>"; i++; }
+      h += `<div class="tw"><table><thead><tr>${hd.map(c => `<th>${inl(c)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`; continue;
+    }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)/))) { const n = Math.min(m[1].length, 3); h += `<h${n}>${inl(m[2])}</h${n}>`; i++; continue; }
+    if (/^\s*([-*_])\s*\1\s*\1[\s\-*_]*$/.test(l)) { h += "<hr>"; i++; continue; }
+    if (/^\s*[-*]\s+/.test(l)) { h += "<ul>"; while (i < L.length && /^\s*[-*]\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*[-*]\s+/, ""))}</li>`; i++; } h += "</ul>"; continue; }
+    if (/^\s*\d+[.)]\s+/.test(l)) { h += "<ol>"; while (i < L.length && /^\s*\d+[.)]\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*\d+[.)]\s+/, ""))}</li>`; i++; } h += "</ol>"; continue; }
+    if (!l.trim()) { i++; continue; }
+    let p = []; while (i < L.length && L[i].trim() && !/^(#{1,4}\s|\s*[-*]\s+|\s*\d+[.)]\s+|\s*\|)/.test(L[i])) { p.push(L[i]); i++; }
+    if (!p.length) { p.push(l); i++; }
+    h += `<p>${inl(p.join(" "))}</p>`;
+  }
+  return h;
+}
+
+// ---------- run ----------
+async function run(rep) {
+  const T = ($("tk").value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const B = "";
+  if (!T && !rep.list) { status("Enter a ticker first.", true); return; }
+  const TL = rep.list ? ($("sec").value ? $("sec").value + ($("band").value ? ", " + BANDS[$("band").value][0] : "") : "my list") : T;
+  if (ctrl) ctrl.abort(); ctrl = new AbortController(); const sig = ctrl.signal;
+  current = null; setActs(false); setBusy(true);
+  $("resTitle").textContent = `${rep.name} — ${TL}`; $("out").innerHTML = "";
+  const q = `${rep.name}: ${TL}`;
+  try {
+    status("Pulling Investair data…", false, true);
+    const res = await rep.fetch(T, q, sig);
+    if (!res.length) { status($("sec").value ? "No companies found in that sector and size band. Try another size." : "Your list is empty. Add companies under My list of companies first, or choose a sector above.", true); return; }
+    if (sig.aborted) return;
+    const failed = res.filter(r => r.data && r.data.error).map(r => r.label);
+    const dataTxt = res.map(r => `### ${r.label}\n${trim(r.data, r.max || 24000)}`).join("\n\n").slice(0, 220000);
+    const prompt = `You are Investair's research writer. Today is ${todayISO()}.\n\n${rep.brief(T, B)}\n\n${STYLE}\n\nUse ONLY the Investair data below (JSON from Investair's tools; fields with "error" failed — say what is missing in a one-line "Data notes" entry).${failed.length ? " Failed sources: " + failed.join(", ") + "." : ""}\n\nINVESTAIR DATA:\n${dataTxt}`;
+    status("Writing the report…", false, true);
+    const out = await sample(prompt, { modelTier: "default", cache: false, signal: sig,
+      onText: ({ text }) => { $("out").innerHTML = md(text); } });
+    current = { md: out.text, title: `${rep.name} — ${TL}`, slug: `${rep.list ? ($("sec").value ? sqlStr($("sec").value).replace(/[^A-Za-z0-9]+/g, "-").toLowerCase() : "list") : T}-${rep.id}-${todayISO()}` };
+    $("out").innerHTML = md(out.text);
+    status(out.truncated ? "Done, but the answer was cut short. Try again for a full version." : `Done · Investair data as pulled ${todayLong()}${failed.length ? " · missing: " + failed.join(", ") : ""}`, !!out.truncated);
+    setActs(true);
+  } catch (e) {
+    const c = e && e.code;
+    if (c === "cancelled") { status("Stopped."); }
+    else if (c === "not_granted") status("Claude access for this page was declined. Allow it from the page's Permissions menu to generate reports.", true);
+    else if (c === "rate_limited") status("Too many requests just now. Wait a minute and try again.", true);
+    else status("Couldn't generate the report (" + (c || (e && e.message) || "error") + ").", true);
+    if (e && e.text) { current = { md: e.text, title: `${rep.name} — ${TL}`, slug: `${rep.list ? ($("sec").value ? sqlStr($("sec").value).replace(/[^A-Za-z0-9]+/g, "-").toLowerCase() : "list") : T}-${rep.id}-${todayISO()}` }; $("out").innerHTML = md(e.text); setActs(true); }
+  } finally { setBusy(false); }
+}
+["grid", "grid2"].forEach(g => $(g).addEventListener("click", e => { const b = e.target.closest(".rbtn"); if (!b || b.disabled) return; const r = REPORTS.find(x => x.id === b.dataset.id); if (r) run(r); }));
+$("bStop").onclick = () => ctrl && ctrl.abort();
+
+// ---------- outputs ----------
+$("bCopy").onclick = async () => { if (!current) return; try { await navigator.clipboard.writeText(current.md); status("Copied to clipboard."); } catch { status("Copy isn't available here. Use Save as Markdown instead.", true); } };
+async function save(filename, data) {
+  if (!downloads) { status("Downloads aren't available in this view.", true); return; }
+  try { await downloads.save({ filename, data }); status("Saved " + filename + "."); }
+  catch (e) { const c = e && e.code; if (c === "declined") return; if (c === "extension_not_enabled") status("This file type isn't enabled here. Use Save as Markdown instead.", true); else status("Couldn't save the file (" + (c || "error") + ").", true); }
+}
+$("bMd").onclick = () => current && save(current.slug + ".md", current.md);
+$("bDocx").onclick = async () => {
+  if (!current) return;
+  if (typeof JSZip === "undefined" || typeof iaBuildDocx !== "function") { status("Word export couldn't load. Use Save as Markdown instead.", true); return; }
+  try {
+    const src = $("logoTop").src; const b64 = src.split(",")[1]; const bin = atob(b64); const logo = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) logo[i] = bin.charCodeAt(i);
+    const blob = await iaBuildDocx(JSZip, current.md, current.title, logo, { eyebrow: "INVESTAIR STANDARDISED REPORT", sub: "Generated " + todayLong(), footer: "investair.com.au" });
+    await save(current.slug + ".docx", blob);
+  } catch (e) { status("Couldn't build the Word file (" + ((e && e.message) || "error") + "). Use Save as Markdown instead.", true); }
+};
+
+
+// ---------- my list (saved per viewer) ----------
+const LSK = "ia_std_reports_list";
+let uid = null, db = null;
+const listDoc = () => (db && uid) ? db.doc("data/users/" + uid + "/prefs/coverage") : null;
+const lsGet = () => { try { return JSON.parse(localStorage.getItem(LSK) || "null"); } catch { return null; } };
+const lsSet = v => { try { localStorage.setItem(LSK, JSON.stringify(v)); } catch {} };
+async function loadList() {
+  try { const u = window.claude ? await claude.use("user") : null; uid = u ? await u.id() : null; db = window.claude ? await claude.use("db") : null; } catch { db = null; }
+  let saved = null;
+  try { const d = listDoc(); if (d) { const sn = await d.get(); if (sn.exists) saved = sn.data().items; } } catch {}
+  if (!saved) saved = lsGet();
+  if (Array.isArray(saved) && saved.length) { COVERAGE = saved.filter(x => Array.isArray(x) && x[0]).map(x => [String(x[0]).toUpperCase(), String(x[1] || "")]); renderPick(); }
+}
+async function persist() { lsSet(COVERAGE); try { const d = listDoc(); if (d) await d.set({ items: COVERAGE, updated: new Date().toISOString() }); } catch {} }
+const lmsg = (t, err) => { const m = $("listMsg"); m.textContent = t; m.style.color = err ? "#b91c1c" : ""; };
+$("listSave").onclick = async () => {
+  const want = [...new Set(($("listTa").value || "").toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean))].slice(0, 25);
+  if (!want.length) { lmsg("Enter at least one ASX code.", true); return; }
+  if (!mcp) { lmsg("Investair isn't connected, so codes can't be checked.", true); return; }
+  const known = new Map(COVERAGE); const next = [], problems = [];
+  lmsg("Checking codes against Investair…");
+  for (const t of want) {
+    if (known.has(t)) { next.push([t, known.get(t)]); continue; }
+    const r = await call("get_market_snapshot", { ticker: t, user_question: "Check ASX code " + t + " for my list" }, t);
+    const sn = r.data && r.data.tool_response && r.data.tool_response.snapshot;
+    if (sn && sn.company_name) next.push([t, sn.company_name]); else problems.push(t);
+  }
+  if (!next.length) { lmsg("None of those codes were found. Check the spelling.", true); return; }
+  COVERAGE = next; renderPick(); await persist();
+  lmsg(problems.length ? "Saved " + next.length + ". Not found or no market data, so left out: " + problems.join(", ") + "." : "Saved " + next.length + " companies.", !!problems.length);
+};
+$("listReset").onclick = async () => { COVERAGE = DEFAULT_COVERAGE.slice(); renderPick(); await persist(); lmsg(COVERAGE.length ? "Reset to the list from setup." : "List cleared. Add ASX codes and select Check and save list."); };
+
+// ---------- capabilities ----------
+setBusy(false);
+(async () => {
+  const [m, s, d] = window.claude ? await Promise.all([claude.use("mcp"), claude.use("sample"), claude.use("downloads")]) : [null, null, null];
+  mcp = m; sample = s; downloads = d;
+  if (!mcp || !sample) { const n = $("notice"); n.style.display = "block"; n.textContent = !mcp ? "Connect Investair in Settings → Connectors to use this page." : "This view can't reach Claude, so reports can't be written here. Open the page on claude.ai."; }
+  if (!downloads) { $("bMd").title = $("bDocx").title = "Downloads aren't available in this view"; }
+  setBusy(false);
+  await loadList();
+  if (mcp) loadSectors();
+})();
+})();
+</script>
+
