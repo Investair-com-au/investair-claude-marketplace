@@ -163,31 +163,48 @@ Then ask: proceed with the unvalidated name, or stop?
 
 ## 5. Ask: coverage (optional)
 
-Use `AskUserQuestion` with these optional questions:
+Before asking, briefly explain the default to the user:
+
+> **Default scope — the Sweet Spot list**: the Pipeline (and the Raise
+> Pipeline report) automatically screens every ASX company Investair
+> tracks and finds ones with 4–10 weeks cash runway — the companies most
+> likely to need a capital raise soon. No list needed; Investair does the
+> screening live each time you run it.
+>
+> The optional questions below let you:
+> - Pre-select a **sector** so the Sector Report opens on your market (e.g.
+>   Gold, Copper, Lithium). The Pipeline still screens everything.
+> - Add **house stocks** — tickers your desk has mandates on. These are
+>   always flagged at the top of the Pipeline regardless of their runway.
+> - Add a **coverage list** — the companies you actively cover. This
+>   pre-populates the Company Page ticker selector and the Standardised
+>   Reports "My list" tab.
+
+Then use `AskUserQuestion` with these optional questions:
 
 **Question 1** — Primary sector (Investair sub-industry):
 > Optional: What is your primary sector in Investair? (e.g. Gold, Copper,
 > Lithium, Oil & Gas). This pre-selects your sector in the Standardised
-> Reports. Leave blank to default to My list.
+> Reports. Leave blank — the default Sweet Spot list covers everything.
 
-**Question 2** — Focus tagline:
-> Optional: A short focus phrase for the masthead (e.g. "WA gold
-> explorers", "battery metals & critical minerals"). Leave blank to omit.
+**Question 2** — House stocks:
+> Optional: ASX codes of your house stocks (space- or comma-separated).
+> These are always highlighted at the top of the Pipeline regardless of
+> their cash runway. Leave blank if none.
 
-**Question 3** — House stocks:
-> Optional: ASX codes of stocks your desk has mandates on (space- or
-> comma-separated, e.g. "ABC DEF GHI"). These are always highlighted in
-> the pipeline regardless of sweet-spot score. Leave blank if none.
-
-**Question 4** — Coverage list:
+**Question 3** — Coverage list:
 > Optional: Your coverage list as ASX codes and company names, one per
 > line, e.g.:
 > ```
 > ABC, Acme Gold
 > DEF, Delta Copper
 > ```
-> These pre-populate the Company Page and Standardised Reports. Leave
-> blank for an empty starting list.
+> Pre-populates the Company Page and Standardised Reports "My list" tab.
+> Leave blank to start with an empty list you can add to later.
+
+**Question 4** — Focus tagline:
+> Optional: A short focus phrase for the masthead (e.g. "WA gold
+> explorers", "battery metals & critical minerals"). Leave blank to omit.
 
 Store:
 - `SECTOR` — primary sector string (blank = `""`)
