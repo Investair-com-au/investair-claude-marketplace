@@ -8,7 +8,7 @@ description: >
   "set up my broker workspace", "install the pipeline", or similar
   first-time-setup requests. Idempotent: safe to re-run.
 metadata:
-  version: "0.2.0"
+  version: "0.3.3"
 ---
 
 # Investair Broker Setup
@@ -24,49 +24,39 @@ The three template files are in this skill's `artifacts/` directory:
 - `company-page-template.html` — Investair Company Page
 - `standardised-reports-template.html` — Standardised Reports
 
-## 1. Check for CoWork
+The connector is always `Investair_data`. No connector configuration is
+needed from the user.
 
-Inspect your session context to determine whether you are running inside
-Cowork (a persistent Claude workspace session). The clearest signal is
-whether a `scheduled-tasks.json` file exists under
-`~/Library/Application Support/Claude/local-agent-mode-sessions/`. Run:
+## 1. Find the template directory
 
-```bash
-ls ~/Library/Application\ Support/Claude/local-agent-mode-sessions/ 2>/dev/null
-```
-
-If the directory is empty or missing, you are **not** in CoWork. Tell the
-user:
-
-> **You're not in a CoWork session.** The weekly pipeline scheduled task
-> requires CoWork, Investair's persistent workspace. Without it, the
-> pipeline can't run automatically every Monday morning.
->
-> To set up CoWork, open the Claude desktop app, click **New Space** in the
-> left sidebar, then re-run `/broker-setup` from that space.
->
-> I'll continue installing and pinning the three artifacts now — you can
-> come back to schedule the pipeline once you're in CoWork.
-
-Do **not** stop — continue with the remaining steps even if CoWork is
-absent (just skip step 10).
-
-## 2. Find the template directory
-
-Locate the template files. Run:
+Run:
 
 ```bash
 find ~/.claude/plugins -name "pipeline-template.html" -path "*/broker-setup/artifacts/*" 2>/dev/null | head -1
 ```
 
-Store the directory (the folder containing that file) as `TMPL_DIR`. If
-no match is found, tell the user the plugin may need to be reinstalled and
-stop.
+Store the directory (the folder containing that file) as `TMPL_DIR`. If no
+match is found, tell the user the plugin may need to be reinstalled and stop.
+
+## 2. Get the firm name (plain-text exchange — one reply)
+
+**CRITICAL: Do this BEFORE listing any artifacts. Send a single plain-text
+message. Do NOT call `AskUserQuestion` here. Do NOT list artifacts first.**
+
+Message to send (copy exactly):
+
+> What is your firm's display name? It will appear in the masthead of your
+> three Investair dashboards.
+
+Wait for the user's reply. Store it as `FIRM_NAME`. Do not proceed until
+you have a reply.
+
+Do NOT ask about sectors, house stocks, connector, coverage list, broker
+name, CoWork, or scheduling here.
 
 ## 3. Check for existing artifacts
 
-List the user's artifacts to detect whether any of the three are already
-installed:
+Now that you have FIRM_NAME, list the user's artifacts:
 
 ```
 Artifact({ action: "list", scope: "mine", limit: 50 })
@@ -77,210 +67,239 @@ Look for titles matching any of:
 - "Company Page" (or ends with "Company Page")
 - "Standardised Reports" (or ends with "Standardised Reports")
 
-If **any** existing artifacts match, tell the user what you found and ask:
+If **any** match, use `AskUserQuestion` (do not write a text response) with
+one question:
 
-> I found an existing **[name]** artifact in your library. Would you like
-> to keep it (I'll install a fresh copy alongside) or replace it (the
-> existing one will be archived)?
+> I found an existing [name(s)] dashboard in your library. What would you
+> like to do?
 
-Wait for their answer. If replace: read the old artifact, rename it to
-`[old title] (archived)` by republishing with the old URL and new title.
+Options:
+- "Overwrite the existing dashboards" — republish over the existing ones
+  (same URLs, stay pinned)
+- "Keep them and install alongside" — fresh copies with a different title
 
-If **no** existing artifacts are found, proceed directly.
+Wait for the answer before continuing.
 
-## 4. Ask: firm details
+**If overwrite:** read each matching artifact (`Artifact({ action: "read", url })`)
+and extract the existing setup from the HTML:
+- `BROKER_CANONICAL` — the string inside `/*BROKER_START*/"..."/*BROKER_END*/`
+  (Pipeline template)
+- Optionally reuse `SECTOR`, `FOCUS` and `COVERAGE` slots if present
 
-**IMPORTANT — no memory pre-population**: Do NOT use memory, prior session
-context, or previous /broker-setup runs to suggest or pre-populate firm
-names. Every call to this skill is a fresh setup for a different broker.
-Broker names from past runs are confidential and must never appear as
-suggested options. Ask Question 1 and Question 2 as plain free-text
-questions only — no pre-suggested options, no "Other", no "Something else"
-with prefilled names.
+Set `OVERWRITE = true` and remember each existing URL. Skip the broker
+lookup in step 4, using the extracted `BROKER_CANONICAL` as the broker
+input. If the broker cannot be extracted, fall back to the lookup in step 4.
 
-Do not save any broker names, firm names, or canonical names to memory
-during or after this skill run.
+**If keep alongside:** `OVERWRITE = false`; append ` – {FIRM_NAME}` to the
+three titles so they don't collide.
 
-Use `AskUserQuestion` with these questions in one call:
+If **no** matches, set `OVERWRITE = false` and proceed to step 3b without
+asking anything.
 
-**Question 1** — Firm name:
-> Which firm are you setting up for? (Type the display name — it will
-> appear in the artifact masthead.)
+## 3b. Ask: optional preferences (AskUserQuestion)
 
-**Question 2** — Broker name for Investair lookup:
-> What is your firm's name as it would appear in a placement announcement
-> on the ASX? We'll look it up in Investair's deal data to find the exact
-> canonical name used there.
+Now use `AskUserQuestion` with these **three** questions in one call.
+Use the fixed options below exactly — do NOT generate your own options or
+add firm names from memory.
 
-**Question 3** — Investair connector name:
-> What is the Investair connector named in claude.ai Settings → Connectors?
-> Leave blank for the default: `Investair_data`
+**Question 1** — Primary sector:
+> Optional: What is your primary sector? Pre-selects your sector in the
+> Standardised Reports.
 
-Store answers as:
-- `FIRM_NAME` — firm display name
-- `BROKER_INPUT` — the raw name the user typed (used for the lookup below)
-- `SERVER` — connector display name (default `"Investair_data"` if blank)
-
-## 4b. Look up and confirm the broker canonical name
-
-Using the Investair_data connector, validate the user's input against
-Investair's broker deal data. The goal is to find the exact string stored
-as `broker_canonical_name` in `Broker.deal_broker_map`.
-
-Try the following candidate names **in order**, stopping at the first that
-returns a non-empty result. For each candidate, run:
-
-```sql
-SELECT broker_canonical_id, COUNT(*) AS deals
-FROM Broker.deal_broker_map
-WHERE broker_canonical_name = '<CANDIDATE>'
-GROUP BY broker_canonical_id
-ORDER BY deals DESC
-LIMIT 1
-```
-
-Candidates to try (generate them from BROKER_INPUT):
-1. BROKER_INPUT as typed
-2. Title-cased version (e.g. "mst financial" → "MST Financial")
-3. Uppercased abbreviation if input looks like initials (e.g. "mst" → "MST")
-4. BROKER_INPUT with trailing legal suffixes stripped one at a time:
-   "Securities", "Capital", "Limited", "Ltd", "Financial", "Group",
-   "Advisory", "Stockbroking", "Partners", "Broking", "Equities",
-   "Funds Management", "Asset Management", "Investments", "Corp", "Inc"
-5. Stripped version title-cased
-6. FIRM_NAME if it differs from BROKER_INPUT (try both as-typed and
-   title-cased)
-
-For each candidate that **returns a result** (non-zero rows), confirm with
-the user before proceeding:
-
-> I found a broker matching **"[candidate]"** in Investair's deal data
-> ([N] deals). Is that your firm?
-
-- **Yes** → set `BROKER_CANONICAL = candidate`. Proceed to step 5.
-- **No** → continue trying the next candidate.
-
-If **no candidate matches**, tell the user:
-
-> I couldn't find your broker in Investair's deal data with any variation
-> of that name. The pipeline will show an error when it loads if the name
-> isn't right. You can proceed now and correct it later under the
-> pipeline's Customise screen, or stop to check your Investair canonical
-> name with the Investair team.
-
-Then ask: proceed with the unvalidated name, or stop?
-- If proceed → `BROKER_CANONICAL = BROKER_INPUT` (as typed).
-- If stop → end the skill.
-
-## 5. Ask: coverage (optional)
-
-Before asking, briefly explain the default to the user:
-
-> **Default scope — the Sweet Spot list**: the Pipeline (and the Raise
-> Pipeline report) automatically screens every ASX company Investair
-> tracks and finds ones with 4–10 weeks cash runway — the companies most
-> likely to need a capital raise soon. No list needed; Investair does the
-> screening live each time you run it.
->
-> The optional questions below let you:
-> - Pre-select a **sector** so the Sector Report opens on your market (e.g.
->   Gold, Copper, Lithium). The Pipeline still screens everything.
-> - Add **house stocks** — tickers your desk has mandates on. These are
->   always flagged at the top of the Pipeline regardless of their runway.
-> - Add a **coverage list** — the companies you actively cover. This
->   pre-populates the Company Page ticker selector and the Standardised
->   Reports "My list" tab.
-
-Then use `AskUserQuestion` with these optional questions:
-
-**Question 1** — Primary sector (Investair sub-industry):
-> Optional: What is your primary sector in Investair? (e.g. Gold, Copper,
-> Lithium, Oil & Gas). This pre-selects your sector in the Standardised
-> Reports. Leave blank — the default Sweet Spot list covers everything.
+Options (use exactly):
+- label: "Gold",                    description: "ASX gold explorers and producers"
+- label: "Copper / Battery Metals", description: "Base metals, lithium, battery materials"
+- label: "Oil & Gas",               description: "ASX energy sector"
+- label: "Other / multiple",        description: "Type your sector(s) in the reply box below"
 
 **Question 2** — House stocks:
-> Optional: ASX codes of your house stocks (space- or comma-separated).
-> These are always highlighted at the top of the Pipeline regardless of
-> their cash runway. Leave blank if none.
+> Optional: ASX codes of your house stocks. These are always flagged at the
+> top of the Pipeline regardless of cash runway.
 
-**Question 3** — Coverage list:
-> Optional: Your coverage list as ASX codes and company names, one per
-> line, e.g.:
-> ```
-> ABC, Acme Gold
-> DEF, Delta Copper
-> ```
-> Pre-populates the Company Page and Standardised Reports "My list" tab.
-> Leave blank to start with an empty list you can add to later.
+Options (use exactly):
+- label: "I have house stocks", description: "Type the ASX codes in the reply box below"
+- label: "No house stocks",     description: "Skip — no house stocks to add"
 
-**Question 4** — Focus tagline:
-> Optional: A short focus phrase for the masthead (e.g. "WA gold
-> explorers", "battery metals & critical minerals"). Leave blank to omit.
+**Question 3** — Focus tagline:
+> Optional: A short phrase for the masthead (e.g. "WA gold explorers").
 
-Store:
-- `SECTOR` — primary sector string (blank = `""`)
-- `FOCUS` — focus tagline string (blank = `""`)
-- `HOUSE_STOCKS` — array of ASX codes (blank = `[]`)
-- `COVERAGE` — array of `["TICKER", "Company name"]` pairs (blank = `[]`)
+Options (use exactly):
+- label: "I'll add a tagline", description: "Type it in the reply box below"
+- label: "No tagline",         description: "Skip — no tagline needed"
 
-For HOUSE_STOCKS: split on spaces and commas, uppercase each code,
-deduplicate, limit to 10.
+Parse the answers and any free-text replies:
+- `SECTORS` — sector string(s) from Q1 (blank if skipped, `[]` for no sector)
+- `HOUSE_STOCKS` — uppercased ASX codes from Q2 reply, split on spaces/commas,
+  deduplicated, limit 10 (blank = `[]`)
+- `FOCUS` — tagline string from Q3 reply (blank = `""`)
 
-For COVERAGE: parse each line as `TICKER, Company name` or
-`TICKER — Company name`. Uppercase the ticker. Limit to 25 pairs.
+## 4. Look up and confirm the broker canonical name
+
+**Skip this step if `OVERWRITE = true`** — `BROKER_CANONICAL` was taken from the
+existing dashboards (set `BROKER_CANONICAL_ID` by running the query below
+with an exact match on that name, silently, and proceed to step 5).
+
+**IMPORTANT: Do NOT ask the user for a broker lookup name, an ASX
+announcement name, or any variation of their firm name. Do not present
+pre-filled options. Run the lookup automatically and silently using
+FIRM_NAME. The only user interaction in this step is a single yes/no
+confirmation if a match is found.**
+
+Using the `Investair_data` connector, run a fuzzy search against
+`Broker.deal_broker_map` to find the canonical broker name. All names in
+this table are normalised — if a match is found it is the right name to use.
+
+Run this query once, using a LIKE search across all candidates in one pass:
+
+```sql
+SELECT broker_canonical_name, broker_canonical_id, COUNT(*) AS deals
+FROM Broker.deal_broker_map
+WHERE broker_canonical_name LIKE '%<FIRM_NAME_KEYWORD>%'
+GROUP BY broker_canonical_name, broker_canonical_id
+ORDER BY deals DESC
+LIMIT 5
+```
+
+Where `FIRM_NAME_KEYWORD` is the most distinctive word or words from
+FIRM_NAME (strip common suffixes: Securities, Capital, Limited, Ltd,
+Financial, Group, Advisory, Stockbroking, Partners, Broking, Equities,
+Investments, Corp, Inc — use what remains).
+
+If the query returns one clear match (highest deal count by a significant
+margin, or only one result), confirm silently with the user in one line:
+
+> Found **"[broker_canonical_name]"** in Investair's deal data
+> ([N] deals). Using that — is that right?
+
+- **Yes / no reply needed** → set `BROKER_CANONICAL = broker_canonical_name`
+  and `BROKER_CANONICAL_ID = broker_canonical_id`. Proceed to step 5.
+- **No** → ask which of the returned names is correct (show the list),
+  or confirm the user wants to proceed with FIRM_NAME unvalidated.
+
+If the query returns multiple similarly-scored results, show the short list
+and ask the user to pick one.
+
+If **no results**, tell the user in one line:
+
+> I couldn't find your firm in Investair's deal data — the Pipeline sweet
+> spot won't be derived from your deal history. Proceeding with
+> "[FIRM_NAME]". You can correct this later in the Pipeline's Customise
+> screen.
+
+Then proceed: `BROKER_CANONICAL = FIRM_NAME`, `BROKER_CANONICAL_ID = null`.
+
+## 5. Auto-generate coverage list from raise history
+
+Tell the user:
+
+> I'll build your initial coverage list from the ASX companies where your
+> firm led or co-led a capital raise in the past 12 months. You can add,
+> remove, or modify this list from within the Company Page and Standardised
+> Reports dashboards at any time.
+
+Then:
+
+### 5a. Discover Placement table schema
+
+Run `describe_table('Placement.deals_daily')` to find the column names for:
+- Issuer ASX ticker (e.g. `issuer_asx_code`, `asx_code`)
+- Issuer company name (e.g. `company_name`, `issuer_name`)
+- Deal date (e.g. `deal_date`)
+- Lead broker identifier — look for a column linking deals to a broker
+  canonical id or name (e.g. `lead_broker_canonical_id`, `broker_id`,
+  `bookrunner_id`). There may be separate lead and co-lead columns.
+
+If `describe_table` is unavailable, use `run_readonly_sql` to run:
+
+```sql
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'Placement' AND TABLE_NAME = 'deals_daily'
+ORDER BY ORDINAL_POSITION
+```
+
+### 5b. Query lead and co-lead raises
+
+Using the column names discovered above, run a query of the form:
+
+```sql
+SELECT DISTINCT
+  [issuer_ticker_col]  AS ticker,
+  [company_name_col]   AS company_name
+FROM Placement.deals_daily
+WHERE deal_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+  AND (
+    [lead_broker_col] = '[BROKER_CANONICAL_ID or BROKER_CANONICAL]'
+    -- also include co-lead col if it exists, e.g.:
+    -- OR [colead_broker_col] = '[BROKER_CANONICAL_ID or BROKER_CANONICAL]'
+  )
+ORDER BY deal_date DESC
+LIMIT 50
+```
+
+Match on `BROKER_CANONICAL_ID` if it's non-null and the column holds IDs;
+otherwise match on `BROKER_CANONICAL` if the column holds name strings.
+
+If the query fails (column name mismatch), try without the company name
+column and join to a company name source, or omit company names and use
+tickers only. If no query works, skip coverage (COVERAGE = []) and note it.
+
+### 5c. Store results
+
+Store results as `COVERAGE` — an array of `["TICKER", "Company name"]`
+pairs (or `["TICKER", ""]` if names unavailable). Limit to 50 pairs.
+
+Tell the user:
+
+> Found **[N] companies** from your firm's capital raises in the past 12
+> months — these will be your starting coverage list.
+> [List the tickers inline, e.g.: GOR, RMS, WAF, ...]
+> You can modify this list in the Company Page and Reports dashboards.
+
+If N = 0, tell the user no matching raises were found and coverage will
+start empty.
+
+## Publishing rules (steps 6–8)
+
+- Titles always start with **"Investair"** so the brand shows in the pinned
+  sidebar title. The firm name appears only in the masthead (OWNER slot).
+  If `OVERWRITE = false` and existing dashboards were kept, append
+  ` – {FIRM_NAME}` to each title.
+- If `OVERWRITE = true`, pass the existing artifact's `url` in the publish
+  call so it is republished in place (no archive, no duplicate). Skip the
+  `pin` call for any artifact that is already pinned.
 
 ## 6. Publish the Sweet Spot Pipeline
 
 ### 6a. Apply slot substitutions
 
-Write a Python script and run it. The script reads
+Write and run a Python script that reads
 `$TMPL_DIR/pipeline-template.html` and applies these exact string
 replacements (substituting actual runtime values before writing the script):
 
 - `<title>Investair Sweet Spot Pipeline Template</title>` →
-  `<title>{FIRM_NAME} Sweet Spot Pipeline</title>`
+  `<title>Investair Sweet Spot Pipeline</title>`
 - `<!--OWNER_START-->Internal<!--OWNER_END-->` →
   `<!--OWNER_START-->Prepared for {FIRM_NAME} · Internal<!--OWNER_END-->`
 - `/*BROKER_START*/""/*BROKER_END*/` →
   `/*BROKER_START*/"{BROKER_CANONICAL}"/*BROKER_END*/`
-- If SERVER ≠ "Investair_data":
-  `/*SERVER_START*/"Investair_data"/*SERVER_END*/` →
-  `/*SERVER_START*/"{SERVER}"/*SERVER_END*/`
 
 Write the result to `/tmp/ia-pipeline-filled.html`.
 
-Example Python script (substitute actual values into it):
-
-```python
-import sys
-t = open('$TMPL_DIR/pipeline-template.html', encoding='utf-8').read()
-t = t.replace('<title>Investair Sweet Spot Pipeline Template</title>',
-              '<title>FIRM_NAME Sweet Spot Pipeline</title>')
-t = t.replace('<!--OWNER_START-->Internal<!--OWNER_END-->',
-              '<!--OWNER_START-->Prepared for FIRM_NAME · Internal<!--OWNER_END-->')
-t = t.replace('/*BROKER_START*/""/*BROKER_END*/',
-              '/*BROKER_START*/"BROKER_CANONICAL"/*BROKER_END*/')
-# Only if SERVER != "Investair_data":
-# t = t.replace('/*SERVER_START*/"Investair_data"/*SERVER_END*/',
-#               '/*SERVER_START*/"SERVER"/*SERVER_END*/')
-open('/tmp/ia-pipeline-filled.html', 'w', encoding='utf-8').write(t)
-print('Done')
-```
-
-### 6b. Publish the pipeline
+### 6b. Publish
 
 ```
 Artifact({
   action: "publish",
   file_path: "/tmp/ia-pipeline-filled.html",
-  title: "{FIRM_NAME} Sweet Spot Pipeline",
+  title: "Investair Sweet Spot Pipeline",
   icon: "chart",
   capabilities: {
     db: {},
     user: {},
     mcp: {
       servers: [{
-        server: "{SERVER}",
+        server: "Investair_data",
         tools: ["run_readonly_sql", "list_announcements", "get_substantial_holders_batch"]
       }]
     }
@@ -290,10 +309,9 @@ Artifact({
 
 Store the returned URL as `PIPELINE_URL`.
 
-### 6c. Write initial screen config (if sectors or house stocks given)
+### 6c. Write initial screen config
 
-If `SECTOR` is non-empty or `HOUSE_STOCKS` is non-empty, write the initial
-screen config to the pipeline's shared db. Load ArtifactData via
+If `SECTORS` or `HOUSE_STOCKS` is non-empty, load ArtifactData via
 `ToolSearch("select:ArtifactData")`, then:
 
 ```
@@ -304,16 +322,13 @@ ArtifactData({
   doc_id: "screen",
   data: {
     cfg: {
-      segments: [SECTOR],   // omit or leave [] if SECTOR is blank
-      house: HOUSE_STOCKS   // omit or leave [] if none
+      segments: SECTORS,      // [] if empty
+      house: HOUSE_STOCKS     // [] if empty
     },
-    at: "YYYY-MM-DD"        // today's date
+    at: "YYYY-MM-DD"          // today's date
   }
 })
 ```
-
-This sets the pipeline's default screen overrides. The pipeline's
-Customise screen panel will show these values as the saved custom screen.
 
 ## 7. Publish the Company Page
 
@@ -321,30 +336,26 @@ Customise screen panel will show these values as the saved custom screen.
 
 Python script reading `$TMPL_DIR/company-page-template.html`, applying:
 - `<title>Investair Company Page Template</title>` →
-  `<title>{FIRM_NAME} Company Page</title>`
+  `<title>Investair Company Page</title>`
 - `<!--OWNER_START-->Internal<!--OWNER_END-->` →
   `<!--OWNER_START-->Prepared for {FIRM_NAME} · Internal<!--OWNER_END-->`
 - If FOCUS non-empty:
   `<!--FOCUS_START--><!--FOCUS_END-->` →
   `<!--FOCUS_START--> · {FOCUS}<!--FOCUS_END-->`
-- If SERVER ≠ "Investair_data":
-  `/*SERVER_START*/"Investair_data"/*SERVER_END*/` →
-  `/*SERVER_START*/"{SERVER}"/*SERVER_END*/`
 - If COVERAGE non-empty:
   `/*COVERAGE_START*/[]/*COVERAGE_END*/` →
   `/*COVERAGE_START*/{JSON_COVERAGE}/*COVERAGE_END*/`
-  where `{JSON_COVERAGE}` is `json.dumps(COVERAGE)` — a JSON array of
-  `["TICKER","Company name"]` pairs.
+  where `{JSON_COVERAGE}` is `json.dumps(COVERAGE)`.
 
 Write to `/tmp/ia-company-page-filled.html`.
 
-### 7b. Publish the company page
+### 7b. Publish
 
 ```
 Artifact({
   action: "publish",
   file_path: "/tmp/ia-company-page-filled.html",
-  title: "{FIRM_NAME} Company Page",
+  title: "Investair Company Page",
   icon: "chart",
   capabilities: {
     db: {},
@@ -353,7 +364,7 @@ Artifact({
     downloads: {},
     mcp: {
       servers: [{
-        server: "{SERVER}",
+        server: "Investair_data",
         tools: ["get_market_snapshot", "run_readonly_sql", "get_cashflow_snapshot",
                 "get_cashflow_snapshots", "list_cashflow_quarterly", "get_company_projects",
                 "list_announcements", "list_capital_raises", "get_peers",
@@ -373,31 +384,28 @@ Store the returned URL as `COMPANY_PAGE_URL`.
 Python script reading `$TMPL_DIR/standardised-reports-template.html`,
 applying:
 - `<title>Investair Standardised Reports Template</title>` →
-  `<title>{FIRM_NAME} Standardised Reports</title>`
+  `<title>Investair Standardised Reports</title>`
 - `<!--OWNER_START-->Internal<!--OWNER_END-->` →
   `<!--OWNER_START-->Prepared for {FIRM_NAME} · Internal<!--OWNER_END-->`
 - If FOCUS non-empty:
   `<!--FOCUS_START--><!--FOCUS_END-->` →
   `<!--FOCUS_START--> · {FOCUS}<!--FOCUS_END-->`
-- If SERVER ≠ "Investair_data":
-  `/*SERVER_START*/"Investair_data"/*SERVER_END*/` →
-  `/*SERVER_START*/"{SERVER}"/*SERVER_END*/`
-- If SECTOR non-empty:
+- If SECTORS non-empty (use first sector as the primary):
   `/*SECTOR_START*/""/*SECTOR_END*/` →
-  `/*SECTOR_START*/"{SECTOR}"/*SECTOR_END*/`
+  `/*SECTOR_START*/"{SECTORS[0]}"/*SECTOR_END*/`
 - If COVERAGE non-empty:
   `/*COVERAGE_START*/[]/*COVERAGE_END*/` →
   `/*COVERAGE_START*/{JSON_COVERAGE}/*COVERAGE_END*/`
 
 Write to `/tmp/ia-reports-filled.html`.
 
-### 8b. Publish the reports
+### 8b. Publish
 
 ```
 Artifact({
   action: "publish",
   file_path: "/tmp/ia-reports-filled.html",
-  title: "{FIRM_NAME} Standardised Reports",
+  title: "Investair Standardised Reports",
   icon: "chart",
   capabilities: {
     db: {},
@@ -406,7 +414,7 @@ Artifact({
     downloads: {},
     mcp: {
       servers: [{
-        server: "{SERVER}",
+        server: "Investair_data",
         tools: ["get_market_snapshot", "get_cashflow_snapshot", "get_peers",
                 "get_substantial_holders", "get_substantial_holders_batch",
                 "list_announcements", "list_capital_raises", "list_deal_brokers",
@@ -421,216 +429,83 @@ Store the returned URL as `REPORTS_URL`.
 
 ## 9. Pin the three artifacts
 
-Run these three pin calls in order:
-
 ```
 Artifact({ action: "pin", url: PIPELINE_URL })
 Artifact({ action: "pin", url: COMPANY_PAGE_URL })
 Artifact({ action: "pin", url: REPORTS_URL })
 ```
 
-After each `pin` call, confirm it succeeded. If a pin fails, tell the user
-and continue with the remaining artifacts rather than stopping.
+If a pin fails, tell the user and continue.
 
-## 10. Schedule the pipeline (CoWork only)
+## 10. Confirm and give scheduling text
 
-Skip this step if step 1 found you are not in CoWork.
+Reply with the setup summary, then provide the scheduling block below.
 
-### 10a. Find the active scheduled-tasks.json
-
-```bash
-find ~/Library/Application\ Support/Claude/local-agent-mode-sessions \
-  -name scheduled-tasks.json -print0 \
-  | xargs -0 ls -t 2>/dev/null \
-  | head -1
-```
-
-Read the file. If an entry with `id: "broker-sweet-spot-pipeline"` already
-exists, report it and skip to step 11.
-
-### 10b. Write the weekly task prompt
-
-Create this directory and file, substituting actual values for FIRM_NAME,
-BROKER_CANONICAL, SERVER, and PIPELINE_URL:
-
-**Directory**: `~/Claude/Scheduled/broker-sweet-spot-pipeline/`
-**File**: `SKILL.md`
-
-**Content** (substitute actual values before writing):
-
-```markdown
----
-name: broker-sweet-spot-pipeline
-description: Weekly Sweet Spot Pipeline for {FIRM_NAME}
----
-
-# Weekly Sweet Spot Pipeline — {FIRM_NAME}
-
-Run the weekly Investair Sweet Spot Pipeline for {FIRM_NAME} and update
-the pipeline artifact with the latest results.
-
-Broker canonical name: **{BROKER_CANONICAL}**
-Pipeline artifact: {PIPELINE_URL}
-
-## Steps
-
-### 1. Load ArtifactData
-
-ToolSearch("select:ArtifactData") to load the ArtifactData tool.
-
-### 2. Read the saved screen config (if any)
-
-ArtifactData({
-  action: "get",
-  url: "{PIPELINE_URL}",
-  collection: "config",
-  doc_id: "screen"
-})
-
-If the doc exists and has `cfg`, use those values as overrides to the
-broker's derived sweet spot. Store as SCREEN_CONFIG.
-
-### 3. Run the screen against Investair
-
-Use the {SERVER} connector. First find the broker's canonical ID:
-
-  run_readonly_sql: SELECT b.broker_canonical_id AS id
-  FROM Broker.deal_broker_map b
-  WHERE b.broker_canonical_name = '{BROKER_CANONICAL}'
-  GROUP BY b.broker_canonical_id
-  ORDER BY COUNT(*) DESC
-  LIMIT 1
-
-Then derive the sweet spot from the broker's last 12 months of deals:
-segments by deal count (top 3 Investair sub-industries), market cap core
-band from Q2–Q3 of deal sizes, lifecycle stages with ≥15% of deals.
-Apply any SCREEN_CONFIG overrides on top.
-
-Screen Cashflow.cashflow_daily for companies with:
-- Confirmed runway 4–10 weeks
-  (adjusted_estimated_quarters_funding_confirmed between 0.308 and 0.769)
-- In the broker's sweet spot segments (or all if segments empty)
-- Market cap in the broker's core band (or all if not set)
-- In the right lifecycle stages (or all if not set)
-- runway_publishable = 1
-
-Also capture:
-- House stocks from SCREEN_CONFIG (always include in WATCH)
-- Companies approaching the window (10–26 weeks, in core band) for WATCH
-
-Call list_announcements on the top 25 candidates (last 45 days) to filter
-out companies with active raises, trading halts, placements, or takeovers.
-
-Call get_substantial_holders_batch on the remaining candidates.
-
-Classify:
-- **CONFIRMED**: in window + in segment + in core band + no active raise
-- **WATCH**: house stocks | approaching window | in full range outside core
-
-### 4. Read the previous weekly run
-
-ArtifactData({
-  action: "get",
-  url: "{PIPELINE_URL}",
-  collection: "weekly",
-  doc_id: "latest"
-})
-
-Store as PREV_RUN (may be null if first run).
-
-### 5. Write the new weekly run
-
-ArtifactData({
-  action: "set",
-  url: "{PIPELINE_URL}",
-  collection: "weekly",
-  doc_id: "latest",
-  data: {
-    date: "YYYY-MM-DD",
-    conf: ["TKR1", ...],
-    watch: ["TKR2", ...],
-    summary: "2–3 sentence plain-text summary",
-    prev: {date, conf, watch}  // from PREV_RUN, or null if first run
-  }
-})
-
-### 6. Send summary (only if changes)
-
-Compare today's conf+watch with PREV_RUN conf+watch. If there are new
-entrants, exits, or material runway changes, send:
-
-> **{FIRM_NAME} Sweet Spot Pipeline — [date]**
-> [summary]
->
-> New: [new tickers] · Left: [exited tickers]
->
-> View pipeline: {PIPELINE_URL}
-
-If nothing changed since last week, skip the send.
-```
-
-### 10c. Register in scheduled-tasks.json
-
-Get epoch milliseconds:
-
-```bash
-date +%s000
-```
-
-Append to the `scheduledTasks` array in the registry file (read it first,
-add the new entry, write it back):
-
-```json
-{
-  "id": "broker-sweet-spot-pipeline",
-  "cronExpression": "0 7 * * 1",
-  "enabled": true,
-  "filePath": "/Users/<home>/Claude/Scheduled/broker-sweet-spot-pipeline/SKILL.md",
-  "createdAt": <epoch_ms>,
-  "permissionMode": "auto",
-  "disableJitter": false
-}
-```
-
-Replace `/Users/<home>` with the actual home directory. After editing,
-validate the JSON:
-
-```bash
-python3 -m json.tool <path-to-scheduled-tasks.json> > /dev/null && echo OK
-```
-
-## 11. Confirm
-
-Reply with:
+**Summary format:**
 
 ```
 ✅ Setup complete for [FIRM_NAME]
 
 Three artifacts published and pinned:
-• [FIRM_NAME] Sweet Spot Pipeline — [PIPELINE_URL]
-• [FIRM_NAME] Company Page — [COMPANY_PAGE_URL]
-• [FIRM_NAME] Standardised Reports — [REPORTS_URL]
+• Sweet Spot Pipeline   → [PIPELINE_URL]
+• Company Page          → [COMPANY_PAGE_URL]
+• Standardised Reports  → [REPORTS_URL]
 
-Broker: [BROKER_CANONICAL]
-[If sector set:] Primary sector: [SECTOR]
-[If house stocks set:] House stocks: [HOUSE_STOCKS joined with spaces]
-[If focus set:] Focus: [FOCUS]
-
-[If CoWork:]
-Scheduled: Pipeline runs every Monday at 7:00 am (see CoWork Scheduled panel).
-
-[If not CoWork:]
-⚠️  Pipeline not scheduled — re-run /broker-setup from a CoWork space to
-add the Monday 7 am schedule.
+Broker:  [BROKER_CANONICAL]
+[If SECTORS set:]  Sectors: [SECTORS joined with ", "]
+[If HOUSE_STOCKS:] House stocks: [tickers joined with spaces]
+[If FOCUS set:]    Focus: [FOCUS]
+Coverage: [N] companies pre-loaded from your raise history (editable in dashboards)
 ```
+
+**Then give this scheduling block** — substitute actual values for
+FIRM_NAME, BROKER_CANONICAL, and PIPELINE_URL before displaying:
+
+---
+
+> **To schedule the weekly pipeline**, open your CoWork space and paste
+> this into the chat:
+>
+> ```
+> Please schedule the Investair Sweet Spot Pipeline to run every Monday
+> at 7:00 am.
+>
+> Firm: [FIRM_NAME]
+> Broker canonical name: [BROKER_CANONICAL]
+> Pipeline artifact URL: [PIPELINE_URL]
+>
+> Each Monday at 7 am, Claude should:
+> 1. Read the saved screen config from the pipeline artifact database
+>    (collection: "config", doc_id: "screen") — use those sector/house
+>    stock overrides if present.
+> 2. Use the Investair_data connector to screen for ASX companies with
+>    4–10 weeks confirmed cash runway in the broker's sweet spot sectors.
+>    Derive the sweet spot from the broker's last 12 months of deals
+>    (top segments by deal count, core market cap band). Apply any saved
+>    overrides on top.
+> 3. Always include house stocks in the WATCH list regardless of runway.
+>    Also add companies approaching the window (10–26 weeks) in the
+>    broker's core band.
+> 4. Call list_announcements on the top 25 candidates (last 45 days) to
+>    filter out active raises, halts, placements and takeovers.
+> 5. Read the previous week's results from the pipeline artifact database
+>    (collection: "weekly", doc_id: "latest").
+> 6. Write the new results:
+>    ArtifactData — set — collection: "weekly", doc_id: "latest" —
+>    data: { date, conf: [tickers], watch: [tickers], summary, prev }
+> 7. If conf or watch has changed from last week, send a brief summary.
+>    If nothing changed, skip the message.
+> ```
+
+---
 
 ## Required closing
 
 Always end with this feedback prompt:
 
-How useful was this setup? Rate 1–5 and add any comments — reply with your
-score and feedback to log it.
+How useful was this setup? Rate 1–5 and add any comments — reply with
+your score and feedback to log it.
 
-If the user replies with a score and/or feedback, extract the numeric rating
-(if given) and their text, then call `log_feedback` once with their full
-reply.
+If the user replies with a score and/or feedback, extract the numeric
+rating (if given) and their text, then call `log_feedback` once with their
+full reply.
