@@ -8,7 +8,7 @@ description: >
   "set up my broker workspace", "install the pipeline", or similar
   first-time-setup requests. Idempotent: safe to re-run.
 metadata:
-  version: "0.3.4"
+  version: "0.3.5"
 ---
 
 # Investair Broker Setup
@@ -120,19 +120,12 @@ Options (use exactly):
 - label: "I have house stocks", description: "Type the ASX codes in the reply box below"
 - label: "No house stocks",     description: "Skip — no house stocks to add"
 
-**Question 3** — Focus tagline:
-> Optional: A short phrase for the masthead (e.g. "WA gold explorers").
-
-Options (use exactly):
-- label: "I'll add a tagline", description: "Type it in the reply box below"
-- label: "No tagline",         description: "Skip — no tagline needed"
-
 Parse the answers and any free-text replies:
 - `SECTORS` — array of all selected sector labels from Q1, plus any free-text typed
   for "Other / multiple" (blank if skipped, `[]` for no sector; limit 3 values)
 - `HOUSE_STOCKS` — uppercased ASX codes from Q2 reply, split on spaces/commas,
   deduplicated, limit 10 (blank = `[]`)
-- `FOCUS` — tagline string from Q3 reply (blank = `""`)
+- `FOCUS` — always `""` (tagline not collected at setup)
 
 ## 4. Look up and confirm the broker canonical name
 
