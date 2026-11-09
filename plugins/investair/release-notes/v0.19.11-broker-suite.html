@@ -1,0 +1,562 @@
+<title>Investair Broker Suite — Technical Release Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap">
+
+<style>
+/* Layout: single-column document, max 760px, section cards */
+:root {
+  --bg:        #ffffff;
+  --bg-subtle: #f4f6f9;
+  --bg-card:   #ffffff;
+  --border:    #e2e7ef;
+  --fg:        #111827;
+  --fg-mid:    #4b5563;
+  --fg-muted:  #6b7280;
+  --navy:      #0d1f3c;
+  --teal:      #0ab5a0;
+  --teal-pale: #e6faf8;
+  --gold:      #d4a017;
+  --gold-pale: #fdf8ea;
+  --red:       #dc2626;
+  --green:     #16a34a;
+  --tag-bg:    #edf2fb;
+  --tag-fg:    #2563eb;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0d1117;
+    --bg-subtle: #161b25;
+    --bg-card:   #1a2235;
+    --border:    #2a3650;
+    --fg:        #e2e8f0;
+    --fg-mid:    #94a3b8;
+    --fg-muted:  #64748b;
+    --navy:      #1e3a5f;
+    --teal:      #0ecfb8;
+    --teal-pale: #0a2a26;
+    --gold:      #f0b429;
+    --gold-pale: #1e1800;
+    --tag-bg:    #1e2d4a;
+    --tag-fg:    #60a5fa;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #0d1117;
+  --bg-subtle: #161b25;
+  --bg-card:   #1a2235;
+  --border:    #2a3650;
+  --fg:        #e2e8f0;
+  --fg-mid:    #94a3b8;
+  --fg-muted:  #64748b;
+  --navy:      #1e3a5f;
+  --teal:      #0ecfb8;
+  --teal-pale: #0a2a26;
+  --gold:      #f0b429;
+  --gold-pale: #1e1800;
+  --tag-bg:    #1e2d4a;
+  --tag-fg:    #60a5fa;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+
+/* Header */
+.doc-header {
+  background: var(--navy);
+  margin-left: max(-16px, calc(-1 * env(safe-area-inset-left, 0px)));
+  margin-right: max(-16px, calc(-1 * env(safe-area-inset-right, 0px)));
+  padding: 48px max(32px, env(safe-area-inset-left, 0px)) 40px;
+  margin-bottom: 40px;
+}
+.doc-header .eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 10px;
+}
+.doc-header h1 {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px;
+  text-wrap: balance;
+  line-height: 1.2;
+}
+.doc-header .meta {
+  font-size: 13px;
+  color: rgba(255,255,255,.5);
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.doc-header .meta span { display: flex; align-items: center; gap: 5px; }
+
+/* Content wrapper */
+.content { max-width: 760px; margin: 0 auto; }
+
+/* Section */
+.section { margin-bottom: 36px; }
+.section-title {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0 0 14px;
+}
+h2 {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0 0 6px;
+}
+p { margin: 0 0 14px; color: var(--fg-mid); max-width: 65ch; }
+p:last-child { margin-bottom: 0; }
+
+/* Dashboard cards */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.dashboard-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.dashboard-card .icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.icon-teal { background: var(--teal-pale); }
+.icon-gold { background: var(--gold-pale); }
+.dashboard-card h3 { margin-bottom: 6px; font-size: 14px; }
+.dashboard-card p { font-size: 13px; line-height: 1.5; }
+
+/* Change log */
+.change-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.change-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.change-badge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 2px;
+}
+.badge-fix   { background: #fef2f2; color: #b91c1c; }
+.badge-new   { background: #f0fdf4; color: #15803d; }
+.badge-improved { background: var(--teal-pale); color: #0a7a6e; }
+.badge-ux    { background: var(--gold-pale); color: #92400e; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge-fix { background:#3b0a0a; color:#fca5a5; }
+  :root:not([data-theme="light"]) .badge-new { background:#052e16; color:#86efac; }
+  :root:not([data-theme="light"]) .badge-improved { background:var(--teal-pale); color:#5eead4; }
+  :root:not([data-theme="light"]) .badge-ux  { background:var(--gold-pale); color:#fcd34d; }
+}
+:root[data-theme="dark"] .badge-fix { background:#3b0a0a; color:#fca5a5; }
+:root[data-theme="dark"] .badge-new { background:#052e16; color:#86efac; }
+:root[data-theme="dark"] .badge-improved { background:var(--teal-pale); color:#5eead4; }
+:root[data-theme="dark"] .badge-ux  { background:var(--gold-pale); color:#fcd34d; }
+
+.change-item-body { min-width: 0; }
+.change-item-body h3 { font-size: 14px; margin-bottom: 3px; }
+.change-item-body p  { font-size: 13px; margin: 0; }
+
+/* Setup steps */
+.steps { counter-reset: step; display: flex; flex-direction: column; gap: 10px; }
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.step-num {
+  counter-increment: step;
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .step-num { background: var(--teal); color: #0d1117; }
+}
+:root[data-theme="dark"] .step-num { background: var(--teal); color: #0d1117; }
+.step-body { min-width: 0; }
+.step-body h3 { font-size: 14px; margin-bottom: 3px; }
+.step-body p  { font-size: 13px; margin: 0; }
+
+/* Version pill */
+.version-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+}
+.pill-teal { background: var(--teal-pale); color: #0a7a6e; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pill-teal { color: #5eead4; }
+}
+:root[data-theme="dark"] .pill-teal { color: #5eead4; }
+
+/* Divider */
+.divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+/* Code */
+code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* Table */
+.code-block-scroll { overflow-x: auto; }
+.slot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.slot-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.slot-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--fg-mid);
+  vertical-align: top;
+  min-width: 0;
+}
+.slot-table td:first-child { white-space: nowrap; }
+.slot-table tr:last-child td { border-bottom: none; }
+
+/* Note box */
+.note {
+  background: var(--gold-pale);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--fg-mid);
+}
+</style>
+
+<header class="doc-header">
+  <div class="content">
+    <div class="eyebrow">Technical Release Notes</div>
+    <h1>Investair Broker Dashboard Suite</h1>
+    <div class="meta">
+      <span>📅 November 2026</span>
+      <span>🏷 Plugin v0.19.11 · Skill v0.3.6</span>
+      <span>👤 Stuart Frith → Terry</span>
+    </div>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- Version summary -->
+  <div class="version-row">
+    <span class="pill pill-teal">Plugin v0.19.11</span>
+    <span class="pill pill-teal">Skill v0.3.6</span>
+    <span class="pill">3 artifacts</span>
+    <span class="pill">Investair_data MCP</span>
+    <span class="pill">GitHub: Investair-com-au/investair-claude-marketplace</span>
+  </div>
+
+  <!-- Architecture -->
+  <div class="section">
+    <div class="section-title">Architecture</div>
+    <h2>How it works</h2>
+    <p>Each broker user owns three private Claude artifacts published to their claude.ai account. The artifacts are HTML pages that declare the <code>Investair_data</code> MCP connector plus the <code>db</code> and <code>user</code> runtime capabilities. All live data is fetched at view time through the connector — there is no Investair backend serving these pages; the Claude artifact runtime handles auth and data access.</p>
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="icon icon-teal">📊</div>
+        <h3>Sweet Spot Pipeline</h3>
+        <p>Capabilities: <code>db</code>, <code>user</code>, <code>mcp</code><br>MCP tools: <code>run_readonly_sql</code>, <code>list_announcements</code>, <code>get_substantial_holders_batch</code><br>DB collections: <code>config/screen</code> (sector + house stock overrides), <code>weekly/latest</code> (last run results)</p>
+      </div>
+      <div class="dashboard-card">
+        <div class="icon icon-gold">🏢</div>
+        <h3>Company Page</h3>
+        <p>Capabilities: <code>db</code>, <code>user</code>, <code>sample</code>, <code>downloads</code>, <code>mcp</code><br>MCP tools: <code>get_market_snapshot</code>, <code>get_cashflow_snapshot</code>, <code>get_peers</code>, <code>list_announcements</code>, <code>list_capital_raises</code>, <code>get_substantial_holders_batch</code>, <code>run_readonly_sql</code>, <code>get_company_projects</code></p>
+      </div>
+      <div class="dashboard-card">
+        <div class="icon icon-teal">📄</div>
+        <h3>Standardised Reports</h3>
+        <p>Capabilities: <code>db</code>, <code>user</code>, <code>sample</code>, <code>downloads</code>, <code>mcp</code><br>MCP tools: <code>get_market_snapshot</code>, <code>get_cashflow_snapshot</code>, <code>get_peers</code>, <code>get_substantial_holders</code>, <code>list_announcements</code>, <code>list_capital_raises</code>, <code>list_deal_brokers</code>, <code>screen_peer_brokers</code>, <code>run_readonly_sql</code></p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Template system -->
+  <div class="section">
+    <div class="section-title">Template System</div>
+    <h2>Slot-fill pattern</h2>
+    <p>The three dashboard HTML templates live in the plugin's <code>skills/broker-setup/artifacts/</code> directory. At setup time, a Python script performs exact string substitutions (named slots) in each template before publishing. No DOM manipulation or server-side templating — plain string replace.</p>
+    <div class="code-block-scroll">
+      <table class="slot-table">
+        <thead><tr><th>Slot marker</th><th>Replaced with</th><th>Dashboards</th></tr></thead>
+        <tbody>
+          <tr><td><code>&lt;!--OWNER_START--&gt;Internal&lt;!--OWNER_END--&gt;</code></td><td>Masthead text: "Prepared for {FIRM_NAME} · Internal"</td><td>All 3</td></tr>
+          <tr><td><code>/*BROKER_START*/""/*BROKER_END*/</code></td><td><code>"{BROKER_CANONICAL}"</code> — the normalised broker name from <code>Broker.deal_broker_map</code></td><td>Pipeline</td></tr>
+          <tr><td><code>/*COVERAGE_START*/[]/*COVERAGE_END*/</code></td><td>JSON array of <code>["TICKER","Company name"]</code> pairs from last 24 months' raises</td><td>Company Page, Reports</td></tr>
+          <tr><td><code>/*SECTOR_START*/""/*SECTOR_END*/</code></td><td>Primary sector string</td><td>Reports</td></tr>
+          <tr><td><code>&lt;title&gt;...Template&lt;/title&gt;</code></td><td>Title without "Template"</td><td>All 3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:12px;">The overwrite path (re-running setup for an existing firm) reads the current slot values back from the published artifact HTML to avoid asking the user for data already captured.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Setup skill flow -->
+  <div class="section">
+    <div class="section-title">Setup Skill</div>
+    <h2><code>/broker-setup</code> — execution flow</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Find template directory</h3>
+          <p><code>find ~/.claude/plugins -name "pipeline-template.html" -path "*/broker-setup/artifacts/*"</code>. Stores <code>TMPL_DIR</code>. Stops if not found.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Collect firm name — plain text, no AskUserQuestion</h3>
+          <p>Critical ordering fix: firm name is collected via a plain conversational message <em>before</em> any artifact listing. This prevents broker names from leaking into Claude's context and appearing as pre-populated options. Stores <code>FIRM_NAME</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Check for existing artifacts</h3>
+          <p><code>Artifact({ action: "list", scope: "mine", limit: 50 })</code>. Looks for titles matching "Sweet Spot Pipeline", "Company Page", "Standardised Reports". If found: AskUserQuestion overwrite vs keep-alongside. Overwrite path reads existing artifact HTML to extract <code>BROKER_CANONICAL</code> and other slot values, skipping redundant questions.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Optional preferences — AskUserQuestion with fixed options</h3>
+          <p>Two questions: (1) multi-select sectors up to 3 (Gold / Copper-Battery Metals / Oil &amp; Gas / Other) → <code>SECTORS[]</code>; (2) house stocks (ASX codes) → <code>HOUSE_STOCKS[]</code>. Options are hardcoded in SKILL.md — Claude cannot generate its own options or pull firm names from memory.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Broker canonical lookup</h3>
+          <p>Single <code>LIKE '%KEYWORD%'</code> query against <code>Broker.deal_broker_map</code>. Keyword derived from FIRM_NAME by stripping common suffixes (Securities, Capital, Ltd, etc.). Confirms match with user in one line. If no match, proceeds with FIRM_NAME unvalidated — pipeline sweet spot won't be derived from deal history. Stores <code>BROKER_CANONICAL</code> and <code>BROKER_CANONICAL_ID</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Auto-generate coverage list</h3>
+          <p><code>describe_table('Placement.deals_daily')</code> to discover column names, then query lead/co-lead raises for the past 24 months filtered by <code>BROKER_CANONICAL_ID</code>. Returns up to 50 <code>["TICKER","Company name"]</code> pairs → <code>COVERAGE</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <h3>Publish 3 artifacts</h3>
+          <p>Python slot-fill → publish each artifact with full capability declarations. After Pipeline publish, writes initial <code>config/screen</code> doc to artifact database via ArtifactData if SECTORS or HOUSE_STOCKS non-empty.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">8</div>
+        <div class="step-body">
+          <h3>Pin + auto-schedule</h3>
+          <p>Pins all 3 artifacts. Calls <code>mcp__scheduled-tasks__create_scheduled_task</code> with <code>cronExpression: "0 7 * * 1"</code> (Monday 7am local), taskId <code>investair-pipeline-{firm-slug}</code>, and a fully self-contained prompt embedding FIRM_NAME, BROKER_CANONICAL, PIPELINE_URL. If creation fails, provides a 2-line fallback text.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Weekly scheduled task -->
+  <div class="section">
+    <div class="section-title">Scheduled Task</div>
+    <h2>Weekly pipeline — runtime flow</h2>
+    <p>Each Monday at 7am a fresh Claude session runs with the self-contained prompt. No memory of setup. The prompt includes the pipeline artifact URL, broker canonical name, and firm name. The session:</p>
+    <ol style="color:var(--fg-mid); padding-left:20px; margin:0; display:flex; flex-direction:column; gap:6px;">
+      <li>Reads <code>config/screen</code> from artifact database — sector and house stock overrides set by the broker from within the dashboard UI.</li>
+      <li>Calls <code>screen_funding_risk</code> / <code>screen_cashflow</code> on Investair_data to find ASX companies with 4–10 weeks confirmed cash runway.</li>
+      <li>Derives the broker's sweet spot from last 12 months of deal data (top sectors by deal count, core market-cap band). Applies saved overrides on top.</li>
+      <li>Forces house stocks into the WATCH list regardless of runway.</li>
+      <li>Calls <code>list_announcements</code> on top 25 candidates (last 45 days) to filter out active raises, halts, placements, takeovers.</li>
+      <li>Reads <code>weekly/latest</code> from artifact database (previous week's results).</li>
+      <li>Writes new results to <code>weekly/latest</code>: <code>{ date, conf, watch, summary, prev }</code>.</li>
+      <li>If conf or watch changed, sends a brief summary message. Otherwise skips.</li>
+    </ol>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Bug history -->
+  <div class="section">
+    <div class="section-title">Bug History &amp; Fixes</div>
+    <h2>Setup skill — what broke and why</h2>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="change-badge badge-fix">Fix</span>
+        <div class="change-item-body">
+          <h3>Broker name pre-population in AskUserQuestion</h3>
+          <p><strong>Root cause:</strong> The skill listed existing artifacts before asking for the firm name. Artifact titles contained broker names (e.g. "MST Financial Sweet Spot Pipeline"). Claude extracted these names into AskUserQuestion options because the tool schema requires 2–4 options — Claude generates them from whatever is in its context. No instruction to avoid this was sufficient while the names were in context.</p>
+          <p><strong>Fix:</strong> Firm name is now collected as a plain-text message in Step 2, before any artifact listing. Step 3 (artifact check) only runs after FIRM_NAME is established. The AskUserQuestion calls for preference questions use fully hardcoded options specified in SKILL.md.</p>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="change-badge badge-fix">Fix</span>
+        <div class="change-item-body">
+          <h3>Skill edits overwritten by marketplace refresh</h3>
+          <p><strong>Root cause:</strong> The marketplace is a git clone of <code>github.com/Investair-com-au/investair-claude-marketplace</code>. When CoWork starts a new session it refreshes (pulls) the marketplace from GitHub. All local edits to SKILL.md were uncommitted — every marketplace refresh overwrote them with the GitHub version. Additionally, CoWork maintains its own extracted plugin copy in <code>local-agent-mode-sessions/{session-id}/rpm/plugin_{id}/</code> that must also be synced manually per session.</p>
+          <p><strong>Fix:</strong> All skill changes are now committed and pushed to the GitHub repo. Standard <code>git add → commit → push</code> after every SKILL.md edit. Manual CoWork copy sync still required for in-flight sessions.</p>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="change-badge badge-fix">Fix</span>
+        <div class="change-item-body">
+          <h3>hooks.json format error</h3>
+          <p><strong>Root cause:</strong> Event names were at the root level of the JSON object. Expected format is <code>{"hooks":{"SessionStart":[...]}}</code>.</p>
+          <p><strong>Fix:</strong> Wrapped event entries in a <code>"hooks"</code> key. Validated via PublishPlugin which rejects with a descriptive error.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Plugin versioning -->
+  <div class="section">
+    <div class="section-title">Versioning</div>
+    <h2>Plugin &amp; skill version history</h2>
+    <div style="overflow-x:auto;">
+      <table class="slot-table">
+        <thead><tr><th>Plugin</th><th>Skill</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td>0.19.7</td><td>0.3.2</td><td>Firm name moved to plain-text; AskUserQuestion options hardcoded in SKILL.md</td></tr>
+          <tr><td>0.19.8</td><td>0.3.3</td><td><strong>Artifact listing moved to after firm name collection</strong> — definitive fix for broker name leak</td></tr>
+          <tr><td>0.19.9</td><td>0.3.4</td><td>Coverage window → 24 months; sectors → multi-select up to 3</td></tr>
+          <tr><td>0.19.10</td><td>0.3.5</td><td>Tagline question removed</td></tr>
+          <tr><td><strong>0.19.11</strong></td><td><strong>0.3.6</strong></td><td>Auto-create scheduled task via <code>mcp__scheduled-tasks__create_scheduled_task</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Next steps -->
+  <div class="section">
+    <div class="section-title">Next Steps</div>
+    <h2>Blockers &amp; actions</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Publish plugin to org — <em>blocking customer onboarding</em></h3>
+          <p>Run <code>PublishPlugin</code> from Claude Code to push the plugin to the Investair org marketplace. Currently tested locally only. Required before any broker outside Stuart's account can run <code>/broker-setup</code>. User interrupted this step during testing to validate the setup flow first.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Fix git commit identity</h3>
+          <p>All marketplace commits currently show <code>stuartfrith@Stuarts-MacBook-Air.local</code> (auto-configured). Run <code>git config user.name</code> and <code>git config user.email</code> in <code>~/.claude/plugins/marketplaces/investair/</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Pilot run with first broker</h3>
+          <p>Run <code>/broker-setup</code> end-to-end with a real broker user post-publish to validate the full flow in production: firm name → broker lookup → coverage generation → 3 artifacts published → scheduled task created.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Announcement assets ready</h3>
+          <p>Customer-facing email HTML and animated explainer artifact are already published. Pending org plugin publish before distribution.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="note">
+    <strong>Security note:</strong> <code>broker_canonical_name</code> is never returned by any server tool — id-only design. The broker canonical name is stored in the pipeline template slot (<code>/*BROKER_START*/</code>) at publish time and read back from the artifact HTML on overwrite. It never passes through Claude's memory or any external store.
+  </div>
+
+</div>
