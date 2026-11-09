@@ -8,7 +8,7 @@ description: >
   "set up my broker workspace", "install the pipeline", or similar
   first-time-setup requests. Idempotent: safe to re-run.
 metadata:
-  version: "0.3.3"
+  version: "0.3.4"
 ---
 
 # Investair Broker Setup
@@ -102,11 +102,11 @@ Now use `AskUserQuestion` with these **three** questions in one call.
 Use the fixed options below exactly — do NOT generate your own options or
 add firm names from memory.
 
-**Question 1** — Primary sector:
-> Optional: What is your primary sector? Pre-selects your sector in the
-> Standardised Reports.
+**Question 1** — Primary sectors (multiSelect: true, up to 3):
+> Optional: Which sectors do you focus on? Select up to 3. Pre-selects
+> your sectors in the Standardised Reports.
 
-Options (use exactly):
+Options (use exactly, with multiSelect: true):
 - label: "Gold",                    description: "ASX gold explorers and producers"
 - label: "Copper / Battery Metals", description: "Base metals, lithium, battery materials"
 - label: "Oil & Gas",               description: "ASX energy sector"
@@ -128,7 +128,8 @@ Options (use exactly):
 - label: "No tagline",         description: "Skip — no tagline needed"
 
 Parse the answers and any free-text replies:
-- `SECTORS` — sector string(s) from Q1 (blank if skipped, `[]` for no sector)
+- `SECTORS` — array of all selected sector labels from Q1, plus any free-text typed
+  for "Other / multiple" (blank if skipped, `[]` for no sector; limit 3 values)
 - `HOUSE_STOCKS` — uppercased ASX codes from Q2 reply, split on spaces/commas,
   deduplicated, limit 10 (blank = `[]`)
 - `FOCUS` — tagline string from Q3 reply (blank = `""`)
@@ -193,7 +194,7 @@ Then proceed: `BROKER_CANONICAL = FIRM_NAME`, `BROKER_CANONICAL_ID = null`.
 Tell the user:
 
 > I'll build your initial coverage list from the ASX companies where your
-> firm led or co-led a capital raise in the past 12 months. You can add,
+> firm led or co-led a capital raise in the past 24 months. You can add,
 > remove, or modify this list from within the Company Page and Standardised
 > Reports dashboards at any time.
 
@@ -227,7 +228,7 @@ SELECT DISTINCT
   [issuer_ticker_col]  AS ticker,
   [company_name_col]   AS company_name
 FROM Placement.deals_daily
-WHERE deal_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+WHERE deal_date >= DATE_SUB(CURDATE(), INTERVAL 24 MONTH)
   AND (
     [lead_broker_col] = '[BROKER_CANONICAL_ID or BROKER_CANONICAL]'
     -- also include co-lead col if it exists, e.g.:
@@ -251,7 +252,7 @@ pairs (or `["TICKER", ""]` if names unavailable). Limit to 50 pairs.
 
 Tell the user:
 
-> Found **[N] companies** from your firm's capital raises in the past 12
+> Found **[N] companies** from your firm's capital raises in the past 24
 > months — these will be your starting coverage list.
 > [List the tickers inline, e.g.: GOR, RMS, WAF, ...]
 > You can modify this list in the Company Page and Reports dashboards.
