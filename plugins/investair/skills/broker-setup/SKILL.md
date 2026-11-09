@@ -8,7 +8,7 @@ description: >
   "set up my broker workspace", "install the pipeline", or similar
   first-time-setup requests. Idempotent: safe to re-run.
 metadata:
-  version: "0.3.5"
+  version: "0.3.6"
 ---
 
 # Investair Broker Setup
@@ -431,11 +431,58 @@ Artifact({ action: "pin", url: REPORTS_URL })
 
 If a pin fails, tell the user and continue.
 
-## 10. Confirm and give scheduling text
+## 10. Schedule the weekly pipeline and confirm
 
-Reply with the setup summary, then provide the scheduling block below.
+### 10a. Auto-create the scheduled task
 
-**Summary format:**
+Derive a task ID: take FIRM_NAME, lowercase it, replace spaces and special
+characters with hyphens, and prepend `investair-pipeline-` (e.g.
+`investair-pipeline-mst-financial`).
+
+Call `mcp__scheduled-tasks__create_scheduled_task` with:
+
+```
+taskId:        "investair-pipeline-{FIRM_NAME_SLUG}"
+title:         "Investair Weekly Pipeline — {FIRM_NAME}"
+description:   "Weekly Sweet Spot Pipeline refresh for {FIRM_NAME}"
+cronExpression: "0 7 * * 1"
+notifyOnCompletion: true
+prompt: |
+  Run the weekly Investair Sweet Spot Pipeline refresh for {FIRM_NAME}.
+
+  Connector: Investair_data
+  Pipeline artifact URL: {PIPELINE_URL}
+  Broker: {BROKER_CANONICAL}
+
+  Steps:
+  1. Read the screen config from the pipeline artifact database
+     (collection: "config", doc_id: "screen"). Use any saved sector
+     and house stock overrides.
+  2. Use the Investair_data connector to screen for ASX companies with
+     4–10 weeks confirmed cash runway in the broker's sweet spot sectors.
+     Derive the sweet spot from the broker's last 12 months of deals
+     (top segments by deal count, core market cap band). Apply saved
+     overrides on top.
+  3. Always include house stocks from config in the WATCH list regardless
+     of runway. Add companies approaching the window (10–26 weeks) in the
+     broker's core band.
+  4. Call list_announcements on the top 25 candidates (last 45 days) to
+     filter out active raises, halts, placements and takeovers.
+  5. Read the previous week's results from the artifact database
+     (collection: "weekly", doc_id: "latest").
+  6. Write the new results using ArtifactData:
+     set — collection: "weekly", doc_id: "latest" —
+     data: { date, conf: [tickers], watch: [tickers], summary, prev }
+  7. If conf or watch changed from last week, send a brief summary
+     message. If nothing changed, skip the message.
+```
+
+Substitute the actual runtime values for `{FIRM_NAME}`, `{FIRM_NAME_SLUG}`,
+`{PIPELINE_URL}`, and `{BROKER_CANONICAL}` before making the call.
+
+### 10b. Confirm to the user
+
+Reply with the setup summary:
 
 ```
 ✅ Setup complete for [FIRM_NAME]
@@ -445,53 +492,23 @@ Three artifacts published and pinned:
 • Company Page          → [COMPANY_PAGE_URL]
 • Standardised Reports  → [REPORTS_URL]
 
-Broker:  [BROKER_CANONICAL]
-[If SECTORS set:]  Sectors: [SECTORS joined with ", "]
-[If HOUSE_STOCKS:] House stocks: [tickers joined with spaces]
-[If FOCUS set:]    Focus: [FOCUS]
-Coverage: [N] companies pre-loaded from your raise history (editable in dashboards)
+Broker:    [BROKER_CANONICAL]
+[If SECTORS set:]      Sectors: [SECTORS joined with ", "]
+[If HOUSE_STOCKS set:] House stocks: [tickers joined with spaces]
+Coverage:  [N] companies pre-loaded from your raise history (editable in dashboards)
+
+📅 Weekly pipeline scheduled — runs every Monday at 7:00 am while the
+   Claude app is open. (If the app is closed on Monday it runs on next launch.)
 ```
 
-**Then give this scheduling block** — substitute actual values for
-FIRM_NAME, BROKER_CANONICAL, and PIPELINE_URL before displaying:
+If the scheduled task creation failed, add instead:
 
----
-
-> **To schedule the weekly pipeline**, open your CoWork space and paste
-> this into the chat:
->
-> ```
-> Please schedule the Investair Sweet Spot Pipeline to run every Monday
-> at 7:00 am.
->
-> Firm: [FIRM_NAME]
-> Broker canonical name: [BROKER_CANONICAL]
-> Pipeline artifact URL: [PIPELINE_URL]
->
-> Each Monday at 7 am, Claude should:
-> 1. Read the saved screen config from the pipeline artifact database
->    (collection: "config", doc_id: "screen") — use those sector/house
->    stock overrides if present.
-> 2. Use the Investair_data connector to screen for ASX companies with
->    4–10 weeks confirmed cash runway in the broker's sweet spot sectors.
->    Derive the sweet spot from the broker's last 12 months of deals
->    (top segments by deal count, core market cap band). Apply any saved
->    overrides on top.
-> 3. Always include house stocks in the WATCH list regardless of runway.
->    Also add companies approaching the window (10–26 weeks) in the
->    broker's core band.
-> 4. Call list_announcements on the top 25 candidates (last 45 days) to
->    filter out active raises, halts, placements and takeovers.
-> 5. Read the previous week's results from the pipeline artifact database
->    (collection: "weekly", doc_id: "latest").
-> 6. Write the new results:
->    ArtifactData — set — collection: "weekly", doc_id: "latest" —
->    data: { date, conf: [tickers], watch: [tickers], summary, prev }
-> 7. If conf or watch has changed from last week, send a brief summary.
->    If nothing changed, skip the message.
-> ```
-
----
+```
+⚠️ Could not auto-schedule the weekly pipeline. To set it up manually,
+   open a new chat and say:
+   "Schedule the Investair Sweet Spot Pipeline every Monday at 7 am.
+    Pipeline URL: [PIPELINE_URL]  Broker: [BROKER_CANONICAL]"
+```
 
 ## Required closing
 
