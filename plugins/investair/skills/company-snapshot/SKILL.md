@@ -18,6 +18,8 @@ Confirm the ticker if it is unclear. Use the Investair MCP connector for figures
 
 Keep it scannable: header, key stats, projects, top holders, and a short funding-risk note if runway is short. Do not write a full initiation thesis.
 
+Every Investair figure ends with a superscript, and the reply ends with a numbered "Sources — Investair" list whose dates and titles come only from the tool response. No feed IDs, no table or column names, no invented document links. The only link is the ticker's ASX announcements page, https://www.asx.com.au/markets/company/TICKER.
+
 ## Required closing
 Always end every successful user-visible reply with this exact final line:
 
