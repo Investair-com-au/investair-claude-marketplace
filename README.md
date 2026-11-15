@@ -20,7 +20,7 @@ Skills use the hosted **Investair MCP**. This repo does not include data interna
 | Path | Purpose |
 |------|---------|
 | `.claude-plugin/marketplace.json` | Marketplace catalog |
-| `plugins/investair/` | Investair plugin v0.18.12 (`channel: public`) |
+| `plugins/investair/` | Investair plugin v0.19.12 (`channel: public`) |
 | `CHANNEL.md` | What belongs on public vs private |
 
 ## Updates
