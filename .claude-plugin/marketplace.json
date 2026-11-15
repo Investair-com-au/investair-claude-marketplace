@@ -13,7 +13,7 @@
       "name": "investair",
       "source": "./plugins/investair",
       "description": "ASX research skills over Investair MCP: snapshots, peers, initiation and sector reports, investor targeting, weekly digests, and feedback.",
-      "version": "0.19.12",
+      "version": "0.19.13",
       "author": {
         "name": "Stuart Frith"
       },
