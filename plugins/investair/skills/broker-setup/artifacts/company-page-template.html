@@ -1,0 +1,1227 @@
+<!-- Investair Company Page TEMPLATE. No firm, broker or stock is embedded; the install skill fills these slots before publishing a copy, and every slot can be left as is. TITLE: in <title>, replace "Investair Company Page Template" with "Investair Company Page" (or "<Firm> Company Page"). OWNER: in the masthead, replace the text between the OWNER_START and OWNER_END comment markers (default "Internal") with e.g. "Prepared for <Firm> · Internal". FOCUS: in the masthead, put " · focus text" (e.g. " · WA gold explorers") between the FOCUS_START and FOCUS_END comment markers. SERVER: in the script, replace "Investair_data" between the SERVER_START and SERVER_END markers with the Investair connector's display name if it differs. COVERAGE: in the script, replace [] between the COVERAGE_START and COVERAGE_END markers with [["TICKER","Company name"],...] (max 25); the first ticker pre-fills the ASX code box. Left blank, the ASX code box and My list start empty for the user to fill. Publish without a doctype/html/head/body skeleton. Declare mcp (Investair_data tools), sample, downloads, user, db. -->
+<title>Investair Company Page Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Investair brand: tokens from the Investair Style Guide (investair.com.au production CSS).
+   Layout: full-width navy masthead band with the wordmark, light content area, white cards with the amber rule, navy footer band.
+   Single deliberate light look with navy bands (the brand's own two grounds). */
+:root{
+  color-scheme: light;
+  --brand-navy:#0a2342; --brand-orange:#ff6b35; --brand-amber:#e8760a; --brand-teal:#1a7f8e;
+  --brand-gray:#f5f7fa; --surface-page:#f9fafb; --surface:#ffffff;
+  --ink:#0a2342; --ink-body:#4a5568; --ink-muted:#64748b; --ink-navy-body:#d1d5db; --ink-navy-muted:#9ca3af;
+  --border:#e2e8f0; --border-card:#e5e7eb; --danger:#ef4444;
+  --accent-tint:rgba(232,118,10,.18); --teal-tint:rgba(26,127,142,.1); --danger-tint:rgba(239,68,68,.08);
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05); --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+  --radius-md:6px; --radius-lg:8px; --radius-xl:12px;
+  --display:Montserrat,"Helvetica Neue",Arial,sans-serif; --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--surface-page);color:var(--ink-body);font-family:var(--body);font-size:15px;line-height:1.5}
+
+/* Navy masthead band */
+.ia-top{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:20px 28px}
+.ia-top .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-logo-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ia-logo{height:44px;width:auto;display:block}
+.ia-owner{font:600 12px/16px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-brand{font:600 13px/18px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-title{font:700 32px/1.2 var(--display);color:#fff;margin:0;text-wrap:balance}
+.mh-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mh-badge{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.mh-date{font:500 12.5px/16px var(--body);color:var(--ink-navy-muted)}
+.mh-note{font:400 15px/23px var(--body);color:var(--ink-navy-body);max-width:74ch;margin:4px 0 0}
+.mh-note b{color:#fff;font-weight:600}
+
+/* Content */
+.page{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:24px 40px}
+.ss-strip{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ss-label{font:600 12px/16px var(--body);color:var(--ink-muted);margin-right:4px;text-transform:uppercase;letter-spacing:.1em}
+.ss-chip{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.ss-chip.bz{background:var(--brand-navy);color:#fff}
+.ss-chip.cu{background:var(--brand-teal);color:#fff}
+.ss-chip.out{background:var(--surface);color:var(--ink);border:1px solid var(--border-card)}
+
+.sec-head{font:700 13px/18px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:28px 0 12px;display:flex;align-items:center;gap:10px}
+.sec-head::before{content:"";width:18px;height:4px;border-radius:2px;background:var(--brand-amber)}
+.sec-head .n{color:var(--ink)}
+.sec-rule{flex:1;height:1px;background:var(--border)}
+
+.deal-stack{display:flex;flex-direction:column;gap:14px}
+.deal{background:var(--surface);border:1px solid var(--border-card);border-left:4px solid var(--brand-amber);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.deal-top{padding:18px 22px 12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.deal-ticker{font:700 30px/1 var(--display);color:var(--ink);letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.deal-name{font:500 14px/20px var(--body);color:var(--ink-muted);margin-top:6px}
+.deal-badge{font:600 12px/16px var(--body);padding:6px 11px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy);align-self:flex-start;white-space:nowrap}
+.deal-badge.bz{background:var(--brand-navy);color:#fff}
+.deal-badge.cu{background:var(--brand-teal);color:#fff}
+.deal-badge.nt{background:var(--brand-gray);color:var(--ink);border:1px solid var(--border-card)}
+.flag{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/16px var(--body);padding:3px 9px;border-radius:var(--radius-md);color:var(--ink);border:1px solid var(--border-card);background:var(--surface)}
+.flag.urgent{border-color:var(--danger);background:var(--danger-tint)}
+.flag.urgent::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.flag.ok{border-color:var(--brand-teal);background:var(--teal-tint)}
+.flags{padding:0 22px 16px;display:flex;gap:8px;flex-wrap:wrap}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--brand-gray)}
+.metric{padding:12px 16px;border-right:1px solid var(--border)}
+.metric:last-child{border-right:none}
+.m-lbl{font:600 11px/14px var(--body);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.m-val{font:700 18px/24px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+
+.deal-tl{padding:12px 22px 14px}
+.tl-note{font-size:14px;line-height:22px;color:var(--ink-body);margin-bottom:10px}
+.tl-note .k{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.inf{color:var(--ink);font-weight:600;background:var(--accent-tint);padding:0 4px;border-radius:3px}
+.tl-track{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;height:10px;border-radius:2px;overflow:hidden}
+.tl-fill{background:var(--border)}
+.tl-fill.on{background:var(--brand-amber)}
+.tl-fill.on.bz{background:var(--brand-navy)}
+.tl-fill.on.cu{background:var(--brand-teal)}
+.tl-fill.on.nt{background:var(--ink-muted)}
+.tl-fill.on.zone,.tl-fill.on.zone.bz,.tl-fill.on.zone.cu,.tl-fill.on.zone.nt{background:var(--danger)}
+.tl-scale{position:relative;height:14px;font:500 10.5px/14px var(--body);color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.tl-scale span{position:absolute;top:0;transform:translateX(-50%)}
+.tl-scale span:first-child{transform:none}
+.tl-scale span:last-child{transform:translateX(-100%)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-muted);margin:4px 0 0}
+.legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+.watch-stack .deal{opacity:.9}
+.watch-stack .metric{padding:10px 14px}
+.watch-stack .m-val{font-size:16px}
+.watch-stack .deal-ticker{font-size:24px}
+
+.ex-wrap{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);overflow-x:auto;box-shadow:var(--shadow-sm)}
+.ex-table{width:100%;border-collapse:collapse}
+.ex-table th{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--brand-navy);text-align:left;padding:10px 14px;white-space:nowrap}
+.ex-table td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-tk{font:700 13px/18px var(--display);color:var(--ink)}
+.ex-wk,.ex-mc{font:500 12.5px/18px var(--body);white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ex-mc{color:var(--ink-muted)}
+.ex-rs{font-size:13px;color:var(--ink-body);min-width:220px}
+
+.method{margin-top:20px;font-size:13px;line-height:20px;color:var(--ink-muted);max-width:82ch}
+
+/* Navy footer band */
+.ia-foot{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:28px}
+.ia-foot .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-foot .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ia-foot img{height:32px;width:auto}
+.ia-foot .tag{font-size:14px;color:var(--ink-navy-body)}
+.ia-foot .legal{border-top:1px solid rgba(255,255,255,.12);padding-top:12px;font-size:12.5px;color:var(--ink-navy-muted)}
+
+:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+
+@media (max-width:640px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(-n+2){border-bottom:1px solid var(--border)}
+  .deal-ticker{font-size:24px}
+  .mh-title{font-size:26px}
+  .deal-top,.deal-tl,.flags{padding-inline:16px}
+}
+
+.gen{font:700 14px/20px var(--body);border:0;background:var(--brand-amber);color:var(--brand-navy);border-radius:var(--radius-md);padding:10px 18px;cursor:pointer}
+.gen[disabled]{opacity:.5;cursor:not-allowed}
+.cp-head{margin-top:20px;padding:20px 22px;background:var(--surface);border:1px solid var(--border-card);border-left:4px solid var(--brand-amber);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+.cp-head .eb{font:600 12px/16px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.cp-head h2{font:700 30px/1.15 var(--display);color:var(--ink);margin:4px 0 0}
+.cp-head .sub{color:var(--ink-muted);font-size:14px;margin:6px 0 0}
+.cp-head .flags{padding:12px 0 0}
+.cp-tabs{display:flex;gap:22px;margin-top:18px;border-bottom:2px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:2;background:var(--surface-page)}
+.cp-tabs::-webkit-scrollbar{display:none}
+.cp-tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 0;font:600 14px/20px var(--body);color:var(--ink-muted);cursor:pointer;white-space:nowrap}
+.cp-tab:hover{color:var(--ink)}
+.cp-tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--brand-amber)}
+.cp-tab:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+.cp-panel{padding-top:18px}
+.cp-panel[hidden]{display:none}
+.lede{color:var(--ink-body);margin:0 0 14px;max-width:70ch;line-height:1.55}
+.take{font:600 18px/1.5 var(--display);color:var(--ink);margin:0 0 16px;max-width:60ch}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:12px}
+.fig{background:var(--surface);border:1px solid var(--border-card);border-top:3px solid var(--brand-amber);border-radius:var(--radius-lg);padding:12px 14px;box-shadow:var(--shadow-sm)}
+.fig h4{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);margin:0}
+.fig .big{font:700 22px/1.2 var(--display);color:var(--ink);margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.fig .note{font-size:12.5px;color:var(--ink-muted);margin:0;line-height:1.4}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:14px;margin-top:14px}
+.cp-c{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:16px 18px;min-width:0}
+.cp-c h3{font:700 15px/20px var(--display);color:var(--ink);margin:0}
+.cp-c .cn{font-size:13px;color:var(--ink-muted);margin:4px 0 12px;line-height:1.45}
+.sub-h{font:700 13px/18px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:26px 0 8px;display:flex;align-items:center;gap:10px}
+.sub-h::before{content:"";width:18px;height:4px;border-radius:2px;background:var(--brand-amber)}
+.chart{position:relative;min-height:200px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--body)}
+.tip{position:absolute;z-index:3;width:min(330px,calc(100% - 8px));max-height:270px;overflow:hidden;background:var(--surface);border:1px solid var(--border-card);border-left:4px solid var(--brand-amber);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:10px 12px;font-size:12.5px;line-height:1.45;color:var(--ink-body);pointer-events:none}
+.tip-i+.tip-i{border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.tip-h{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.tip-t{font-weight:600;color:var(--ink);margin:2px 0}
+.tip-r{margin-top:4px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+tr[data-go]{cursor:pointer}tr[data-go]:hover td{background:var(--brand-gray)}tr[data-go]:focus-visible{outline:2px solid var(--brand-orange);outline-offset:-2px}
+.ovbox{margin-top:12px;background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:10px 16px;font-size:14px}
+.ovbox>summary{cursor:pointer;font:600 13px/18px var(--body);color:var(--ink)}
+.ovbox #ovBody{margin-top:10px}.ov-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.ovbox button{font:600 12px/16px var(--body);border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:var(--radius-md);padding:7px 12px;cursor:pointer}
+.ovbox button.linkbtn{border:0;background:none;padding:0;color:var(--brand-teal);font:700 13px var(--display)}
+.ovbox .msg{font-size:13px;color:var(--ink-muted)}
+.ovbox .ww{width:100%;min-height:150px;margin-top:8px;font:400 13px/19px var(--body);text-transform:none;border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;color:var(--ink);background:var(--brand-gray)}
+.ov-table td{white-space:normal}.ov-table td:nth-child(6){min-width:110px}.ov-table td:nth-child(7){min-width:190px}.sigs{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}.sigs .badge{margin:0}.ov-table td.num{white-space:nowrap}
+.burn-ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px}.burn-ctl label{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}.burn-ctl input[type=range]{flex:1 1 220px;max-width:420px;accent-color:var(--brand-amber)}.burn-ctl output{font:600 13px/18px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+.chart .fl{cursor:pointer}.chart .fl:focus-visible{outline:2px solid var(--brand-orange)}
+.up{color:#0f766e}.dn{color:#b91c1c}.mut{color:var(--ink-muted)}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.seg button{appearance:none;border:0;background:#fff;color:var(--ink-muted);font:600 12px/16px var(--body);padding:6px 11px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--border)}
+.seg button[aria-pressed=true]{background:var(--brand-navy);color:#fff}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.cp-table td.num,.cp-table th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cp-table tr.self td{background:var(--accent-tint);font-weight:600}
+.cp-table td.heat{border-radius:3px}
+.tscroll{max-height:380px;overflow:auto}
+.badge{display:inline-block;font:600 11px/14px var(--body);padding:2px 8px;border-radius:999px;background:var(--accent-tint);color:var(--ink);margin-right:6px}
+.rec{display:inline-block;font:600 11px/14px var(--body);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.rec.u{background:rgba(26,127,142,.14);color:#0f766e}.rec.d{background:var(--danger-tint);color:#b91c1c}.rec.f{background:var(--brand-gray);color:var(--ink-muted)}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:12px;margin:0 0 12px}
+.dl dt{font-size:12px;color:var(--ink-muted)}.dl dd{margin:2px 0 0;font:700 18px/1.2 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}.dl dd small{display:block;font:400 12px/16px var(--body);color:var(--ink-muted)}
+.uc{position:relative;border:1px solid var(--border-card);border-radius:var(--radius-xl);background:var(--surface);overflow:hidden;min-height:190px;margin-top:14px}
+.uc-ghost{padding:20px 22px;opacity:.45;filter:grayscale(1)}
+.uc-ghost i{display:block;height:12px;border-radius:3px;background:var(--border);margin:14px 0}
+.uc-band{position:absolute;left:-8%;right:-8%;top:50%;transform:translateY(-50%) rotate(-3deg);background:repeating-linear-gradient(135deg,var(--brand-amber) 0 16px,#f4a561 16px 32px);color:var(--brand-navy);text-align:center;padding:12px 24px;box-shadow:var(--shadow-lg);border-top:3px solid var(--brand-navy);border-bottom:3px solid var(--brand-navy)}
+.uc-band b{font:700 15px/20px var(--display);letter-spacing:.14em;text-transform:uppercase;display:block}
+.uc-band span{display:block;font:500 12.5px/18px var(--body);margin:3px auto 0;max-width:min(56ch,72%)}
+.askc{margin-top:26px}
+.ask{padding:0}
+.ask textarea{width:100%;min-height:54px;font:400 14px/20px var(--body);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;color:var(--ink)}
+.ask .row{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.ask button{font:600 12.5px/16px var(--body);border:0;background:var(--brand-navy);color:#fff;border-radius:var(--radius-md);padding:8px 14px;cursor:pointer}
+.ask button[disabled]{opacity:.5;cursor:not-allowed}
+.qa .q{font:600 13px/18px var(--body);color:var(--ink);margin-top:14px}
+.qa .a{border-left:3px solid var(--brand-amber);padding-left:12px;margin-top:6px}
+@media(max-width:640px){.cp-head h2{font-size:24px}.cp-tabs{gap:16px}}
+
+.st{display:inline-block;margin-left:7px;font:700 9.5px/15px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:0 7px;border-radius:999px;vertical-align:1px;white-space:nowrap}
+.st.live{background:rgba(26,127,142,.15);color:#0f766e}
+.st.calc{background:rgba(10,35,66,.1);color:var(--brand-navy)}
+.st.ai{border:1px solid var(--brand-amber);color:#b45309;line-height:13px}
+.st.part{background:linear-gradient(90deg,rgba(26,127,142,.22) 50%,var(--brand-gray) 50%);color:var(--ink)}
+.st.soon{background:repeating-linear-gradient(135deg,var(--brand-amber) 0 5px,#f4a561 5px 10px);color:var(--brand-navy)}
+.tablegend{margin:10px 0 0;font-size:12.5px;color:var(--ink-muted);line-height:2}
+.tablegend .st{margin:0 6px 0 14px}.tablegend .st:first-child{margin-left:0}
+.score{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.score .sb{display:inline-flex;gap:3px}
+.score .sb i{width:11px;height:9px;border-radius:2px;background:var(--border)}
+.score .sb i.on{background:var(--brand-amber)}
+.score b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.sev{display:inline-block;font:700 11px/16px var(--body);padding:2px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.sev.high{background:var(--danger-tint);color:#b91c1c}.sev.medium{background:var(--accent-tint);color:#9a4a07}.sev.low{background:var(--brand-gray);color:var(--ink-muted)}
+.rec.w{background:var(--accent-tint);color:#9a4a07}
+.how{margin-top:14px;font-size:13.5px;color:var(--ink-body)}.how summary{cursor:pointer;font-weight:600;color:var(--ink)}.how ul{padding-left:20px;line-height:1.55}
+.cta .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.linkbtn{appearance:none;background:none;border:0;padding:0;color:var(--brand-teal);font:600 13px var(--body);text-decoration:underline;cursor:pointer}
+.linkbtn[disabled],.gen[disabled]{opacity:.5;cursor:not-allowed}
+.listbox{margin-top:12px;background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);padding:10px 16px;font-size:14px}
+.listbox summary{cursor:pointer;font:600 13px/18px var(--body);color:var(--ink)}
+.listbox textarea{width:100%;min-height:70px;margin-top:10px;font:600 14px/20px var(--display);text-transform:uppercase;border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;color:var(--ink)}
+.listbox .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.listbox button{font:600 12px/16px var(--body);border:1px solid var(--border);background:var(--surface);color:var(--ink);border-radius:var(--radius-md);padding:7px 12px;cursor:pointer}
+.listbox button.pri{background:var(--brand-amber);border-color:var(--brand-amber);color:var(--brand-navy)}
+.listbox .msg{font-size:13px;color:var(--ink-muted)}
+</style>
+
+<style>
+.desk-bar{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:16px 18px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.desk-bar label{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);display:block;margin-bottom:4px}
+.desk-bar input,.desk-bar select{font:600 15px/20px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);padding:8px 10px;background:#fff;min-width:0}
+.desk-bar input{width:110px;text-transform:uppercase;font-family:var(--display)}
+.desk-bar select{max-width:100%}
+.desk-hint{font-size:13px;color:var(--ink-muted);flex:1 1 220px}
+.btn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.rbtn{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--border-card);border-top:4px solid var(--brand-amber);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.rbtn:hover{box-shadow:var(--shadow-lg)}
+.rbtn:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+.rbtn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.rbtn b{font:700 15px/20px var(--display);color:var(--ink)}
+.rbtn span{font-size:13px;line-height:19px;color:var(--ink-body)}
+.rbtn.role{border-top-color:var(--brand-teal)}
+.res{margin-top:8px;background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.res-head{background:var(--brand-navy);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.res-head h2{font:700 15px/20px var(--display);margin:0;color:#fff}
+.res-acts{display:flex;gap:8px;flex-wrap:wrap}
+.res-acts button{font:600 12px/16px var(--body);border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:var(--radius-md);padding:6px 10px;cursor:pointer}
+.res-acts button.pri{background:var(--brand-amber);border-color:var(--brand-amber);color:var(--brand-navy)}
+.res-acts button[disabled]{opacity:.45;cursor:not-allowed}
+.res-status{padding:10px 18px;font-size:13px;color:var(--ink-muted);border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.res-status.err{color:#b91c1c;background:var(--danger-tint)}
+.spin{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--brand-amber);border-radius:50%;animation:sp 0.8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.md{padding:18px 22px 22px;color:var(--ink-body);font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.md h1,.md h2,.md h3{font-family:var(--display);color:var(--ink);line-height:1.3;margin:18px 0 8px}
+.md h1{font-size:22px}.md h2{font-size:18px;border-bottom:2px solid var(--brand-amber);padding-bottom:4px}.md h3{font-size:15px}
+.md p{margin:8px 0}.md ul,.md ol{padding-left:22px;margin:8px 0}
+.md .tw{overflow-x:auto;margin:10px 0;border:1px solid var(--border-card);border-radius:var(--radius-md)}
+.md table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+.md th{background:var(--brand-navy);color:#fff;text-align:left;font:600 11.5px/15px var(--body);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;white-space:nowrap}
+.md td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.md code{background:var(--brand-gray);padding:0 4px;border-radius:3px}
+.md hr{border:0;border-top:1px solid var(--border);margin:16px 0}
+.empty{padding:28px 22px;color:var(--ink-muted);font-size:14px}
+.notice{margin-top:12px;padding:12px 16px;border-radius:var(--radius-md);background:var(--danger-tint);border:1px solid var(--danger);color:var(--ink);font-size:14px;display:none}
+</style>
+
+<header class="ia-top"><div class="inner">
+  <div class="ia-logo-row"><img class="ia-logo" id="logoTop" src="data:image/png;base64,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" alt="Investair — Capital Markets Intelligence"><span class="ia-owner"><!--OWNER_START-->Internal<!--OWNER_END--></span></div>
+  <div class="mh-brand">Company page<!--FOCUS_START--><!--FOCUS_END--></div>
+  <h1 class="mh-title">Investair Company Page</h1>
+  <div class="mh-meta"><span class="mh-badge">Live Investair data · On demand</span><span class="mh-date" id="today"></span></div>
+  <p class="mh-note">Type an ASX code and Claude builds a company profile from <b>live Investair data</b>: price and volume, funding and runway, placements, peers, register and announcements. Then ask follow-up questions about it.</p>
+</div></header>
+<main class="page">
+  <div class="desk-bar">
+    <div><label for="tk">ASX code</label><input id="tk" value="" placeholder="e.g. BHP" maxlength="6" autocomplete="off" spellcheck="false"></div>
+    <div><label for="pick">My list</label><select id="pick"></select></div>
+    <div><button class="gen" id="gen">Generate page</button></div>
+    <div class="desk-hint">Takes about 30–90 seconds. Figures come from Investair; the written summary is AI-drafted, so check the source announcement before relying on a number. Sections marked Under construction are not yet available.</div>
+  </div>
+  <div class="notice" id="notice"></div>
+  <details class="listbox" id="listBox"><summary>My list of companies <span id="listCount" class="msg"></span></summary>
+    <textarea id="listTa" aria-label="ASX codes, separated by spaces or commas" spellcheck="false"></textarea>
+    <div class="row"><button class="pri" id="listSave">Check and save list</button><button id="listReset">Reset to the list from setup</button><span class="msg" id="listMsg">Add or remove ASX codes. Each new code is checked against Investair before it is saved. Saved for you only.</span></div>
+  </details>
+  <details class="ovbox" id="ovBox" open hidden><summary>My list overview <span id="ovMeta" class="msg"></span></summary>
+    <div id="ovBody"></div>
+    <div class="ov-act"><button id="ovRefresh" type="button">Refresh</button><span class="msg" id="ovNote">Sorted by who is closest to needing money. Select a row to open that company.</span></div>
+    <details class="how" id="wwBox"><summary>Weekly watch: have this list checked every week</summary>
+      <p>Copy this prompt into a new scheduled task in Claude. It re-runs the list each week and reports runway drops, new raises and new holder notices.</p>
+      <textarea id="wwText" class="ww" readonly aria-label="Weekly watch prompt"></textarea>
+      <div class="ov-act"><button id="wwCopy" type="button">Copy prompt</button><span class="msg" id="wwMsg"></span></div>
+    </details>
+  </details>
+  <div class="empty" id="cpEmpty">Choose a company above and select <b>Generate page</b>.</div>
+  <div id="cp" style="display:none">
+    <header class="cp-head"><div class="eb" id="hEb"></div><h2 id="hName"></h2><p class="sub" id="hSub"></p><div class="flags" id="hFlags"></div></header>
+    <div class="cp-tabs" role="tablist" aria-label="Company page sections" id="tabs">
+      <button class="cp-tab" role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true" title="Most of this tab is live; revenue and profit are under construction">Overview<span class="st part">Partial</span></button>
+      <button class="cp-tab" role="tab" id="tab-announcements" aria-controls="p-announcements" aria-selected="false" tabindex="-1" title="Built from Investair data">Announcements<span class="st live">Live</span></button>
+      <button class="cp-tab" role="tab" id="tab-promises" aria-controls="p-promises" aria-selected="false" tabindex="-1" title="Drafted by Claude on request from announcement summaries">Promises<span class="st ai">AI</span></button>
+      <button class="cp-tab" role="tab" id="tab-financials" aria-controls="p-financials" aria-selected="false" tabindex="-1" title="Burn and quarterly cash are live; full-year figures are under construction">Financials<span class="st part">Partial</span></button>
+      <button class="cp-tab" role="tab" id="tab-placements" aria-controls="p-placements" aria-selected="false" tabindex="-1" title="Built from Investair data">Placements<span class="st live">Live</span></button>
+      <button class="cp-tab" role="tab" id="tab-peers" aria-controls="p-peers" aria-selected="false" tabindex="-1" title="Built from Investair data">Peers<span class="st live">Live</span></button>
+      <button class="cp-tab" role="tab" id="tab-targets" aria-controls="p-targets" aria-selected="false" tabindex="-1" title="Investors on the peers' registers but not this company's, from Investair data">Who to target<span class="st calc">Calc</span></button>
+      <button class="cp-tab" role="tab" id="tab-scorecard" aria-controls="p-scorecard" aria-selected="false" tabindex="-1" title="Rated by fixed rules from the Investair data on this page">Scorecard<span class="st calc">Calc</span></button>
+      <button class="cp-tab" role="tab" id="tab-risks" aria-controls="p-risks" aria-selected="false" tabindex="-1" title="Derived by rule from the Investair data on this page">Risks<span class="st calc">Calc</span></button>
+      <button class="cp-tab" role="tab" id="tab-relationships" aria-controls="p-relationships" aria-selected="false" tabindex="-1" title="Drafted by Claude on request from announcement summaries">Customers and partners<span class="st ai">AI</span></button>
+    </div>
+    <p class="tablegend"><span class="st live">Live</span> built from Investair data <span class="st calc">Calc</span> rated by fixed rules from that data <span class="st ai">AI</span> drafted by Claude when you ask <span class="st part">Partial</span> some sections still under construction <span class="st soon">Soon</span> under construction</p>
+
+    <section class="cp-panel" role="tabpanel" id="p-overview" aria-labelledby="tab-overview"></section>
+    <section class="cp-panel" role="tabpanel" id="p-announcements" aria-labelledby="tab-announcements" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-promises" aria-labelledby="tab-promises" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-financials" aria-labelledby="tab-financials" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-placements" aria-labelledby="tab-placements" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-peers" aria-labelledby="tab-peers" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-targets" aria-labelledby="tab-targets" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-scorecard" aria-labelledby="tab-scorecard" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-risks" aria-labelledby="tab-risks" hidden></section>
+    <section class="cp-panel" role="tabpanel" id="p-relationships" aria-labelledby="tab-relationships" hidden></section>
+
+    <div class="sec-head askc"><span class="n" id="askHead">Ask about this company</span><span class="sec-rule"></span></div>
+    <section class="cp-c"><div class="ask">
+      <textarea id="q" placeholder="For example: who are the largest holders, and are they buying?" aria-label="Question about this company"></textarea>
+      <div class="row"><button id="bAsk" disabled>Ask</button><span class="mut" style="font-size:13px">Answers use only the data already pulled for this page.</span></div>
+      <div class="qa" id="qa"></div>
+    </div></section>
+  </div>
+  <p class="method">Data: Investair connector (market, cash flow, quarterly filings, raises, substantial holders, announcements, peers, projects), called with the viewer's own access. Runway is Investair's confirmed estimate; enterprise value is market cap less adjusted cash. Price changes are price only (no dividends); periods spanning a share consolidation are left blank. Substantial holder notices with a prime-broker clause are treated as lending or collateral, not buying. Nothing here is financial advice.</p>
+</main>
+
+<footer class="ia-foot"><div class="inner">
+  <div class="row"><img id="logoFoot" alt="Investair"><span class="tag">Capital markets intelligence for ASX-listed companies.</span></div>
+  <div class="legal">Data: Investair · Internal use only · <span id="footDate"></span>. General information only, not financial advice.</div>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+/* Investair-branded .docx builder: Markdown → WordprocessingML, zipped with JSZip. */
+function iaBuildDocx(JSZip, mdText, title, logoBytes, meta) {
+  const NAVY = "0A2342", AMBER = "E8760A", BODY = "4A5568", MUTED = "64748B";
+  const x = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const runs = (text, base) => {
+    base = base || "";
+    const out = [];
+    const parts = String(text).replace(/`([^`]+)`/g, "$1").split(/(\*\*[^*]+\*\*)/g);
+    for (const p of parts) {
+      if (!p) continue;
+      const bold = /^\*\*[^*]+\*\*$/.test(p);
+      const t = bold ? p.slice(2, -2) : p.replace(/(^|[^*])\*([^*]+)\*/g, "$1$2");
+      out.push(`<w:r><w:rPr>${base}${bold ? "<w:b/>" : ""}</w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r>`);
+    }
+    return out.join("");
+  };
+  // Parse markdown into blocks
+  const lines = mdText.replace(/\r/g, "").split("\n");
+  const blocks = [];
+  for (let i = 0; i < lines.length;) {
+    const l = lines[i];
+    if (/^\s*\|/.test(l) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+      const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+      const rows = [cells(l)]; i += 2;
+      while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+      blocks.push({ t: "table", rows }); continue;
+    }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)/))) { blocks.push({ t: "h", lvl: Math.min(m[1].length, 3), text: m[2] }); i++; continue; }
+    if ((m = l.match(/^\s*([-*]|\d+\.)\s+(.*)/))) { blocks.push({ t: "li", ord: /\d/.test(m[1]), text: m[2] }); i++; continue; }
+    if (/^\s*(---|\*\*\*)\s*$/.test(l)) { blocks.push({ t: "hr" }); i++; continue; }
+    if (l.trim()) {
+      const p = [l]; i++;
+      while (i < lines.length && lines[i].trim() && !/^(#|\s*[-*|]\s|\s*\d+\.\s|\s*(---|\*\*\*)\s*$)/.test(lines[i])) { p.push(lines[i]); i++; }
+      blocks.push({ t: "p", text: p.join(" ") }); continue;
+    }
+    i++;
+  }
+  // Body XML
+  const body = [];
+  if (logoBytes) {
+    const cx = 1737360, cy = Math.round(1737360 * 130 / 480);
+    body.push(`<w:p><w:pPr><w:spacing w:after="120"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Investair logo" descr="Investair — Capital Markets Intelligence"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="1" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdLogo"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
+  }
+  body.push(`<w:p><w:pPr><w:pStyle w:val="Eyebrow"/></w:pPr>${runs((meta && meta.eyebrow) || "Investair research desk")}</w:p>`);
+  body.push(`<w:p><w:pPr><w:pStyle w:val="Title"/></w:pPr>${runs(title)}</w:p>`);
+  if (meta && meta.sub) body.push(`<w:p><w:pPr><w:pStyle w:val="Subtitle"/></w:pPr>${runs(meta.sub)}</w:p>`);
+  let skippedFirstH1 = false;
+  for (const b of blocks) {
+    if (b.t === "h") {
+      if (b.lvl === 1 && !skippedFirstH1) { skippedFirstH1 = true; continue; }
+      body.push(`<w:p><w:pPr><w:pStyle w:val="Heading${b.lvl}"/></w:pPr>${runs(b.text)}</w:p>`);
+    } else if (b.t === "p") {
+      body.push(`<w:p>${runs(b.text)}</w:p>`);
+    } else if (b.t === "li") {
+      body.push(`<w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="${b.ord ? 2 : 1}"/></w:numPr></w:pPr>${runs(b.text)}</w:p>`);
+    } else if (b.t === "hr") {
+      body.push(`<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="8" w:space="1" w:color="${AMBER}"/></w:pBdr></w:pPr></w:p>`);
+    } else if (b.t === "table") {
+      const n = Math.max(...b.rows.map(r => r.length));
+      const w = Math.floor(9360 / n);
+      const tr = (r, head) => `<w:tr>${head ? "<w:trPr><w:tblHeader/></w:trPr>" : ""}${Array.from({ length: n }, (_, k) =>
+        `<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/>${head ? `<w:shd w:val="clear" w:color="auto" w:fill="${NAVY}"/>` : ""}</w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>${runs(r[k] || "", head ? `<w:b/><w:color w:val="FFFFFF"/><w:sz w:val="17"/>` : `<w:sz w:val="18"/>`)}</w:p></w:tc>`).join("")}</w:tr>`;
+      body.push(`<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders><w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:insideH w:val="single" w:sz="4" w:color="E2E8F0"/></w:tblBorders><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${Array.from({ length: n }, () => `<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${b.rows.map((r, k) => tr(r, k === 0)).join("")}</w:tbl><w:p/>`);
+    }
+  }
+  body.push(`<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="8" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:before="240"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="${NAVY}"/></w:rPr><w:t xml:space="preserve">INVESTAIR</w:t></w:r><w:r><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="18"/></w:rPr><w:t xml:space="preserve"> · Capital markets intelligence for ASX-listed companies · investair.com.au. General information only, not financial advice.</w:t></w:r></w:p>`);
+
+  const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body.join("")}<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+
+  const font = (f) => `<w:rFonts w:ascii="${f}" w:hAnsi="${f}" w:cs="${f}"/>`;
+  const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr>${font("Inter")}<w:color w:val="${BODY}"/><w:sz w:val="21"/><w:lang w:val="en-AU"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="300" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="44"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="12" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:after="240"/></w:pPr><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="19"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Eyebrow"><w:name w:val="Eyebrow"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="40"/></w:pPr><w:rPr><w:b/><w:caps/><w:color w:val="${AMBER}"/><w:spacing w:val="20"/><w:sz w:val="18"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="320" w:after="120"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="32"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:pBdr><w:left w:val="single" w:sz="24" w:space="6" w:color="${AMBER}"/></w:pBdr><w:spacing w:before="280" w:after="100"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="26"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr>${font("Montserrat")}<w:b/><w:color w:val="${NAVY}"/><w:sz w:val="22"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="ListParagraph"><w:name w:val="List Paragraph"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="360"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Footer"><w:name w:val="footer"/><w:basedOn w:val="Normal"/><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="16"/></w:rPr></w:style>
+</w:styles>`;
+
+  const numbering = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:abstractNum w:abstractNumId="0"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="260"/></w:pPr><w:rPr><w:color w:val="${AMBER}"/></w:rPr></w:lvl></w:abstractNum>
+<w:abstractNum w:abstractNumId="1"><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="360" w:hanging="300"/></w:pPr></w:lvl></w:abstractNum>
+<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num>
+</w:numbering>`;
+
+  const footer = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:pStyle w:val="Footer"/><w:tabs><w:tab w:val="right" w:pos="9638"/></w:tabs></w:pPr><w:r><w:rPr><w:b/><w:color w:val="${NAVY}"/></w:rPr><w:t xml:space="preserve">INVESTAIR</w:t></w:r><w:r><w:t xml:space="preserve"> · Capital Markets Intelligence · ${x((meta && meta.footer) || "")}</w:t></w:r><w:r><w:tab/><w:t xml:space="preserve">Page </w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t>1</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>`;
+
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
+  zip.file("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`);
+  zip.file("docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(title)}</dc:title><dc:creator>Investair</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().slice(0, 19)}Z</dcterms:created></cp:coreProperties>`);
+  zip.file("word/_rels/document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdNum" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>${logoBytes ? `<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/investair-logo.png"/>` : ""}</Relationships>`);
+  zip.file("word/document.xml", doc);
+  zip.file("word/styles.xml", styles);
+  zip.file("word/numbering.xml", numbering);
+  zip.file("word/footer1.xml", footer);
+  if (logoBytes) zip.file("word/media/investair-logo.png", logoBytes);
+  return zip.generateAsync({ type: "uint8array", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+if (typeof module !== "undefined") module.exports = { iaBuildDocx };
+
+</script>
+<script>
+(() => {
+const SERVER = /*SERVER_START*/"Investair_data"/*SERVER_END*/;
+const DEFAULT_COVERAGE = /*COVERAGE_START*/[]/*COVERAGE_END*/;
+let COVERAGE = DEFAULT_COVERAGE.slice();
+const $ = id => document.getElementById(id);
+const todayISO = () => new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
+const todayLong = () => new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "Australia/Sydney" });
+$("logoFoot").src = $("logoTop").src; $("today").textContent = "Today " + todayLong(); $("footDate").textContent = todayLong();
+const renderPick = () => { $("pick").innerHTML = '<option value="">' + (COVERAGE.length ? "Pick from my list…" : "My list is empty: add codes below") + '</option>' + COVERAGE.map(([t, n]) => `<option value="${t}">${t}${n ? " — " + n : ""}</option>`).join(""); $("listTa").value = COVERAGE.map(c => c[0]).join(" "); $("listCount").textContent = "(" + COVERAGE.length + " companies)"; if (!$("tk").value && COVERAGE.length) $("tk").value = COVERAGE[0][0]; };
+renderPick();
+$("pick").onchange = e => { if (e.target.value) $("tk").value = e.target.value; };
+
+const STYLE = `House style: answer first (2–3 sentence takeaway), then 2–4 clearly separated sections, short plain sentences, Australian spelling, A$ with sensible precision (A$12.4m). Attribute figures to Investair ("According to Investair's data…") and give as-of dates; every section heading names the data window it covers. Never invent figures, holders, dates, drill results, resources or catalysts; prefix inferences with "Inferred:" and say what they rest on. Treat substantial-holder notices with a prime-broker clause as stock lending/collateral, not directional buying, and say so. Collapse subsidiaries of one group into one line. Output GitHub-flavoured Markdown only (headings, bullets, pipe tables). Start with a level-1 heading that is a specific descriptive title naming the company and report. End with: "This report is general information only and does not take into account any person's objectives, financial situation or needs. It is not financial advice. Data from Investair as at <date> and public sources; accuracy not guaranteed."`;
+
+// ---------- data helpers ----------
+let mcp = null, sample = null, downloads = null, ctrl = null, current = null;
+const trim = (o, n = 24000) => { let s; try { s = JSON.stringify(o); } catch { s = String(o); } return s.length > n ? s.slice(0, n) + "…[truncated]" : s; };
+const slim = p => { if (!p || typeof p !== "object") return p; const t = p.tool_response !== undefined ? { tool_response: p.tool_response } : { ...p }; if (p.evidence) t.evidence = { as_of: p.evidence.as_of, caveats: p.evidence.caveats }; if (p.noticed_issuer_status) t.noticed_issuer_status = p.noticed_issuer_status; return t; };
+async function call(tool, input, label, signal) {
+  try {
+    const r = await mcp.callTool(SERVER, tool, input, signal ? { signal } : undefined);
+    return { label, data: slim(r && r.payload) };
+  } catch (e) {
+    if (e && e.code === "cancelled") throw e;
+    return { label, data: { error: (e && (e.message || e.code)) || "failed" } };
+  }
+}
+const peersOf = res => { const tr = res && res.data && (res.data.tool_response || res.data); const ps = (tr && tr.peers) || []; return ps.map(p => String(p.peer_ticker || p.ticker || "").toUpperCase()).filter(Boolean); };
+const sqlTk = t => t.replace(/[^A-Z0-9]/g, "");
+
+
+// ---------- formatting ----------
+const MINUS = "−";
+const num = v => { const x = parseFloat(v); return isFinite(x) ? x : null; };
+const aud = v => v == null ? "n/a" : (v < 0 ? MINUS : "") + (Math.abs(v) >= 1e9 ? "A$" + (Math.abs(v) / 1e9).toFixed(2) + "bn" : Math.abs(v) >= 1e6 ? "A$" + (Math.abs(v) / 1e6).toFixed(1) + "m" : Math.abs(v) >= 1e3 ? "A$" + Math.round(Math.abs(v) / 1e3).toLocaleString("en-AU") + "k" : "A$" + Math.round(Math.abs(v)));
+const px = v => v == null ? "n/a" : "A$" + (v >= 1 ? v.toFixed(2) : v.toFixed(3));
+const chg = (now, prev) => (now == null || prev == null || !prev) ? null : (now / prev - 1) * 100;
+const pct1 = v => v == null ? "" : (v > 0 ? "+" : v < 0 ? MINUS : "") + Math.abs(v).toFixed(1) + "%";
+const pcls = v => v == null ? "" : v > 0 ? "up" : v < 0 ? "dn" : "";
+const eh = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const fmtD = s => s ? new Date(String(s).slice(0, 10) + "T00:00:00Z").toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "";
+const fmtS = s => s ? new Date(String(s).slice(0, 10) + "T00:00:00Z").toLocaleDateString("en-AU", { day: "numeric", month: "short", timeZone: "UTC" }) : "";
+const rowsOf = r => (r && r.data && (r.data.rows || (r.data.tool_response && r.data.tool_response.rows))) || [];
+const median = a => { const s = a.slice().sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };
+const mean = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : null;
+const tr_ = r => (r && r.data && r.data.tool_response) || {};
+
+let genId = 0, sumCtrl = null;
+let ctx = null, turns = [], askCtrl = null, analysisCtrl = null, S = null, peerPeriod = "12m", drawn = {};
+const setBusy = b => { $("gen").disabled = b || !mcp || !sample; };
+const status = (msg, err, spin) => { const el = $("sumStatus"); if (!el) return; el.style.display = msg ? "" : "none"; el.className = "res-status" + (err ? " err" : ""); el.innerHTML = (spin ? '<span class="spin"></span>' : "") + "<span></span>"; el.lastChild.textContent = msg || ""; };
+const setActs = on => ["bCopy", "bMd", "bDocx"].forEach(id => { const b = $(id); if (b) b.disabled = !on; });
+
+// ---------- markdown render (safe) ----------
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const inl = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>").replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+function md(src) {
+  const L = src.replace(/\r/g, "").split("\n"); let h = "", i = 0;
+  const cells = r => r.trim().replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+  while (i < L.length) {
+    const l = L[i];
+    if (/^\s*\|/.test(l) && i + 1 < L.length && /^\s*\|?\s*:?-{2,}/.test(L[i + 1])) {
+      const hd = cells(l); i += 2; let rows = "";
+      while (i < L.length && /^\s*\|/.test(L[i])) { rows += "<tr>" + cells(L[i]).map(c => `<td>${inl(c)}</td>`).join("") + "</tr>"; i++; }
+      h += `<div class="tw"><table><thead><tr>${hd.map(c => `<th>${inl(c)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`; continue;
+    }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)/))) { const n = Math.min(m[1].length, 3); h += `<h${n}>${inl(m[2])}</h${n}>`; i++; continue; }
+    if (/^\s*([-*_])\s*\1\s*\1[\s\-*_]*$/.test(l)) { h += "<hr>"; i++; continue; }
+    if (/^\s*[-*]\s+/.test(l)) { h += "<ul>"; while (i < L.length && /^\s*[-*]\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*[-*]\s+/, ""))}</li>`; i++; } h += "</ul>"; continue; }
+    if (/^\s*\d+[.)]\s+/.test(l)) { h += "<ol>"; while (i < L.length && /^\s*\d+[.)]\s+/.test(L[i])) { h += `<li>${inl(L[i].replace(/^\s*\d+[.)]\s+/, ""))}</li>`; i++; } h += "</ol>"; continue; }
+    if (!l.trim()) { i++; continue; }
+    let p = []; while (i < L.length && L[i].trim() && !/^(#{1,4}\s|\s*[-*]\s+|\s*\d+[.)]\s+|\s*\|)/.test(L[i])) { p.push(L[i]); i++; }
+    if (!p.length) { p.push(l); i++; }
+    h += `<p>${inl(p.join(" "))}</p>`;
+  }
+  return h;
+}
+
+
+
+// ---------- building blocks ----------
+const uc = (title, why, lines) => `<div class="uc" role="note" aria-label="${eh(title)}: under construction"><div class="uc-ghost" aria-hidden="true">${Array.from({ length: lines || 5 }, (_, k) => `<i style="width:${55 + ((k * 37) % 42)}%"></i>`).join("")}</div><div class="uc-band"><b>Under construction</b><span>${eh(why)}</span></div></div>`;
+const ucCard = (title, why, lines) => `<div class="cp-c" style="margin-top:14px"><h3>${eh(title)}</h3>${uc(title, why, lines).replace('margin-top:14px', '')}</div>`;
+const card = (h, note, body, id) => `<div class="cp-c"${id ? ` id="${id}"` : ""}><h3>${eh(h)}</h3>${note ? `<p class="cn">${note}</p>` : ""}${body}</div>`;
+const figs = list => `<div class="figs">${list.map(([l, v, n, c]) => `<div class="fig"><h4>${eh(l)}</h4><p class="big ${c || ""}">${eh(v)}</p>${n ? `<p class="note">${eh(n)}</p>` : ""}</div>`).join("")}</div>`;
+const tbl = (cols, rows, cls) => `<div class="ex-wrap tscroll"><table class="ex-table cp-table ${cls || ""}"><thead><tr>${cols.map(c => `<th class="${c[1] || ""}">${eh(c[0])}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+const trow = (cells, cls, attrs) => `<tr class="${cls || ""}"${attrs || ""}>${cells.map(c => `<td class="${c[1] || ""}"${c[2] ? ` style="${c[2]}"` : ""}>${c[0]}</td>`).join("")}</tr>`;
+const chartBox = (id, h) => `<div class="chart" id="${id}" style="min-height:${h || 220}px"></div>`;
+const goBtn = t => `<button type="button" class="linkbtn" data-go="${eh(t)}">${eh(t)}</button>`;
+const NA = '<span class="mut">n/a</span>';
+const UC_CHARTS = '<div class="chart"><p class="mut" style="padding:20px">The chart library did not load in this view.</p></div>';
+
+// ---------- derive ----------
+function derive(R) {
+  const { T, m, lb, wk, c, cq, p, a, r, pe, pcr, ret, pl, hb, dl } = R;
+  const snap = tr_(m).snapshot, cs = tr_(c).snapshot, ident = tr_(c).identity;
+  const d = {};
+  d.partial = !!R.partial; d.T = T; d.snap = snap; d.cs = cs; d.ident = ident;
+  d.name = (snap && snap.company_name) || (cs && cs.company_name) || T;
+  d.asOf = (snap && snap.info_date) || (cs && cs.report_date) || "";
+  d.close = num(snap && snap.close_price);
+  d.mcap = num(snap && snap.market_cap) ?? num(cs && cs.market_cap);
+  d.adjCash = num(cs && cs.adjusted_cash_today_aud);
+  d.burn = num(cs && cs.total_relevant_outgoings_aud);
+  d.runway = num(cs && cs.adjusted_estimated_quarters_funding_confirmed);
+  d.ev = (d.mcap != null && d.adjCash != null) ? d.mcap - d.adjCash : null;
+  d.mcapToCash = (d.mcap != null && d.adjCash) ? d.mcap / d.adjCash : null;
+  const lbr = rowsOf(lb)[0] || {};
+  const now = num(lbr.close_price) ?? d.close;
+  d.c7 = chg(now, num(lbr.close_7d_ago)); d.c91 = chg(now, num(lbr.close_91d_ago)); d.c365 = chg(now, num(lbr.close_365d_ago));
+  d.vol = num(lbr.volume) ?? num(snap && snap.volume); d.avgv = num(lbr.avg_volume_60d); d.vrel = (d.vol != null && d.avgv) ? d.vol / d.avgv : null;
+  d.flags = [];
+  (tr_(c).estimation_context && tr_(c).estimation_context.cash_watch || []).forEach(w => d.flags.push(["urgent", w.flag || String(w)]));
+  if (d.runway != null && d.runway < 2) d.flags.push(["urgent", "Runway under 2 quarters"]);
+  if (cs && cs.base_quarter_end && (Date.now() - new Date(cs.base_quarter_end).getTime()) > 200 * 864e5) d.flags.push(["", "Base quarter more than 6 months old"]);
+  if (ident && ident.redirected) d.flags.push(["", "Renamed: " + (ident.previous_asx_code || "") + " → " + (ident.resolved_asx_code || T)]);
+  if (!d.flags.length) d.flags.push(["ok", "No cash-watch flags"]);
+  const w = rowsOf(wk).map(x => ({ d: String(x.info_date).slice(0, 10), v: num(x.close_price) })).filter(x => x.v != null).reverse();
+  if (lbr.info_date && num(lbr.close_price) != null && (!w.length || w[w.length - 1].d < String(lbr.info_date).slice(0, 10))) w.push({ d: String(lbr.info_date).slice(0, 10), v: num(lbr.close_price) });
+  d.weekly = w;
+  const qs = (((tr_(cq).series || {})[T] || {}).quarters) || [];
+  d.quarters = qs.map(q => { const mu = q.unit === "thousands" ? 1e3 : q.unit === "millions" ? 1e6 : 1; const f = k => q[k] == null ? null : num(q[k]) * mu; return { end: q.quarter_end_date, cash: f("cash_at_quarter_end"), ocf: f("net_operating_cash_flow"), rec: f("receipts_from_customers"), inv: f("net_investing_cash_flow"), fin: f("net_financing_cash_flow"), est: num(q.estimated_quarters_funding) }; }).sort((x, y) => x.end.localeCompare(y.end));
+  d.quarters.forEach((q, i) => { const win = d.quarters.slice(i - 3, i + 1); q.ttm = i >= 3 && win.every(x => x.ocf != null) ? win.reduce((s, x) => s + x.ocf, 0) : null; });
+  d.owns = tr_(r).deals || [];
+  d.peers = peersOf(pe).slice(0, 8); d.peerSource = tr_(pe).peer_source || "";
+  d.peerCash = rowsOf(pcr);
+  d.pret = rowsOf(ret).map(x => { const o = { ticker: x.ticker, name: x.company_name, mcap: num(x.market_cap), now: num(x.close_price), avgv: num(x.avgv) }; ["1m", "3m", "6m", "12m"].forEach(k => { const cp = num(x["c_" + k]), sn = num(x.s_now), sp = num(x["s_" + k]); const split = sn && sp && (sn / sp > 3 || sn / sp < 1 / 3); o[k] = (cp && o.now && !split) ? chg(o.now, cp) : null; }); return o; });
+  d.rel = ["1m", "3m", "6m", "12m"].map(k => { const me = d.pret.find(x => x.ticker === T), pm = median(d.pret.filter(x => x.ticker !== T && x[k] != null).map(x => x[k])); const kv = me ? me[k] : null; return { k, me: kv, med: pm, pts: (kv != null && pm != null) ? kv - pm : null }; });
+  d.pplace = rowsOf(pl).map(x => ({ id: x.deal_id, t: x.asx_code, date: String(x.filing_date).slice(0, 10), disc: num(x.discount_pct), size: num(x.raise_vs_market_cap_pct), p30: num(x.p30), p90: num(x.p90) })).sort((x, y) => y.date.localeCompare(x.date));
+  const pp = d.pplace, m90 = pp.filter(x => x.p90 != null);
+  d.pps = { n: pp.length, issuers: new Set(pp.map(x => x.t)).size, disc: mean(pp.filter(x => x.disc != null).map(x => x.disc)), size: mean(pp.filter(x => x.size != null).map(x => x.size)), p30: mean(pp.filter(x => x.p30 != null).map(x => x.p30)), p90: mean(m90.map(x => x.p90)), above: m90.filter(x => x.p90 > 0).length, matured: m90.length };
+  const hbt = tr_(hb).holders_by_ticker || {};
+  d.notices = []; Object.keys(hbt).forEach(t => ((hbt[t] && hbt[t].holders) || []).forEach(h => d.notices.push({ t, holder: h.beneficial_owner_name || h.party_name || "", vp: num(h.total_voting_power), ev: h.event_type || "", date: String(h.report_date || h.document_issue_date || "").slice(0, 10), pb: h.prime_broker_clause_detected === true || h.prime_broker_clause_detected === "True" || h.prime_broker_clause_detected === 1 })));
+  d.notices.sort((x, y) => y.date.localeCompare(x.date));
+  d.anns = (tr_(a).announcements || []).map(x => ({ id: x.feed_id, date: String(x.date).slice(0, 10), title: x.title || "", prev: x.short_preview || "", ps: x.price_sensitive === 1 || x.price_sensitive === true || x.price_sensitive === "1" })).sort((x, y) => y.date.localeCompare(x.date));
+  const days = rowsOf(dl).map(x => ({ d: String(x.info_date).slice(0, 10), c: num(x.close_price), v: num(x.volume) })).filter(x => x.c != null).sort((x, y) => x.d.localeCompare(y.d));
+  days.forEach((x, i) => { x.vc = i > 0 && x.v > 0 && x.v === days[i - 1].v && x.c === days[i - 1].c ? 0 : (x.v || 0); });
+  d.days = days;
+  d.react = {};
+  d.anns.forEach(an => { const i0 = days.findIndex(x => x.d >= an.date); if (i0 < 1) return; const prev = days[i0 - 1].c, at = k => days[Math.min(days.length - 1, i0 + k)]; const pre = days.slice(Math.max(0, i0 - 20), i0), normal = pre.reduce((s, x) => s + x.vc, 0) / pre.length; const two = days.slice(i0, i0 + 2), vol2 = two.reduce((s, x) => s + x.vc, 0); const move = (at(1).c / prev - 1) * 100, mult = normal > 0 ? vol2 / (2 * normal) : null, busy = mult != null && mult >= 1.5; d.react[an.id] = { move: Math.round(move * 10) / 10, mult: mult == null ? null : Math.round(mult * 10) / 10, rec: move >= 4 ? (busy ? "Bought on volume" : "Drifted up") : move <= -4 ? (busy ? "Sold on volume" : "Drifted down") : busy ? "Traded, price held" : "Little reaction", tone: move >= 4 ? "u" : move <= -4 ? "d" : "f" }; });
+  d.fno = {}; let fn = 0; [...new Set(d.anns.filter(an => d.react[an.id]).map(an => an.date))].sort().forEach(dt => { d.fno[dt] = ++fn; });
+  return d;
+}
+
+// ---------- panels ----------
+function buildPanels(d) {
+  const T = d.T, q = d.quarters, hasD3 = typeof d3 !== "undefined";
+  const lastQ = q[q.length - 1] || {}, prevQ = q[q.length - 2] || {};
+  // Overview
+  $("p-overview").innerHTML = `<p class="take" id="ovTake"></p>` + figs([
+    ["Market value", aud(d.mcap), d.asOf ? "At close on " + fmtD(d.asOf) : ""],
+    ["Last close", px(d.close), d.snap && d.snap.pct_change != null ? "Day " + pct1(num(d.snap.pct_change)) : "", pcls(num(d.snap && d.snap.pct_change))],
+    ["Adjusted cash", aud(d.adjCash), d.cs ? "As at " + fmtD(d.cs.report_date) : ""],
+    ["Market value to cash", d.mcapToCash == null ? "n/a" : d.mcapToCash.toFixed(d.mcapToCash < 2 ? 2 : 1) + "×", "Market value divided by adjusted cash"],
+    ["Runway (confirmed)", d.runway == null ? "n/a" : d.runway.toFixed(1) + " qtrs", d.runway == null ? "" : "About " + Math.round(d.runway * 13) + " weeks"],
+    ["Burn per quarter", d.burn == null ? "n/a" : aud(Math.abs(d.burn)), d.cs ? "Base quarter " + d.cs.base_quarter_end : ""],
+    ["Enterprise value", aud(d.ev), "Market value less adjusted cash"],
+    ["3-month change", pct1(d.c91) || "n/a", d.vrel == null ? "" : "Volume " + d.vrel.toFixed(1) + "× its 60-day norm", pcls(d.c91)]
+  ]) + `<div class="grid2">${card("Cash at each quarter end", "Filed quarterly reports (4C or 5B). Dashed line is today's market value.", chartBox("ch-cash", 230))}${card("Share price, last 12 months", "Weekly closes. Low and high shown under the chart.", chartBox("ch-price", 230))}</div>`
+    + ucCard("Revenue, recurring revenue and profit", "Needs results figures extracted from announcements. Not yet available.", 4)
+    + `<div class="sub-h">Written summary</div><div class="res"><div class="res-head"><h2>Investair summary</h2><div class="res-acts"><button id="bWrite" class="pri" style="display:none">Write summary</button><button id="bCopy" disabled>Copy</button><button id="bMd" disabled>Save as Markdown</button><button id="bDocx" class="pri" disabled>Download Word</button><button id="bStop" style="display:none">Stop</button></div></div><div class="res-status" id="sumStatus" style="display:none"></div><div class="md" id="out"></div></div>`;
+  // Promises, Scorecard, Risks, Relationships
+  renderScoreRisks(d); renderTargets(d); renderAnalysis(d);
+  // Financials
+  const ocfq = q.filter(x => x.ocf != null), burnN = ocfq.filter(x => x.ocf < 0).length;
+  const ttm = ocfq.length >= 4 ? ocfq.slice(-4).reduce((s, x) => s + x.ocf, 0) : null, pttm = ocfq.length >= 8 ? ocfq.slice(-8, -4).reduce((s, x) => s + x.ocf, 0) : null;
+  const worst = ocfq.length ? ocfq.reduce((mn, x) => x.ocf < mn.ocf ? x : mn, ocfq[0]) : null;
+  const qlab = e => e ? new Date(e + "T00:00:00Z").toLocaleDateString("en-AU", { month: "short", year: "numeric", timeZone: "UTC" }) : "";
+  const stat = (t, v, s) => `<div><dt>${eh(t)}</dt><dd class="${pcls(v)}">${v == null ? "n/a" : aud(v)}${s ? `<small>${eh(s)}</small>` : ""}</dd></div>`;
+  const finBody = q.length ? `<dl class="dl">${stat("Operating cash flow, latest quarter", lastQ.ocf, "Quarter to " + qlab(lastQ.end))}${stat("Last 12 months", ttm, "Four quarters to " + qlab(lastQ.end))}${stat("12 months before that", pttm)}${stat("Worst quarter", worst ? worst.ocf : null, worst ? qlab(worst.end) : "")}<div><dt>Quarters burning cash</dt><dd>${burnN} of ${ocfq.length}<small>Net operating outflow</small></dd></div></dl>${chartBox("ch-burn", 300)}` : `<p class="mut">No quarterly filings found.</p>`;
+  const row2 = (lbl, f, fmt) => trow([[lbl], [f(prevQ) == null ? NA : fmt(f(prevQ)), "num"], [f(lastQ) == null ? NA : fmt(f(lastQ)), "num"]]);
+  $("p-financials").innerHTML = `<p class="lede">What the company has filed each quarter. Cash can jump in a quarter for reasons that are not operating performance (a raise, a prepayment or a grant), so read the operating line first.</p>`
+    + card("Cash burn by quarter", "Net operating cash flow from each quarterly report. Bars below zero are quarters that burned cash. The line adds up the last four quarters, which smooths out when annual receipts land.", finBody)
+    + card("Cash runway projection", "Adjusted cash today rolled forward at the last-12-month burn rate (100%). Drag the slider to test a higher or lower burn. Amber marks Investair's confirmed runway; the dots show when each peer's confirmed runway ends.", `<div class="burn-ctl"><label for="burnSl">Burn rate</label><input type="range" id="burnSl" min="25" max="200" step="5" value="${burnPct}" aria-describedby="burnOut"><output id="burnOut" for="burnSl"></output><button type="button" class="linkbtn" id="burnReset">Reset to 100%</button></div>` + chartBox("ch-runway", 330)).replace('class="cp-c"', 'class="cp-c" style="margin-top:14px"')
+    + `<div class="grid2">${card("Last two quarters", "From the quarterly cash flow reports (Appendix 4C or 5B), as filed.", q.length ? tbl([["", ""], [qlab(prevQ.end), "num"], [qlab(lastQ.end), "num"]], [row2("Receipts from customers", x => x.rec, aud), row2("Operating cash flow", x => x.ocf, aud), row2("Investing cash flow", x => x.inv, aud), row2("Financing cash flow", x => x.fin, aud), row2("Cash at quarter end", x => x.cash, aud), row2("Quarters of funding, as filed", x => x.est, v => v.toFixed(1))]) : `<p class="mut">No filings.</p>`)}${ucCard("Year against prior year", "Needs full-year results figures extracted from announcements.", 5)}</div>`
+    + ucCard("Size of the business", "Customers, staff and R&D intensity need figures extracted from announcements.", 4);
+  // Placements
+  const ownRows = d.owns.map(x => trow([[fmtD(x.filing_date || x.pricing_benchmark_date)], [eh(x.issue_types || "")], [x.proceeds == null ? NA : aud(num(x.proceeds)) + (x.proceeds_note ? ` <span class="mut">(${eh(x.proceeds_note)})</span>` : ""), "num"], [x.discount_pct_best == null ? NA : pct1(num(x.discount_pct_best)), "num"], [x.dap_performance_post_30d_pct == null ? NA : pct1(num(x.dap_performance_post_30d_pct)), "num " + pcls(num(x.dap_performance_post_30d_pct))], [x.dap_performance_post_90d_pct == null ? NA : pct1(num(x.dap_performance_post_90d_pct)), "num " + pcls(num(x.dap_performance_post_90d_pct))]]));
+  const pps = d.pps, impl = (d.mcap != null && pps.size != null) ? d.mcap * pps.size / 100 : null;
+  const peerRows = d.pplace.map(x => trow([[fmtD(x.date)], [goBtn(x.t)], [x.disc == null ? NA : pct1(x.disc), "num"], [x.size == null ? NA : x.size.toFixed(1) + "%", "num"], [x.p30 == null ? "" : pct1(x.p30), "num " + pcls(x.p30)], [x.p90 == null ? "" : pct1(x.p90), "num " + pcls(x.p90)]]));
+  $("p-placements").innerHTML = `<p class="lede">Capital raises from Investair's deal book (placements above A$0.5m), as at ${eh(fmtD(d.asOf || new Date().toISOString()))}. Performance compares the share price 30 and 90 trading days after a raise with its diluted adjusted price (DAP), so a positive number means placees are in profit. A negative discount is a price below the last close.</p>`
+    + card(eh(T) + " placements", "", ownRows.length ? tbl([["Date"], ["Type"], ["Proceeds", "num"], ["Discount", "num"], ["30 days", "num"], ["90 days", "num"]], ownRows) : `<p class="big" style="font:700 20px var(--display);margin:0">None on record</p><p class="cn">${eh(d.name)} has no placements above A$0.5m in Investair's deal book. The peer placements below show what a raise has cost companies like it.</p>`)
+    + `<div class="sub-h">What placements cost ${eh(T)}'s peers</div>`
+    + (pps.n ? figs([["Peer placements", String(pps.n), "By " + pps.issuers + " of the peers, last 12 months"], ["Average discount", pct1(pps.disc) || "n/a", "To the last close before the raise"], ["Average size", pps.size == null ? "n/a" : pps.size.toFixed(1) + "%", "Of the issuer's market value"], ["30 days after", pct1(pps.p30) || "n/a", "Average share price vs DAP", pcls(pps.p30)], ["90 days after", pct1(pps.p90) || "n/a", "Average share price vs DAP", pcls(pps.p90)], ["Above DAP at 90 days", pps.matured ? pps.above + " of " + pps.matured : "n/a", "Placements with a matured 90-day result"]])
+      + (impl != null ? `<p class="take" style="margin-top:16px">At the peer average, a ${eh(T)} placement would raise about ${aud(impl)} (${pps.size.toFixed(1)}% of its ${aud(d.mcap)} market value) at a discount of about ${pps.disc == null ? "n/a" : Math.abs(pps.disc).toFixed(0) + "%"}.</p>` : "")
+      + `<div class="grid2">${card("Discount against performance 90 days later", "Each dot is a peer placement with a matured 90-day result.", chartBox("ch-scatter", 280))}${card("Peer placements", "Newest first. Blank performance means 30 or 90 trading days have not passed yet. The data service returns a bounded set of the most recent deals.", tbl([["Date"], ["Peer"], ["Discount", "num"], ["Size", "num"], ["30 days", "num"], ["90 days", "num"]], peerRows))}</div>${card("Placement discounts by deal", "Each column is one peer placement, oldest to newest. Below zero is a discount to the last close; the dashed line is the peer average.", chartBox("ch-disc", 300))}`.replace("class=\"cp-c\"", "class=\"cp-c\" style=\"margin-top:14px\"")
+      : `<div class="cp-c"><p class="mut">No peer placements found for the last 12 months.</p></div>`);
+  // Peers
+  const relFig = d.rel.map(x => [{ "1m": "1 month", "3m": "3 months", "6m": "6 months", "12m": "12 months" }[x.k], x.pts == null ? "n/a" : (x.pts > 0 ? "+" : x.pts < 0 ? MINUS : "") + Math.abs(x.pts).toFixed(1) + " pts", `${eh(T)} ${x.me == null ? "n/a" : pct1(x.me)} against a peer median of ${x.med == null ? "n/a" : pct1(x.med)}`, pcls(x.pts)]);
+  const heat = v => { if (v == null) return ["", "num"]; const a = Math.min(1, Math.abs(v) / 60), tone = v >= 0 ? "26,127,142" : "239,68,68"; return [pct1(v), "num heat " + pcls(v), `background:rgba(${tone},${(0.05 + a * 0.2).toFixed(2)})`]; };
+  const retRows = d.pret.slice().sort((x, y) => x.ticker === T ? -1 : y.ticker === T ? 1 : (y.mcap || 0) - (x.mcap || 0)).map(x => trow([[x.ticker === T ? eh(x.ticker) : goBtn(x.ticker)], [eh(x.name)], [x.mcap == null ? NA : aud(x.mcap), "num"], heat(x["1m"]), heat(x["3m"]), heat(x["6m"]), heat(x["12m"])], x.ticker === T ? "self" : ""));
+  const act = d.pret.map(x => { const n = d.notices.filter(y => y.t === x.ticker); const top = n.filter(y => y.vp != null).sort((a, b) => b.vp - a.vp)[0]; return { t: x.ticker, n: n.length, top: top ? top.holder + " (" + top.vp.toFixed(1) + "%)" : "" }; }).sort((x, y) => x.t === T ? -1 : y.t === T ? 1 : y.n - x.n);
+  const actRows = act.map(x => trow([[x.t === T ? eh(x.t) : goBtn(x.t)], [String(x.n), "num"], [eh(x.top || (x.t === T ? "No notices in 12 months" : "")), ""]], x.t === T ? "self" : ""));
+  const noticeRows = d.notices.slice(0, 80).map(x => trow([[fmtD(x.date)], [x.t === T ? eh(x.t) : goBtn(x.t)], [(x.pb ? '<span class="badge">Prime broker</span>' : "") + eh(x.holder)], [eh(String(x.ev).replace(/_/g, " "))], [x.vp == null ? NA : x.vp.toFixed(2) + "%", "num"]]));
+  $("p-peers").innerHTML = `<p class="lede">Share price change for ${eh(d.name)} and ${Math.max(0, d.pret.length - 1)} companies Investair groups with it${d.peerSource ? " (" + eh(d.peerSource.replace(/_/g, " ")) + ")" : ""}, from daily closing prices to ${eh(fmtD(d.asOf))}. Price only: no dividends, and periods spanning a share consolidation are left blank.</p>`
+    + `<div class="sub-h">${eh(T)} against the peer median</div><p class="lede">Percentage points ahead of (or behind) the middle peer over each period.</p>` + figs(relFig)
+    + `<div class="cp-c" style="margin-top:16px"><div class="chead"><div><h3>Share price change by company</h3><p class="cn">${eh(T)} highlighted; the dashed line is the peer median.</p></div><div class="seg" role="group" aria-label="Period" id="seg">${["1m", "3m", "6m", "12m"].map(k => `<button type="button" data-p="${k}" aria-pressed="${k === peerPeriod}">${k.replace("m", "M")}</button>`).join("")}</div></div>${chartBox("ch-peerperf", 320)}</div>`
+    + card("All periods", "Share price change to the latest trading day.", tbl([["Code"], ["Company"], ["Market value", "num"], ["1M", "num"], ["3M", "num"], ["6M", "num"], ["12M", "num"]], retRows)).replace('class="cp-c"', 'class="cp-c" style="margin-top:14px"')
+    + `<div class="sub-h">Substantial holder activity</div><p class="lede">Notices of becoming, changing or ceasing to be a substantial holder (5% or more) over the last 12 months, from Investair's substantial holding data.</p>`
+    + `<div class="grid2">${card("Activity by company", "Count of notices in the last 12 months (up to 8 per company).", tbl([["Code"], ["Notices", "num"], ["Largest disclosed holder"]], actRows))}${card("Every notice", "Newest first. A prime-broker badge means the filing names a prime-broker arrangement, so the holding may be lent or used in short positions.", noticeRows.length ? tbl([["Date"], ["Code"], ["Holder"], ["Event"], ["Voting power", "num"]], noticeRows) : `<p class="mut">No notices in the last 12 months.</p>`)}</div>`;
+  // Announcements
+  const annRows = d.anns.map(x => { const rc = d.react[x.id]; const title = x.title || (x.prev ? x.prev.replace(/\s+/g, " ").slice(0, 80) + (x.prev.length > 80 ? "…" : "") : "(no title)"); const said = x.prev ? x.prev.replace(/\s+/g, " ").slice(0, 170) + (x.prev.length > 170 ? "…" : "") : ""; return trow([[rc ? `<span class="badge">${d.fno[x.date]}</span>` : ""], [fmtD(x.date), "mut"], [(x.ps ? '<span class="badge">Price sensitive</span>' : "") + `<strong>${eh(title)}</strong>`], [eh(said)], [rc ? pct1(rc.move) : "", "num " + pcls(rc ? rc.move : null)], [rc && rc.mult != null ? rc.mult.toFixed(1) + "×" : "", "num"], [rc ? `<span class="rec ${rc.tone}">${eh(rc.rec)}</span>` : ""]]); });
+  $("p-announcements").innerHTML = `<p class="lede">Each announcement from the last 90 days with a short summary, alongside how the market took it: the share price move and trading volume over the first two trading days. Investair's sentiment score is under construction.</p>`
+    + card("Share price and volume around each announcement", "Daily close (line) and shares traded (bars); numbered flags mark announcements, coloured by how the market reacted. Hover, tap or focus a flag for details; the number matches the # column below.", chartBox("ch-ann", 330)).replace('class="cp-c"', 'class="cp-c" style="margin-bottom:14px"')
+    + card("Announcements", "Newest first. Price, 2 days: close on the second trading day from the announcement against the last close before it. Volume vs normal: shares traded over those two days against the average of the 20 trading days before (1.0× is a normal two days). Moves under 4% count as no change. Repeated identical daily prints are counted once.", annRows.length ? tbl([["#"], ["Date"], ["Announcement"], ["What it said"], ["Price, 2 days", "num"], ["Volume vs normal", "num"], ["Market reception"]], annRows) : `<p class="mut">No announcements in the last 90 days.</p>`);
+  // peer period buttons
+  if (d.partial) ["p-placements", "p-peers", "p-scorecard", "p-risks", "p-targets"].forEach(id => { $(id).innerHTML = LOADING; });
+  const seg = $("seg"); if (seg) seg.onclick = e => { const b = e.target.closest("button"); if (!b) return; peerPeriod = b.dataset.p; seg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false")); drawPeerPerf(); };
+}
+
+// ---------- who to target (calculated from the register) ----------
+let tgtMin = 2;
+const normName = s => String(s || "").toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\b(pty|ltd|limited|inc|llc|lp|plc|corp|corporation|the|co|company)\b/g, " ").replace(/\s+/g, " ").trim();
+function targets(d) {
+  const T = d.T, by = new Map(); let pbN = 0;
+  d.notices.forEach(n => { if (!n.holder) return; const k = normName(n.holder) || n.holder.toLowerCase(); let h = by.get(k); if (!h) by.set(k, h = { names: new Map(), pos: new Map() }); h.names.set(n.holder, (h.names.get(n.holder) || 0) + 1); const cur = h.pos.get(n.t); if (!cur || n.date > cur.date) h.pos.set(n.t, n); });
+  const ceased = n => /ceas/i.test(n.ev || ""), out = [];
+  by.forEach(h => {
+    const own = h.pos.get(T), held = [...h.pos.entries()].filter(([t, n]) => t !== T && !ceased(n) && n.vp != null), peers = held.filter(([, n]) => !n.pb);
+    pbN += held.length - peers.length;
+    if (!peers.length || (own && !ceased(own))) return;
+    out.push({ name: [...h.names.entries()].sort((a, b) => b[1] - a[1])[0][0], peers: peers.map(([t, n]) => ({ t, vp: n.vp, date: n.date })).sort((a, b) => b.vp - a.vp), maxVp: Math.max(...peers.map(([, n]) => n.vp)), latest: peers.map(([, n]) => n.date).sort().pop(), former: own ? own.date : "" });
+  });
+  out.sort((a, b) => b.peers.length - a.peers.length || b.maxVp - a.maxVp);
+  return { rows: out, pbN };
+}
+function renderTargets(d) {
+  const T = d.T, { rows, pbN } = targets(d), n2 = rows.filter(r => r.peers.length >= 2).length, sel = rows.filter(r => r.peers.length >= tgtMin);
+  const body = sel.length ? tbl([["Investor"], ["Peers held"], ["Largest stake", "num"], ["Latest notice"], ["On " + T + " register"]], sel.slice(0, 40).map(r => trow([[`<strong>${eh(r.name)}</strong>`], [`<strong>${r.peers.length}</strong> · ` + r.peers.map(p => `${goBtn(p.t)} <span class="mut">${p.vp.toFixed(1)}%</span>`).join(", ")], [r.maxVp.toFixed(1) + "%", "num"], [fmtD(r.latest), "mut"], [r.former ? `<span class="rec w">Exited ${eh(fmtD(r.former))}</span>` : `<span class="rec u">Not on register</span>`]])))
+    : `<div class="cp-c"><p class="mut">${d.notices.length ? "No investor holds " + (tgtMin > 1 ? "two or more" : "any") + " of the peers without also being on the " + eh(T) + " register in the last 12 months." : "No substantial holder notices were found for the company or its peers in the last 12 months."}</p></div>`;
+  $("p-targets").innerHTML = `<p class="lede">Investors that disclosed a substantial holding (5% or more) in ${eh(T)}'s peers over the last 12 months but are not on ${eh(T)}'s register. They already back companies like it, so they are the natural first calls for a raise or roadshow.</p>`
+    + `<div class="chead" style="margin-bottom:12px"><div class="seg" role="group" aria-label="Minimum peers held" id="tseg"><button type="button" data-m="2" aria-pressed="${tgtMin === 2}">In 2 or more peers (${n2})</button><button type="button" data-m="1" aria-pressed="${tgtMin === 1}">In 1 or more (${rows.length})</button></div>${sel.length ? '<button type="button" class="linkbtn" data-copy="1">Copy list</button>' : ""}<span class="mut" id="tgMsg" style="font-size:13px"></span></div>`
+    + body
+    + `<p class="method">Latest notice per investor and company; investors that have since ceased to be substantial in a peer are not counted for that peer. Notices naming a prime-broker arrangement${pbN ? " (" + pbN + " excluded here)" : ""} are treated as lending or collateral, not as a view. Only holdings of 5% or more are disclosed, and the data service returns up to 8 notices per company, so smaller institutions and older holders will not appear. Names are matched after removing Pty, Ltd and similar endings.</p>`;
+}
+$("p-targets").addEventListener("click", async e => {
+  const mb = e.target.closest("[data-m]"); if (mb && S) { tgtMin = +mb.dataset.m; renderTargets(S); return; }
+  if (e.target.closest("[data-copy]") && S) {
+    const { rows } = targets(S), sel = rows.filter(r => r.peers.length >= tgtMin);
+    const tsv = ["Investor\tPeers held\tPeer holdings\tLargest stake\tLatest notice\tStatus"].concat(sel.map(r => [r.name, r.peers.length, r.peers.map(p => p.t + " " + p.vp.toFixed(1) + "%").join("; "), r.maxVp.toFixed(1) + "%", r.latest, r.former ? "Exited " + r.former : "Not on register"].join("\t"))).join("\n");
+    const msg = $("tgMsg"); try { await navigator.clipboard.writeText(tsv); msg.textContent = "Copied " + sel.length + " rows."; } catch { msg.textContent = "Copy isn't available here."; }
+  }
+});
+
+// ---------- scorecard and risks (calculated by rule) ----------
+const scoreBar = n => n == null ? '<span class="mut">Not rated</span>' : `<span class="score" aria-label="${n} out of 5"><span class="sb">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span><b>${n}</b></span>`;
+const trendCell = t => !t ? "" : `<span class="${t.good === true ? "up" : t.good === false ? "dn" : "mut"}">${t.dir === "up" ? "↑" : t.dir === "down" ? "↓" : "→"} ${eh(t.text)}</span>`;
+function avgDaily(d) { return (d.avgv != null && d.close != null) ? d.avgv * d.close : null; }
+function weeklyVol(d) { const w = d.weekly; if (w.length < 12) return null; const r = []; for (let i = 1; i < w.length; i++) if (w[i - 1].v > 0 && w[i].v > 0) r.push(Math.log(w[i].v / w[i - 1].v)); if (r.length < 10) return null; const m = mean(r); return Math.sqrt(r.reduce((s, x) => s + (x - m) * (x - m), 0) / (r.length - 1)) * Math.sqrt(52) * 100; }
+function scorecard(d) {
+  const q = d.quarters, last = q[q.length - 1], prev = q[q.length - 2], withO = q.filter(x => x.ocf != null);
+  const age = d.cs && d.cs.base_quarter_end ? (Date.now() - new Date(d.cs.base_quarter_end).getTime()) / 864e5 : null;
+  const conf = age == null ? "Low" : age < 120 ? "High" : age < 200 ? "Medium" : "Low";
+  const rows = [];
+  // 1 funding runway
+  const rw = d.runway; let s1 = null; if (rw != null) s1 = rw < 1 ? 1 : rw < 2 ? 2 : rw < 3 ? 3 : rw < 5 ? 4 : 5;
+  const cc = last && prev ? chg(last.cash, prev.cash) : null;
+  rows.push({ dim: "Funding runway", score: s1, conf, trend: cc == null ? null : { dir: cc > 10 ? "up" : cc < -10 ? "down" : "flat", good: cc > 10 ? true : cc < -10 ? false : null, text: "Filed cash " + pct1(cc) + " on the quarter" }, why: rw == null ? "No confirmed runway estimate." : `Investair's confirmed runway is ${rw.toFixed(1)} quarters (about ${Math.round(rw * 13)} weeks) on adjusted cash of ${aud(d.adjCash)} and burn of ${d.burn == null ? "n/a" : aud(Math.abs(d.burn))} a quarter.${d.flags.filter(f => f[0] === "urgent" && !/Runway/.test(f[1])).length ? " Flag: " + d.flags.filter(f => f[0] === "urgent" && !/Runway/.test(f[1])).map(f => f[1]).join("; ") + "." : ""}` });
+  // 2 burn trend
+  const o4 = withO.slice(-4), p4 = withO.slice(-8, -4); const ttm = o4.length === 4 ? o4.reduce((s, x) => s + x.ocf, 0) : null, pttm = p4.length === 4 ? p4.reduce((s, x) => s + x.ocf, 0) : null;
+  let s2 = null, w2 = "Fewer than four quarterly filings, so the trend cannot be rated.";
+  if (ttm != null) { if (ttm >= 0) { s2 = 5; w2 = `Operating cash flow was positive over the last 12 months (${aud(ttm)}).`; } else if (pttm == null) { s2 = null; w2 = `Operating outflow of ${aud(Math.abs(ttm))} over the last 12 months; there is no earlier 12 months to compare.`; } else if (pttm >= 0) { s2 = 1; w2 = `Operating cash flow swung from ${aud(pttm)} to ${aud(ttm)} year on year.`; } else { const r = ttm / pttm; s2 = r < 0.7 ? 5 : r < 0.9 ? 4 : r < 1.1 ? 3 : r < 1.4 ? 2 : 1; w2 = `Operating outflow over the last 12 months was ${aud(Math.abs(ttm))}, against ${aud(Math.abs(pttm))} the 12 months before (${r < 1 ? "down" : "up"} ${Math.abs((r - 1) * 100).toFixed(0)}%).`; } }
+  const lq = withO[withO.length - 1];
+  rows.push({ dim: "Cash burn trend", score: s2, conf: q.length >= 8 ? conf : "Low", trend: lq && ttm != null ? { dir: lq.ocf > ttm / 4 + Math.abs(ttm / 4) * 0.1 ? "up" : lq.ocf < ttm / 4 - Math.abs(ttm / 4) * 0.1 ? "down" : "flat", good: lq.ocf > ttm / 4 + Math.abs(ttm / 4) * 0.1 ? true : lq.ocf < ttm / 4 - Math.abs(ttm / 4) * 0.1 ? false : null, text: "Latest quarter " + aud(lq.ocf) + " against a 12-month average of " + aud(ttm / 4) } : null, why: w2 });
+  // 3 market value to cash
+  const mc = d.mcapToCash; const s3 = mc == null ? null : mc < 1 ? 5 : mc < 2 ? 4 : mc < 5 ? 3 : mc < 15 ? 2 : 1;
+  rows.push({ dim: "Market value against cash", score: s3, conf: d.adjCash ? conf : "Low", trend: d.c91 == null ? null : { dir: d.c91 > 5 ? "up" : d.c91 < -5 ? "down" : "flat", good: null, text: "Share price " + pct1(d.c91) + " over 3 months" }, why: mc == null ? "Needs both market value and adjusted cash." : `The market values the company at ${mc.toFixed(mc < 2 ? 2 : 1)}× its adjusted cash. A low multiple means more of the value is backed by cash; a high one means the market is paying for the business and its prospects.` });
+  // 4 momentum vs peers
+  const rl = d.rel.filter(x => (x.k === "3m" || x.k === "12m") && x.pts != null); const mp = rl.length ? mean(rl.map(x => x.pts)) : null; const s4 = mp == null ? null : mp > 20 ? 5 : mp > 5 ? 4 : mp > -5 ? 3 : mp > -20 ? 2 : 1;
+  const r1 = d.rel.find(x => x.k === "1m");
+  rows.push({ dim: "Share price against peers", score: s4, conf: d.pret.length > 3 ? "High" : "Medium", trend: r1 && r1.pts != null ? { dir: r1.pts > 3 ? "up" : r1.pts < -3 ? "down" : "flat", good: r1.pts > 3 ? true : r1.pts < -3 ? false : null, text: "1 month " + (r1.pts > 0 ? "+" : "") + r1.pts.toFixed(1) + " pts vs peer median" } : null, why: mp == null ? "Peer price changes are not available." : `Average gap to the peer median across 3 and 12 months is ${(mp > 0 ? "+" : "") + mp.toFixed(1)} percentage points (${rl.map(x => x.k.replace("m", " month") + " " + (x.pts > 0 ? "+" : "") + x.pts.toFixed(1)).join(", ")}). Price only; periods with a share consolidation are left out.` });
+  // 5 liquidity
+  const adv = avgDaily(d); const s5 = adv == null ? null : adv >= 1e6 ? 5 : adv >= 2.5e5 ? 4 : adv >= 1e5 ? 3 : adv >= 2.5e4 ? 2 : 1;
+  rows.push({ dim: "Trading liquidity", score: s5, conf: "Medium", trend: d.vrel == null ? null : { dir: d.vrel > 1.2 ? "up" : d.vrel < 0.8 ? "down" : "flat", good: null, text: "Latest volume " + d.vrel.toFixed(1) + "× its 60-day norm" }, why: adv == null ? "No volume history." : `Average daily turnover over 60 days is about ${aud(adv)} (average volume × latest close). Thinly traded stocks are harder to build or exit a position in.` });
+  // Rate by rank within the peer group where there are enough peers with data (at least three); otherwise keep the fixed rule.
+  const peerRank = (me, others, hi) => { const o = others.filter(v => v != null && isFinite(v)); if (me == null || o.length < 3) return null; const worse = o.filter(v => hi ? v < me : v > me).length, ties = o.filter(v => v === me).length, better = o.filter(v => hi ? v > me : v < me).length; return { score: Math.min(5, 1 + Math.floor(((worse + ties / 2) / o.length) * 5)), rank: better + 1, n: o.length + 1 }; };
+  const pc = d.peerCash.filter(x => x.asx_code !== d.T), meC = d.peerCash.find(x => x.asx_code === d.T) || {}, meP = d.pret.find(x => x.ticker === d.T), peerP = d.pret.filter(x => x.ticker !== d.T);
+  const m2c = x => (num(x.mcap_m) != null && num(x.adj_cash_m) > 0) ? num(x.mcap_m) / num(x.adj_cash_m) : null, mom = x => { const v = [x["3m"], x["12m"]].filter(y => y != null); return v.length ? mean(v) : null; }, turn = x => (x.avgv != null && x.now != null) ? x.avgv * x.now : null;
+  const apply = (i, pr, what) => { rows[i].why += pr ? ` Rated by rank: ${pr.rank} of ${pr.n} in the peer group${what}.` : " Rated by a fixed rule: too few peers with data to rank."; if (pr) rows[i].score = pr.score; };
+  apply(0, peerRank(num(meC.runway_q) ?? d.runway, pc.map(x => num(x.runway_q)), true), ", longest confirmed runway first");
+  rows[1].why += " Compared with its own history, as peers' quarterly filings are not on this page.";
+  apply(2, peerRank(m2c(meC) ?? d.mcapToCash, pc.map(m2c), false), ", lowest market value to cash first");
+  apply(3, peerRank(meP ? mom(meP) : null, peerP.map(mom), true), ", on the average of 3 and 12 month price change");
+  apply(4, peerRank(meP && turn(meP) != null ? turn(meP) : adv, peerP.map(turn), true), ", on average daily turnover");
+  const sc = rows.filter(r => r.score != null).map(r => r.score);
+  return { rows, avg: sc.length ? mean(sc) : null, n: sc.length };
+}
+function risks(d) {
+  const out = [], q = d.quarters, withO = q.filter(x => x.ocf != null), o4 = withO.slice(-4), ttm = o4.length === 4 ? o4.reduce((s, x) => s + x.ocf, 0) : null;
+  const add = (cat, sev, what, basis) => out.push({ cat, sev, what, basis: basis || "Derived from Investair data" });
+  if (d.runway != null) add("Funding", d.runway < 2 ? "high" : d.runway < 3 ? "medium" : "low", `Confirmed runway is ${d.runway.toFixed(1)} quarters (about ${Math.round(d.runway * 13)} weeks) on adjusted cash of ${aud(d.adjCash)}.`);
+  d.flags.filter(f => f[0] === "urgent" && !/Runway/.test(f[1])).forEach(f => add("Funding", "medium", f[1] + ". The cash figure can change when this settles.", "Reported by Investair"));
+  if (ttm != null && ttm < 0 && d.adjCash != null) { const yrs = d.adjCash / Math.abs(ttm); add("Burn against cash", yrs < 1 ? "high" : yrs < 2 ? "medium" : "low", `Operating outflow over the last 12 months was ${aud(Math.abs(ttm))}, so adjusted cash covers about ${yrs.toFixed(1)} years at that rate.`); }
+  if (d.pps && d.pps.n && d.runway != null && d.runway < 4) add("Dilution", d.runway < 2 ? "high" : "medium", `With a short runway a raise is likely. Peers raised at an average discount of ${d.pps.disc == null ? "n/a" : Math.abs(d.pps.disc).toFixed(0) + "%"} and about ${d.pps.size == null ? "n/a" : d.pps.size.toFixed(0) + "%"} of market value${d.pps.p90 != null ? ", with an average 90-day result of " + pct1(d.pps.p90) + " against the raise price" : ""}.`);
+  const age = d.cs && d.cs.base_quarter_end ? (Date.now() - new Date(d.cs.base_quarter_end).getTime()) / 864e5 : null;
+  if (age != null && age > 120) add("Data age", age > 200 ? "medium" : "low", `The latest filed quarter ended ${fmtD(d.cs.base_quarter_end)} (${Math.round(age)} days ago). Cash and runway are rolled forward from it, so treat them as estimates until the next quarterly.`);
+  const vol = weeklyVol(d); if (vol != null) add("Price volatility", vol > 100 ? "high" : vol > 60 ? "medium" : "low", `Annualised volatility of weekly closes over the last year is about ${vol.toFixed(0)}%.`);
+  const adv = avgDaily(d); if (adv != null) add("Liquidity", adv < 5e4 ? "high" : adv < 2.5e5 ? "medium" : "low", `Average daily turnover is about ${aud(adv)}.`);
+  const mine = d.notices.filter(n => n.t === d.T), pb = mine.filter(n => n.pb); if (pb.length) add("Register", "medium", `${pb.length} substantial holder notice${pb.length > 1 ? "s" : ""} name a prime-broker arrangement (${[...new Set(pb.map(n => n.holder))].slice(0, 3).join(", ")}), so those holdings may be lent or used in short positions.`, "Reported by Investair");
+  const top = mine.filter(n => n.vp != null).sort((a, b) => b.vp - a.vp)[0]; if (top && top.vp >= 20) add("Register", "medium", `${top.holder} holds ${top.vp.toFixed(1)}% voting power, so a sale or a change in its intentions could move the stock.`);
+  const r12 = d.rel.find(x => x.k === "12m"); if (r12 && r12.pts != null && r12.pts < -30) add("Relative weakness", "medium", `The share price is ${Math.abs(r12.pts).toFixed(0)} percentage points behind the peer median over 12 months.`);
+  const rank = { high: 3, medium: 2, low: 1 }; out.sort((a, b) => rank[b.sev] - rank[a.sev]);
+  return out;
+}
+function renderScoreRisks(d) {
+  const sc = scorecard(d), rk = risks(d);
+  $("p-scorecard").innerHTML = `<p class="lede">${sc.avg == null ? "Not enough data to rate." : `Average rating <b>${sc.avg.toFixed(1)}</b> out of 5 across ${sc.n} dimensions.`} Each dimension is rated 1 (weakest) to 5 (strongest) by where the company ranks in its peer group on that measure, using the Investair data on this page (a fixed rule where there are too few peers). It describes the company's position; it is not a recommendation.</p>`
+    + tbl([["Dimension"], ["Rating"], ["Trend"], ["Confidence"], ["Why"]], sc.rows.map(r => trow([[`<strong>${eh(r.dim)}</strong>`], [scoreBar(r.score)], [trendCell(r.trend)], [eh(r.conf), "mut"], [eh(r.why)]])))
+    + `<details class="how"><summary>How each rating is calculated</summary><ul><li><b>Peer rank:</b> funding runway, market value against cash, share price and liquidity are ranked against the peer group on this page (needs at least three peers with data). Top fifth of the group = 5, next fifth = 4, and so on down to 1. Confirmed runway: longest is best. Market value to cash: lowest is best. Share price: average of the 3 and 12 month change, highest is best. Liquidity: average daily turnover over 60 days, highest is best.</li><li><b>Cash burn trend:</b> operating cash flow over the last 12 months against the 12 months before, so it is compared with the company\'s own history. Burn down more than 30% = 5, down 10–30% = 4, within 10% = 3, up 10–40% = 2, worse = 1. Positive = 5.</li><li><b>Fixed rule fallback:</b> where fewer than three peers have data, runway uses under 1 quarter = 1, under 2 = 2, under 3 = 3, under 5 = 4, 5 or more = 5; market value to cash uses under 1× = 5, under 2× = 4, under 5× = 3, under 15× = 2, above = 1; share price uses the gap to the peer median; liquidity uses A$1m or more = 5, A$250k = 4, A$100k = 3, A$25k = 2, below = 1.</li><li><b>Confidence</b> falls as the latest filed quarter gets older (under 120 days High, under 200 Medium, otherwise Low).</li></ul></details>`;
+  const cnt = s => rk.filter(r => r.sev === s).length;
+  $("p-risks").innerHTML = `<p class="lede">Risks Investair can see in the data on this page, ordered by severity. <b>${cnt("high")}</b> high, <b>${cnt("medium")}</b> medium, <b>${cnt("low")}</b> low. Basis says whether Investair reports it or derived it from filed and market data. Risks the company discloses in announcements are not listed here yet.</p>`
+    + (rk.length ? tbl([["Risk"], ["Severity"], ["What the data shows"], ["Basis"]], rk.map(r => trow([[`<strong>${eh(r.cat)}</strong>`], [`<span class="sev ${r.sev}">${r.sev}</span>`], [eh(r.what)], [eh(r.basis), "mut"]]))) : `<div class="cp-c"><p class="mut">No risks triggered by the rules.</p></div>`)
+    + `<details class="how"><summary>How risks are derived</summary><ul><li>Funding: runway under 2 quarters = high, under 3 = medium. Cash-watch items Investair reports (for example a rights issue yet to settle) are listed as medium.</li><li>Burn against cash: years of cash at the last 12 months' operating outflow. Under 1 = high, under 2 = medium.</li><li>Dilution: shown when runway is under 4 quarters, using what peers' recent placements cost.</li><li>Price volatility: annualised, from weekly closes. Over 100% = high, over 60% = medium.</li><li>Liquidity: average daily turnover under A$50k = high, under A$250k = medium.</li><li>Register: prime-broker notices, and any single holder at 20% or more.</li></ul></details>`;
+}
+
+// ---------- announcement analysis (drafted by Claude on request) ----------
+const PST = { delivered: ["Delivered", "u"], on_track: ["On track", "f"], pending: ["Pending", "f"], moved: ["Target moved", "w"], overdue: ["Overdue", "d"], unclear: ["Unclear", "f"] };
+const ctaCard = (what) => `<div class="cp-c cta"><h3>Analyse announcements</h3><p class="cn">Claude reads the summaries of up to 60 announcements from the last 12 months and drafts ${what}. It takes about a minute and uses your Claude allowance. These are drafts built from short summaries, so check the source announcement before relying on one.</p><div class="row"><button class="gen" data-act="analyse" id="anBtn">Analyse announcements</button><span class="mut" id="anStatus" role="status"></span></div></div>`;
+function renderAnalysis(d) {
+  const A = d.analysis;
+  if (!A) { $("p-promises").innerHTML = `<p class="lede">Each commitment the company made, with the target date and whether it has been delivered, moved or is overdue.</p>` + ctaCard("the company's commitments and target dates"); $("p-relationships").innerHTML = `<p class="lede">Customers, partners and other counterparties named in announcements, and the deals and strategy the company has stated.</p>` + ctaCard("the counterparties it names and the deals it has stated"); return; }
+  const today = todayISO(), note = `<p class="mut" style="font-size:13px">Drafted by Claude on ${eh(fmtD(A.asOf))} from ${A.used} announcement summaries${A.empty ? ` (${A.empty} more had no summary text)` : ""}. Check the source announcement. <button class="linkbtn" data-act="analyse">Run again</button> <span id="anStatus" class="mut" role="status"></span></p>`;
+  const P = A.promises.slice().sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999"));
+  const by = k => P.filter(p => p.status === k).length;
+  const soon = P.filter(p => p.status !== "delivered" && p.due && p.due <= new Date(Date.now() + 120 * 864e5).toISOString().slice(0, 10));
+  $("p-promises").innerHTML = `<p class="lede">Each commitment the company made, with the target date and whether it has been delivered, moved or is overdue.</p>` + note
+    + (P.length ? figs([["Commitments found", String(P.length), "In the last 12 months"], ["Delivered", String(by("delivered")), "", by("delivered") ? "up" : ""], ["On track or pending", String(by("on_track") + by("pending")), ""], ["Overdue or moved", String(by("overdue") + by("moved")), "", by("overdue") + by("moved") ? "dn" : ""]])
+      + (soon.length ? `<div class="sub-h">Due soon and overdue</div>` + tbl([["Due"], ["Commitment"], ["Status"]], soon.map(p => trow([[eh(fmtD(p.due)), p.due < today ? "dn" : ""], [eh(p.statement)], [`<span class="rec ${(PST[p.status] || PST.unclear)[1]}">${(PST[p.status] || PST.unclear)[0]}</span>`]]))) : "")
+      + `<div class="sub-h">All commitments</div>` + tbl([["Stated"], ["Commitment"], ["Target"], ["Status"], ["Evidence"]], P.map(p => trow([[eh(fmtD(p.stated)), "mut"], [`<strong>${eh(p.statement)}</strong>${p.note ? `<div class="mut" style="font-size:12.5px">${eh(p.note)}</div>` : ""}`], [eh(p.target || (p.due ? fmtD(p.due) : "No date given"))], [`<span class="rec ${(PST[p.status] || PST.unclear)[1]}">${(PST[p.status] || PST.unclear)[0]}</span>`], [eh(p.evidence), "mut"]])))
+      : `<div class="cp-c"><p class="mut">No dated commitments were found in the announcement summaries.</p></div>`);
+  const C = A.counterparties.slice().sort((a, b) => b.mentions - a.mentions), E = A.events.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("p-relationships").innerHTML = `<p class="lede">Customers, partners and other counterparties named in announcements, and the deals and strategy the company has stated.</p>` + note
+    + `<div class="grid2">${card("Named counterparties", "Across the announcements read.", C.length ? tbl([["Name"], ["Role"], ["Mentions", "num"], ["First seen"]], C.map(c => trow([[`<strong>${eh(c.name)}</strong>${c.note ? `<div class="mut" style="font-size:12.5px">${eh(c.note)}</div>` : ""}`], [eh(c.role), "mut"], [String(c.mentions), "num"], [eh(fmtD(c.first)), "mut"]]))) : `<p class="mut">None named in the summaries.</p>`)}${card("Strategy and deals, as stated", "Newest first.", E.length ? tbl([["Date"], ["What was announced"], ["Counterparty"], ["Value", "num"]], E.map(e => trow([[eh(fmtD(e.date)), "mut"], [eh(e.summary)], [eh(e.counterparty || "")], [e.value == null ? "" : aud(e.value), "num"]]))) : `<p class="mut">None found in the summaries.</p>`)}</div>`;
+}
+async function runAnalysis() {
+  if (!S || !mcp || !sample) return; const T = S.T; const st = t => document.querySelectorAll("#anStatus").forEach(e => e.textContent = t); document.querySelectorAll("[data-act=analyse]").forEach(b => b.disabled = true);
+  if (analysisCtrl) analysisCtrl.abort(); analysisCtrl = new AbortController(); const sig = analysisCtrl.signal;
+  try {
+    st("Reading announcements…");
+    const r = await call("list_announcements", { ticker: T, days_back: 365, limit: 60, user_question: "Company page analysis: promises and counterparties for " + T }, "Announcements (12 months)", sig);
+    if (r.data && r.data.error) { st("Couldn't read announcements (" + r.data.error + ")."); return; }
+    const all = (tr_(r).announcements || []).map(x => ({ date: String(x.date).slice(0, 10), title: x.title || "", prev: (x.short_preview || "").replace(/\s+/g, " ").trim(), ps: x.price_sensitive === 1 || x.price_sensitive === true || x.price_sensitive === "1" })).sort((a, b) => a.date.localeCompare(b.date));
+    const usable = all.filter(x => x.title || x.prev), empty = all.length - usable.length;
+    if (!usable.length) { st("No announcement summaries to read."); return; }
+    st("Drafting with Claude (about a minute)…");
+    const list = usable.map(x => `${x.date} | ${x.title || "(no title)"}${x.ps ? " [price sensitive]" : ""} | ${x.prev.slice(0, 700)}`).join("\n");
+    const prompt = `You are Investair's research analyst. Today is ${todayISO()}. Company: ${S.name} (${T}). Below are summaries of its ASX announcements from the last 12 months, oldest first (date | title | summary).\n\nExtract three things, using ONLY what the summaries say. Never invent a commitment, date, counterparty, value or deal. If the summaries do not support something, leave it out.\n\n1. "promises": commitments the company made to shareholders with a stated time frame or milestone (for example a launch, approval, study result, first revenue, a quarter or a financial year). For each: "statement" (one plain sentence), "stated" (date of the announcement that made it, YYYY-MM-DD), "target" (the time frame in the company's words, or empty), "due" (YYYY-MM-DD only if an explicit date or period end is stated; Australian financial years run July to June; use the last day of the period; otherwise empty), "status" (one of delivered, on_track, pending, moved, overdue, unclear: delivered only if a later announcement in the list shows it was done; moved if a later announcement changed the target; overdue only if the due date is before today and nothing shows delivery; pending if the due date is still ahead; on_track only if a later announcement says so; otherwise unclear), "evidence" (the title and date of the announcement that supports the status), "note" (one short sentence, optional).\n2. "counterparties": customers, partners, suppliers, licensees, regulators, strategic investors and other named organisations. Each: "name", "role" (customer, partner, supplier, licensee, regulator, investor, other), "mentions" (number of announcements naming it), "first" (YYYY-MM-DD of the first), "note" (optional, short). Exclude the company itself, its auditor and generic brokers unless a deal is involved.\n3. "events": stated deals and strategy moves (contracts, partnerships, licences, acquisitions, divestments, funding, launches). Each: "date" (YYYY-MM-DD), "summary" (one sentence), "counterparty" (name or empty), "value_aud" (a number in Australian dollars only if stated, otherwise null).\n\nReply with only one JSON object: {"promises":[...],"counterparties":[...],"events":[...]}. Use empty arrays where there is nothing.\n\nANNOUNCEMENTS:\n${list}`;
+    const j = await sample.json(prompt, { modelTier: "default", cache: false, signal: sig });
+    const arr = v => Array.isArray(v) ? v : [], s = v => v == null ? "" : String(v);
+    S.analysis = { asOf: todayISO(), used: usable.length, empty,
+      promises: arr(j && j.promises).map(p => ({ statement: s(p.statement), stated: s(p.stated).slice(0, 10), target: s(p.target), due: /^\d{4}-\d{2}-\d{2}/.test(s(p.due)) ? s(p.due).slice(0, 10) : "", status: PST[p.status] ? p.status : "unclear", evidence: s(p.evidence), note: s(p.note) })).filter(p => p.statement),
+      counterparties: arr(j && j.counterparties).map(c => ({ name: s(c.name), role: s(c.role) || "other", mentions: Number(c.mentions) || 1, first: s(c.first).slice(0, 10), note: s(c.note) })).filter(c => c.name),
+      events: arr(j && j.events).map(e => ({ date: s(e.date).slice(0, 10), summary: s(e.summary), counterparty: s(e.counterparty), value: e.value_aud == null || e.value_aud === "" ? null : (num(e.value_aud)) })).filter(e => e.summary) };
+    renderAnalysis(S);
+  } catch (e) { const c = e && e.code; st(c === "cancelled" ? "Stopped." : c === "not_granted" ? "Claude access for this page was declined, so the analysis can't run." : c === "rate_limited" ? "Too many requests just now. Try again in a minute." : c === "invalid_json" ? "Claude's answer couldn't be read. Try again." : "Couldn't analyse (" + (c || (e && e.message) || "error") + ")."); }
+  finally { document.querySelectorAll("[data-act=analyse]").forEach(b => b.disabled = false); }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-act=analyse]"); if (b && !b.disabled) runAnalysis(); });
+
+// ---------- charts ----------
+const clear = id => { const b = $(id); if (!b) return null; if (typeof d3 === "undefined") { b.innerHTML = UC_CHARTS; return null; } b.replaceChildren(); return b; };
+const mkSvg = (b, W, H) => d3.select(b).append("svg").attr("viewBox", `0 0 ${W} ${H}`).attr("role", "img");
+const NAVY = "#0a2342", AMBER = "#e8760a", TEAL = "#1a7f8e", RED = "#ef4444", GREY = "#cbd5e1", INK = "#64748b";
+const axisTxt = (g, x, y, t, anchor) => g.append("text").attr("x", x).attr("y", y).attr("text-anchor", anchor || "middle").attr("dy", "0.32em").style("fill", INK).style("font-size", "11px").text(t);
+function drawCash() {
+  const b = clear("ch-cash"); if (!b || !S) return; const rows = S.quarters.filter(q => q.cash != null).slice(-8);
+  if (!rows.length) { b.innerHTML = '<p class="mut" style="padding:20px">No quarterly filings found.</p>'; return; }
+  const W = Math.max(300, b.clientWidth), H = 230, m = { t: 28, r: 6, b: 28, l: 6 };
+  const x = d3.scaleBand(rows.map(r => r.end), [m.l, W - m.r]).padding(0.35), top = Math.max(d3.max(rows, r => r.cash) || 0, S.mcap || 0) * 1.18, y = d3.scaleLinear([0, top], [H - m.b, m.t]);
+  const g = mkSvg(b, W, H).attr("aria-label", "Cash at each quarter end").append("g"), bw = Math.min(54, x.bandwidth());
+  g.selectAll("rect").data(rows).join("rect").attr("x", r => x(r.end) + (x.bandwidth() - bw) / 2).attr("width", bw).attr("y", r => y(r.cash)).attr("height", r => y(0) - y(r.cash)).attr("rx", 4).style("fill", (r, i) => i === rows.length - 1 ? AMBER : NAVY).append("title").text(r => fmtD(r.end) + ": " + aud(r.cash));
+  g.selectAll("text.v").data(rows).join("text").attr("class", "v").attr("x", r => x(r.end) + x.bandwidth() / 2).attr("y", r => y(r.cash) - 7).attr("text-anchor", "middle").style("fill", NAVY).style("font-size", "11px").text(r => aud(r.cash));
+  g.selectAll("text.l").data(rows).join("text").attr("class", "l").attr("x", r => x(r.end) + x.bandwidth() / 2).attr("y", H - 8).attr("text-anchor", "middle").style("fill", INK).style("font-size", "11px").text(r => new Date(r.end + "T00:00:00Z").toLocaleDateString("en-AU", { month: "short", year: "2-digit", timeZone: "UTC" }));
+  g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(0)).attr("y2", y(0)).style("stroke", GREY);
+  if (S.mcap != null) { const yy = y(S.mcap); g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", yy).attr("y2", yy).style("stroke", TEAL).style("stroke-dasharray", "4 4"); g.append("text").attr("x", m.l).attr("y", yy - 6).style("fill", INK).style("font-size", "11px").text("Market value " + aud(S.mcap)); }
+}
+function drawPrice() {
+  const b = clear("ch-price"); if (!b || !S) return; const pts = S.weekly;
+  if (pts.length < 3) { b.innerHTML = '<p class="mut" style="padding:20px">Not enough price history to draw a chart.</p>'; return; }
+  const W = Math.max(300, b.clientWidth), H = 230, m = { t: 14, r: 10, b: 30, l: 46 };
+  const x = d3.scalePoint(pts.map(p => p.d), [m.l, W - m.r]), lo = d3.min(pts, p => p.v), hi = d3.max(pts, p => p.v), y = d3.scaleLinear([lo * 0.95, hi * 1.05], [H - m.b, m.t]);
+  const g = mkSvg(b, W, H).attr("aria-label", "Weekly closing price, last 12 months").append("g");
+  y.ticks(4).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", "#eef2f6"); axisTxt(g, m.l - 6, y(t), t >= 1 ? t.toFixed(2) : t.toFixed(3), "end"); });
+  g.append("path").datum(pts).attr("d", d3.line().x(p => x(p.d)).y(p => y(p.v))).style("fill", "none").style("stroke", NAVY).style("stroke-width", 2).style("stroke-linejoin", "round");
+  const last = pts[pts.length - 1]; g.append("circle").attr("cx", x(last.d)).attr("cy", y(last.v)).attr("r", 4).style("fill", AMBER);
+  axisTxt(g, m.l, H - 10, fmtS(pts[0].d), "start"); axisTxt(g, W - m.r, H - 10, fmtS(last.d), "end");
+  g.selectAll("circle.h").data(pts).join("circle").attr("class", "h").attr("cx", p => x(p.d)).attr("cy", p => y(p.v)).attr("r", 5).style("fill", "transparent").append("title").text(p => fmtD(p.d) + ": " + px(p.v));
+}
+function drawBurn() {
+  const b = clear("ch-burn"); if (!b || !S) return; const rows = S.quarters.filter(q => q.ocf != null);
+  if (!rows.length) return;
+  const W = Math.max(300, b.clientWidth), H = 300, m = { t: 24, r: 12, b: 30, l: 56 };
+  const vals = rows.flatMap(r => [r.ocf, r.ttm]).filter(v => v != null), x = d3.scaleBand(rows.map(r => r.end), [m.l, W - m.r]).padding(0.3);
+  const y = d3.scaleLinear([Math.min(0, d3.min(vals)) * 1.15, Math.max(0, d3.max(vals)) * 1.15 || 1], [H - m.b, m.t]).nice();
+  const g = mkSvg(b, W, H).attr("aria-label", "Operating cash flow by quarter").append("g");
+  y.ticks(5).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, m.l - 8, y(t), t === 0 ? "A$0" : aud(t), "end"); });
+  const bw = Math.min(30, x.bandwidth()), every = Math.ceil(rows.length / Math.max(1, Math.floor((W - m.l - m.r) / 54)));
+  g.selectAll("rect").data(rows).join("rect").attr("x", r => x(r.end) + (x.bandwidth() - bw) / 2).attr("width", bw).attr("y", r => y(Math.max(0, r.ocf))).attr("height", r => Math.max(1, Math.abs(y(r.ocf) - y(0)))).attr("rx", 3).style("fill", r => r.ocf < 0 ? RED : TEAL).append("title").text(r => "Quarter to " + fmtD(r.end) + ": operating cash flow " + aud(r.ocf) + (r.cash != null ? "; cash at quarter end " + aud(r.cash) : ""));
+  g.selectAll("text.l").data(rows.filter((r, i) => (rows.length - 1 - i) % every === 0)).join("text").attr("class", "l").attr("x", r => x(r.end) + x.bandwidth() / 2).attr("y", H - 10).attr("text-anchor", "middle").style("fill", INK).style("font-size", "11px").text(r => new Date(r.end + "T00:00:00Z").toLocaleDateString("en-AU", { month: "short", year: "2-digit", timeZone: "UTC" }));
+  const line = rows.filter(r => r.ttm != null);
+  if (line.length > 1) { g.append("path").datum(line).attr("d", d3.line().x(r => x(r.end) + x.bandwidth() / 2).y(r => y(r.ttm))).style("fill", "none").style("stroke", AMBER).style("stroke-width", 2); const l = line[line.length - 1]; g.append("text").attr("x", x(l.end) + x.bandwidth() / 2).attr("y", y(l.ttm) - 10).attr("text-anchor", "end").style("fill", NAVY).style("font-size", "11px").text("Last 12 months " + aud(l.ttm)); }
+}
+function drawScatter() {
+  const b = clear("ch-scatter"); if (!b || !S) return; const rows = S.pplace.filter(x => x.p90 != null && x.disc != null);
+  if (!rows.length) { b.innerHTML = '<p class="mut" style="padding:20px">No peer placement has a matured 90-day result yet.</p>'; return; }
+  const W = Math.max(300, b.clientWidth), H = 280, m = { t: 12, r: 14, b: 42, l: 46 }, xe = d3.extent(rows, r => r.disc), ye = d3.extent(rows, r => r.p90);
+  const x = d3.scaleLinear([Math.min(xe[0], 0) - 3, Math.max(xe[1], 0) + 3], [m.l, W - m.r]).nice(), y = d3.scaleLinear([Math.min(ye[0], 0) - 5, Math.max(ye[1], 0) + 5], [H - m.b, m.t]).nice();
+  const g = mkSvg(b, W, H).attr("aria-label", "Discount against 90-day performance").append("g");
+  y.ticks(5).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, m.l - 6, y(t), pct1(t), "end"); });
+  x.ticks(Math.max(2, Math.floor((W - m.l - m.r) / 70))).forEach(t => { g.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", m.t).attr("y2", H - m.b).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, x(t), H - m.b + 14, pct1(t)); });
+  axisTxt(g, (m.l + W - m.r) / 2, H - 6, "Discount to last close (premium to the right)"); g.append("text").attr("transform", `translate(10,${(m.t + H - m.b) / 2}) rotate(-90)`).attr("text-anchor", "middle").style("fill", INK).style("font-size", "11px").text("vs DAP after 90 days");
+  g.selectAll("circle").data(rows).join("circle").attr("cx", r => x(r.disc)).attr("cy", r => y(r.p90)).attr("r", 6).style("fill", r => r.p90 > 0 ? TEAL : NAVY).style("fill-opacity", 0.8).style("stroke", "#fff").append("title").text(r => r.t + ", " + fmtD(r.date) + ": discount " + pct1(r.disc) + ", 90 days " + pct1(r.p90));
+  g.selectAll("text.lb").data(rows).join("text").attr("class", "lb").attr("x", r => x(r.disc) + 9).attr("y", r => y(r.p90)).attr("dy", "0.32em").style("fill", INK).style("font-size", "10px").style("pointer-events", "none").text(r => r.t);
+}
+function drawDisc() {
+  const b = clear("ch-disc"); if (!b || !S) return; const rows = S.pplace.filter(x => x.disc != null).slice().sort((p, q) => p.date.localeCompare(q.date));
+  if (!rows.length) return;
+  const W = Math.max(300, b.clientWidth), H = 300, m = { t: 22, r: 12, b: 50, l: 46 }, x = d3.scaleBand(rows.map(r => r.id), [m.l, W - m.r]).padding(0.25);
+  const y = d3.scaleLinear([Math.min(0, d3.min(rows, r => r.disc)) * 1.15, Math.max(0, d3.max(rows, r => r.disc)) * 1.15 || 5], [H - m.b, m.t]).nice();
+  const g = mkSvg(b, W, H).attr("aria-label", "Placement discounts by deal").append("g");
+  y.ticks(5).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, m.l - 8, y(t), t === 0 ? "0%" : pct1(t), "end"); });
+  const bw = Math.min(30, x.bandwidth());
+  g.selectAll("rect").data(rows).join("rect").attr("x", r => x(r.id) + (x.bandwidth() - bw) / 2).attr("width", bw).attr("y", r => y(Math.max(0, r.disc))).attr("height", r => Math.max(1, Math.abs(y(r.disc) - y(0)))).attr("rx", 3).style("fill", r => r.disc < 0 ? NAVY : GREY).append("title").text(r => r.t + ", " + fmtD(r.date) + ": " + pct1(r.disc));
+  const every = Math.ceil(rows.length / Math.max(1, Math.floor((W - m.l - m.r) / 34)));
+  rows.forEach((r, i) => { if (i % every) return; const cx = x(r.id) + x.bandwidth() / 2; axisTxt(g, cx, H - m.b + 14, r.t); axisTxt(g, cx, H - m.b + 27, new Date(r.date + "T00:00:00Z").toLocaleDateString("en-AU", { month: "short", year: "2-digit", timeZone: "UTC" })); });
+  const av = S.pps.disc; if (av != null) { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(av)).attr("y2", y(av)).style("stroke", AMBER).style("stroke-dasharray", "4 4"); g.append("text").attr("x", W - m.r).attr("y", y(av) - 6).attr("text-anchor", "end").style("fill", INK).style("font-size", "11px").text("Peer average " + pct1(av)); }
+}
+function drawPeerPerf() {
+  const b = clear("ch-peerperf"); if (!b || !S) return; const k = peerPeriod, rows = S.pret.filter(r => r[k] != null).map(r => ({ t: r.ticker, name: r.name, v: r[k] })).sort((p, q) => q.v - p.v);
+  if (!rows.length) { b.innerHTML = '<p class="mut" style="padding:20px">No price change available for this period.</p>'; return; }
+  const med = (S.rel.find(x => x.k === k) || {}).med, rowH = 30, m = { t: 26, r: 12, b: 28, l: 12 }, W = Math.max(300, b.clientWidth), H = m.t + m.b + rows.length * rowH, labW = 52, pad = 58;
+  const ext = d3.extent(rows.map(r => r.v).concat([0, med ?? 0])), x = d3.scaleLinear([Math.min(0, ext[0]), Math.max(0, ext[1])], [m.l + labW + pad, W - m.r - pad]), y = d3.scaleBand(rows.map(r => r.t), [m.t, H - m.b]).padding(0.3);
+  const g = mkSvg(b, W, H).attr("aria-label", "Share price change by company").append("g");
+  g.selectAll("rect.band").data(rows.filter(r => r.t === S.T)).join("rect").attr("x", m.l).attr("width", W - m.l - m.r).attr("y", r => y(r.t) - y.step() * y.paddingInner() / 2).attr("height", y.step()).attr("rx", 6).style("fill", "rgba(232,118,10,.12)");
+  x.ticks(Math.max(2, Math.floor((W - labW - 2 * pad) / 90))).forEach(t => { g.append("line").attr("x1", x(t)).attr("x2", x(t)).attr("y1", m.t).attr("y2", H - m.b).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, x(t), H - 10, t === 0 ? "0%" : pct1(t)); });
+  g.selectAll("rect.b").data(rows).join("rect").attr("class", "b").attr("x", r => x(Math.min(0, r.v))).attr("width", r => Math.max(2, Math.abs(x(r.v) - x(0)))).attr("y", r => y(r.t)).attr("height", y.bandwidth()).attr("rx", 4).style("fill", r => r.t === S.T ? AMBER : r.v >= 0 ? TEAL : RED).style("fill-opacity", r => r.t === S.T ? 1 : 0.75).append("title").text(r => r.name + ": " + pct1(r.v));
+  g.selectAll("text.t").data(rows).join("text").attr("class", "t").attr("x", m.l + 8).attr("y", r => y(r.t) + y.bandwidth() / 2).attr("dy", "0.32em").style("fill", NAVY).style("font-weight", r => r.t === S.T ? 700 : 500).style("font-size", "12px").style("cursor", r => r.t === S.T ? "default" : "pointer").on("click", (ev, r) => { if (r.t !== S.T) go(r.t); }).text(r => r.t);
+  g.selectAll("text.v").data(rows).join("text").attr("class", "v").attr("x", r => r.v < 0 ? x(r.v) - 6 : x(r.v) + 6).attr("y", r => y(r.t) + y.bandwidth() / 2).attr("dy", "0.32em").attr("text-anchor", r => r.v < 0 ? "end" : "start").style("fill", r => r.v < 0 ? "#b91c1c" : "#0f766e").style("font-size", "11.5px").style("font-weight", 600).text(r => pct1(r.v));
+  if (med != null) { g.append("line").attr("x1", x(med)).attr("x2", x(med)).attr("y1", m.t - 6).attr("y2", H - m.b).style("stroke", NAVY).style("stroke-dasharray", "4 4"); g.append("text").attr("x", x(med)).attr("y", m.t - 10).attr("text-anchor", "middle").style("fill", NAVY).style("font-size", "11px").text("Peer median " + pct1(med)); }
+}
+function drawAnn() {
+  const b = clear("ch-ann"); if (!b || !S) return; const days = S.days;
+  if (days.length < 5) { b.innerHTML = '<p class="mut" style="padding:20px">Not enough daily price history.</p>'; return; }
+  const W = Math.max(300, b.clientWidth), H = 330, m = { t: 36, r: 12, b: 26, l: 52 }, volH = 80, gap = 14;
+  const dts = days.map(d => new Date(d.d + "T00:00:00Z")), x = d3.scaleUtc(d3.extent(dts), [m.l, W - m.r]), yP = d3.scaleLinear([0, d3.max(days, d => d.c) * 1.15], [H - m.b - volH - gap, m.t]).nice(), yV = d3.scaleLinear([0, d3.max(days, d => d.vc) || 1], [H - m.b, H - m.b - volH]);
+  const g = mkSvg(b, W, H).attr("aria-label", "Share price and volume around announcements").append("g");
+  yP.ticks(4).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", yP(t)).attr("y2", yP(t)).style("stroke", "#eef2f6"); axisTxt(g, m.l - 6, yP(t), "A$" + (t >= 1 ? t.toFixed(2) : t.toFixed(3)), "end"); });
+  const bw = Math.max(1, (W - m.l - m.r) / days.length - 1);
+  g.selectAll("rect.vol").data(days.filter(d => d.vc > 0)).join("rect").attr("class", "vol").attr("x", d => x(new Date(d.d + "T00:00:00Z")) - bw / 2).attr("width", bw).attr("y", d => yV(d.vc)).attr("height", d => yV(0) - yV(d.vc)).style("fill", GREY);
+  g.append("path").datum(days).attr("d", d3.line().x(d => x(new Date(d.d + "T00:00:00Z"))).y(d => yP(d.c)).curve(d3.curveStepAfter)).style("fill", "none").style("stroke", NAVY).style("stroke-width", 2);
+  x.ticks(Math.max(2, Math.floor((W - m.l - m.r) / 80))).forEach(t => axisTxt(g, x(t), H - 8, d3.utcFormat("%b")(t)));
+  axisTxt(g, m.l - 6, H - m.b - volH / 2, "Volume", "end");
+  const byDate = new Map(); S.anns.forEach(a => { if (S.react[a.id]) { if (!byDate.has(a.date)) byDate.set(a.date, []); byDate.get(a.date).push(a); } });
+  const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; tip.setAttribute("role", "tooltip"); b.appendChild(tip);
+  let pinned = null;
+  const tipHtml = (n, date, list) => list.slice(0, 3).map(a => { const rc = S.react[a.id], ttl = a.title || (a.prev || "").replace(/\s+/g, " ").slice(0, 80) || "(no title)", said = (a.prev || "").replace(/\s+/g, " ").slice(0, 220);
+    return `<div class="tip-i"><div class="tip-h">#${n} · ${eh(fmtD(date))}${a.ps ? " · Price sensitive" : ""}</div><div class="tip-t">${eh(ttl)}</div>${said && said !== ttl ? `<div>${eh(said)}${(a.prev || "").length > 220 ? "…" : ""}</div>` : ""}<div class="tip-r">Price ${pct1(rc.move)} over 2 days${rc.mult != null ? " · volume " + rc.mult.toFixed(1) + "× normal" : ""} · ${eh(rc.rec)}</div></div>`; }).join("") + (list.length > 3 ? `<div class="tip-r">+ ${list.length - 3} more that day, see the table below</div>` : "");
+  const show = (n, date, list, cx) => { tip.innerHTML = tipHtml(n, date, list); tip.hidden = false; const w = tip.offsetWidth; tip.style.left = Math.max(4, Math.min(W - w - 4, cx - w / 2)) + "px"; tip.style.top = (m.t + 2) + "px"; };
+  const hide = () => { pinned = null; tip.hidden = true; };
+  let n = 0; [...byDate.entries()].sort().forEach(([date, list]) => { const rc = S.react[list[0].id], cx = x(new Date(date + "T00:00:00Z")), col = rc.tone === "u" ? TEAL : rc.tone === "d" ? RED : AMBER; n++; const no = n;
+    const f = g.append("g").attr("class", "fl").attr("tabindex", 0).attr("role", "button").attr("aria-label", "Announcement " + no + ", " + fmtD(date)); f.append("line").attr("x1", cx).attr("x2", cx).attr("y1", m.t - 14).attr("y2", H - m.b).style("stroke", col).style("stroke-dasharray", "3 3");
+    f.append("circle").attr("cx", cx).attr("cy", m.t - 18).attr("r", 8).style("fill", col); f.append("text").attr("x", cx).attr("y", m.t - 18).attr("dy", "0.35em").attr("text-anchor", "middle").style("fill", "#fff").style("font-size", "9px").style("font-weight", 700).style("pointer-events", "none").text(String(no));
+    f.append("circle").attr("cx", cx).attr("cy", m.t - 18).attr("r", 15).style("fill", "transparent");
+    const open = () => show(no, date, list, cx);
+    f.on("pointerenter", open).on("pointerleave", () => { if (pinned !== no) tip.hidden = true; else show(no, date, list, cx); }).on("focus", open).on("blur", () => { if (pinned !== no) tip.hidden = true; })
+     .on("click", () => { if (pinned === no) hide(); else { pinned = no; open(); } }).on("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); if (pinned === no) hide(); else { pinned = no; open(); } } else if (ev.key === "Escape") hide(); }); });
+  d3.select(b).select("svg").on("click.tip", ev => { if (!ev.target.closest(".fl")) hide(); });
+}
+let burnPct = 100;
+function drawRunway() {
+  const b = clear("ch-runway"); if (!b || !S) return;
+  const q = S.quarters.filter(x => x.ocf != null), o4 = q.slice(-4), ttm = o4.length === 4 ? o4.reduce((s, x) => s + x.ocf, 0) : null;
+  let burnQ = ttm != null && ttm < 0 ? -ttm / 4 : null, basis = "the last 12 months' average";
+  if (burnQ == null && S.burn != null) { burnQ = Math.abs(S.burn); basis = "Investair's current-quarter estimate"; }
+  if (S.adjCash == null || !burnQ) { b.innerHTML = '<p class="mut" style="padding:20px">Needs adjusted cash and a quarterly burn.</p>'; return; }
+  const baseBurn = burnQ; burnQ = baseBurn * burnPct / 100; if (burnPct !== 100) basis = burnPct + "% of " + basis;
+  const DAY = 864e5, Q = 91.3125 * DAY, base = new Date((S.cs && S.cs.report_date ? String(S.cs.report_date).slice(0, 10) : todayISO()) + "T00:00:00Z"), HQ = Math.min(8, Math.max(4, Math.ceil(S.adjCash / burnQ) + 1)), end = new Date(base.getTime() + HQ * Q), at = r => new Date(base.getTime() + r * Q);
+  const zeroQ = S.adjCash / burnQ, conf = S.runway;
+  const ob = $("burnOut"); if (ob) ob.textContent = burnPct + "% · " + aud(burnQ) + " a quarter · cash out " + fmtD(at(zeroQ).toISOString());
+  const peers = S.peerCash.filter(x => x.asx_code !== S.T && num(x.runway_q) != null).map(x => ({ t: x.asx_code, name: x.company_name, rw: num(x.runway_q), date: at(num(x.runway_q)) })).sort((p, r) => p.rw - r.rw);
+  const inR = peers.filter(p => p.date <= end), beyond = peers.filter(p => p.date > end);
+  const W = Math.max(300, b.clientWidth), m = { t: 26, r: 16, b: 30, l: 56 }, ph = 230, x = d3.scaleUtc([base, end], [m.l, W - m.r]);
+  const ends = [], placed = inR.map(p => { const xx = x(p.date); let r = ends.findIndex(e => xx - e > 46); if (r < 0) { r = ends.length; ends.push(-1e9); } ends[r] = xx; return { ...p, row: r }; });
+  const stripH = placed.length ? 36 + ends.length * 22 : 0, H = m.t + ph + m.b + stripH, y = d3.scaleLinear([0, S.adjCash * 1.12], [m.t + ph, m.t]).nice();
+  const g = mkSvg(b, W, H).attr("aria-label", "Projected cash at the 12-month burn rate, with peers' runway end dates").append("g");
+  y.ticks(5).forEach(t => { g.append("line").attr("x1", m.l).attr("x2", W - m.r).attr("y1", y(t)).attr("y2", y(t)).style("stroke", t === 0 ? GREY : "#eef2f6"); axisTxt(g, m.l - 8, y(t), t === 0 ? "A$0" : aud(t), "end"); });
+  x.ticks(Math.max(2, Math.floor((W - m.l - m.r) / 90))).forEach(t => axisTxt(g, x(t), m.t + ph + 16, d3.utcFormat("%b %y")(t)));
+  const endV = zeroQ <= HQ ? 0 : S.adjCash - burnQ * HQ, endD = zeroQ <= HQ ? at(zeroQ) : end, pts = [{ d: base, v: S.adjCash }, { d: endD, v: endV }];
+  g.append("path").datum(pts).attr("d", d3.area().x(p => x(p.d)).y0(y(0)).y1(p => y(p.v))).style("fill", "rgba(26,127,142,.12)");
+  g.append("path").datum(pts).attr("d", d3.line().x(p => x(p.d)).y(p => y(p.v))).style("fill", "none").style("stroke", TEAL).style("stroke-width", 2.5).append("title").text("Projected cash: " + aud(S.adjCash) + " less " + aud(burnQ) + " a quarter");
+  g.append("circle").attr("cx", x(base)).attr("cy", y(S.adjCash)).attr("r", 4).style("fill", NAVY);
+  g.append("text").attr("x", x(base) + 8).attr("y", y(S.adjCash) - 8).style("fill", NAVY).style("font-size", "11px").text("Adjusted cash " + aud(S.adjCash));
+  const vline = (d, col, label, yy, title) => { const xx = x(d), right = xx > W * 0.62; g.append("line").attr("x1", xx).attr("x2", xx).attr("y1", m.t - 6).attr("y2", m.t + ph).style("stroke", col).style("stroke-dasharray", "4 4").append("title").text(title); g.append("text").attr("x", right ? xx - 5 : xx + 5).attr("y", yy).attr("text-anchor", right ? "end" : "start").style("fill", col).style("font-size", "11px").style("font-weight", 600).text(label); };
+  if (zeroQ <= HQ) vline(at(zeroQ), RED, "Cash out " + fmtS(at(zeroQ).toISOString()) + " " + at(zeroQ).getUTCFullYear() + " at this burn rate", m.t - 10, "Projected cash reaches zero");
+  if (conf != null && conf <= HQ) vline(at(conf), AMBER, "Investair confirmed runway ends " + fmtS(at(conf).toISOString()) + " " + at(conf).getUTCFullYear(), m.t + 8, "Investair's confirmed runway: " + conf.toFixed(1) + " quarters");
+  if (placed.length) {
+    const y0 = m.t + ph + m.b + 8; axisTxt(g, m.l, y0 - 2, "Peers: when each one's confirmed runway ends", "start");
+    placed.forEach(p => { const cx = x(p.date), cy = y0 + 16 + p.row * 22, right = cx > W - 60; g.append("line").attr("x1", cx).attr("x2", cx).attr("y1", m.t + ph).attr("y2", cy).style("stroke", "#e2e8f0");
+      g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", 5).style("fill", p.date < (zeroQ <= HQ ? at(zeroQ) : end) ? RED : NAVY).style("fill-opacity", 0.85).append("title").text(p.name + ": " + p.rw.toFixed(1) + " quarters, to about " + fmtD(p.date.toISOString().slice(0, 10)));
+      g.append("text").attr("x", right ? cx - 9 : cx + 9).attr("y", cy).attr("dy", "0.32em").attr("text-anchor", right ? "end" : "start").style("fill", NAVY).style("font-size", "11px").style("font-weight", 600).text(p.t); });
+  }
+  d3.select(b).append("p").attr("class", "mut").style("font-size", "12.5px").style("margin", "6px 0 0").text("Adjusted cash of " + aud(S.adjCash) + " less " + aud(burnQ) + " a quarter, based on " + basis + "." + (conf != null ? " Investair's confirmed runway is " + conf.toFixed(1) + " quarters." : "") + (!peers.length ? " No peer runway data." : "") + (beyond.length ? " Funded beyond " + (HQ === 8 ? "two years" : HQ * 3 + " months") + ": " + beyond.map(p => p.t + " (" + p.rw.toFixed(1) + " qtrs)").join(", ") + "." : "") + " Red dots run out before " + S.T + " does.");
+}
+
+$("p-financials").addEventListener("input", e => { if (e.target.id === "burnSl") { burnPct = +e.target.value; drawRunway(); } });
+$("p-financials").addEventListener("click", e => { if (e.target.id === "burnReset") { burnPct = 100; const sl = $("burnSl"); if (sl) sl.value = 100; drawRunway(); } });
+function drawVisible() {
+  const open = [...document.querySelectorAll(".cp-panel")].find(p => !p.hidden); if (!open || !S) return;
+  const id = open.id;
+  if (id === "p-overview") { drawCash(); drawPrice(); }
+  else if (id === "p-financials") { drawBurn(); drawRunway(); }
+  else if (id === "p-placements") { drawScatter(); drawDisc(); }
+  else if (id === "p-peers") drawPeerPerf();
+  else if (id === "p-announcements") drawAnn();
+}
+
+// ---------- tabs ----------
+const tabEls = () => [...document.querySelectorAll(".cp-tab")];
+function showTab(tab, focus) {
+  tabEls().forEach(t => { const on = t === tab; t.setAttribute("aria-selected", on ? "true" : "false"); t.tabIndex = on ? 0 : -1; document.getElementById(t.getAttribute("aria-controls")).hidden = !on; });
+  if (focus) tab.focus(); tab.scrollIntoView({ block: "nearest", inline: "nearest" }); drawVisible();
+}
+$("tabs").addEventListener("click", e => { const t = e.target.closest(".cp-tab"); if (t) showTab(t); });
+$("tabs").addEventListener("keydown", e => { const ts = tabEls(), i = ts.indexOf(document.activeElement); if (i < 0) return; let n = null; if (e.key === "ArrowRight") n = ts[(i + 1) % ts.length]; else if (e.key === "ArrowLeft") n = ts[(i - 1 + ts.length) % ts.length]; else if (e.key === "Home") n = ts[0]; else if (e.key === "End") n = ts[ts.length - 1]; if (n) { e.preventDefault(); showTab(n, true); } });
+let rz = null; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawVisible, 150); });
+
+// ---------- generate ----------
+const TB = "ASX_Market.ASX_DailyMarketInformation";
+const look = d => `(SELECT x.close_price FROM ${TB} x WHERE x.ticker=t.ticker AND x.info_date<=DATE_SUB(t.info_date, INTERVAL ${d}) ORDER BY x.info_date DESC LIMIT 1)`;
+const sharesAt = (n, d) => `(SELECT x.market_cap/x.close_price FROM ${TB} x WHERE x.ticker=t.ticker AND x.info_date<=DATE_SUB(t.info_date, INTERVAL ${d}) ORDER BY x.info_date DESC LIMIT 1) AS s_${n}`;
+const hashTicker = () => { const h = (location.hash || "").replace(/^#/, "").toUpperCase(); return /^[A-Z0-9]{1,6}$/.test(h) ? h : ""; };
+const LOADING = '<div class="cp-c"><p class="mut"><span class="spin" style="display:inline-block;vertical-align:middle;margin-right:8px"></span>Loading peers, register and placements…</p></div>';
+function renderHead(S) {
+  const T = S.T, stage = (S.cs && (S.cs.lifecycle_stage_name || S.cs.common_stage)) || "", sector = (S.snap && S.snap.sector && S.snap.sector !== "Unknown" && S.snap.sector) || (S.cs && S.cs.sector) || "";
+  $("hEb").textContent = "ASX: " + T; $("hName").textContent = S.name;
+  $("hSub").textContent = [sector, stage, S.ident && S.ident.listing_status, "Market data as at " + fmtD(S.asOf)].filter(Boolean).join(" · ");
+  $("hFlags").innerHTML = S.flags.map(([k, t]) => `<span class="flag ${k}">${eh(t)}</span>`).join("");
+}
+async function generate(T0, opts) {
+  opts = opts || {};
+  const T = String(T0 != null ? T0 : ($("tk").value || "")).trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!T) { $("cpEmpty").style.display = ""; $("cpEmpty").textContent = "Enter an ASX code first."; return; }
+  $("tk").value = T; genId++;
+  if (ctrl) ctrl.abort(); const myCtrl = ctrl = new AbortController(); const sig = myCtrl.signal;
+  if (askCtrl) askCtrl.abort(); if (analysisCtrl) analysisCtrl.abort(); if (sumCtrl) sumCtrl.abort();
+  current = null; ctx = null; turns = []; S = null; $("qa").innerHTML = ""; $("bAsk").disabled = true; setBusy(true);
+  $("cpEmpty").style.display = ""; $("cpEmpty").textContent = opts.note || ("Pulling Investair data for " + T + "…"); $("cp").style.display = "none";
+  const q = `Company page: ${T}`, K = sqlTk(T);
+  try {
+    // Stage 1: everything that depends only on the code. The page renders as soon as this lands.
+    const [m, lb, wk, c, cq, p, a, r, pe, dl] = await Promise.all([
+      call("get_market_snapshot", { ticker: T, user_question: q }, "Market snapshot", sig),
+      call("run_readonly_sql", { sql: `SELECT t.info_date, t.close_price, t.volume, ${look("7 DAY")} AS close_7d_ago, ${look("91 DAY")} AS close_91d_ago, ${look("365 DAY")} AS close_365d_ago, (SELECT ROUND(AVG(x.volume)) FROM ${TB} x WHERE x.ticker=t.ticker AND x.info_date>DATE_SUB(t.info_date, INTERVAL 60 DAY)) AS avg_volume_60d FROM ${TB} t WHERE t.ticker='${K}' AND t.info_date=(SELECT MAX(info_date) FROM ${TB} WHERE ticker='${K}')`, user_question: q }, "Price lookbacks and volume norm", sig),
+      call("run_readonly_sql", { sql: `SELECT info_date, close_price FROM ${TB} WHERE ticker='${K}' AND info_date >= DATE_SUB(CURDATE(), INTERVAL 380 DAY) AND DAYOFWEEK(info_date)=6 ORDER BY info_date DESC LIMIT 60`, user_question: q }, "Weekly (Friday) closes, about 12 months", sig),
+      call("get_cashflow_snapshot", { asx_code: T, user_question: q }, "Cash flow and runway", sig),
+      call("list_cashflow_quarterly", { asx_code: T, limit: 12, user_question: q }, "Quarterly cash flow filings", sig),
+      call("get_company_projects", { ticker: T, user_question: q }, "Projects", sig),
+      call("list_announcements", { ticker: T, days_back: 90, limit: 40, user_question: q }, "Announcements (90 days)", sig),
+      call("list_capital_raises", { asx_code: T, limit: 10, include_related_announcements: false, user_question: q }, "Capital raises", sig),
+      call("get_peers", { target_ticker: T, top_n: 8, user_question: q }, "Peers", sig),
+      call("run_readonly_sql", { sql: `SELECT info_date, close_price, volume FROM ${TB} WHERE ticker='${K}' AND info_date >= DATE_SUB(CURDATE(), INTERVAL 125 DAY) ORDER BY info_date DESC LIMIT 100`, user_question: q }, "Daily price and volume, about 4 months", sig)]);
+    if (sig.aborted) return;
+    const snap = tr_(m).snapshot, cs = tr_(c).snapshot;
+    if (!snap && !cs) { $("cpEmpty").textContent = "No Investair market or cash data found for " + T + ". Check the code. If the company was renamed or delisted, ask Claude to check it in chat (resolve company)."; return; }
+    S = derive({ T, m, lb, wk, c, cq, p, a, r, pe, dl, partial: true });
+    renderHead(S); buildPanels(S); wireOutputs(); showTab($("tab-overview"));
+    $("cpEmpty").style.display = "none"; $("cp").style.display = ""; $("askHead").textContent = "Ask about " + T;
+    $("ovBox").open = false;
+    status("Loading peers, register and placements…", false, true);
+    // Stage 2: peer-dependent data.
+    const pk = peersOf(pe).slice(0, 8), all = [T, ...pk], inAll = all.map(t => `'${sqlTk(t)}'`).join(","), inPk = pk.map(t => `'${sqlTk(t)}'`).join(",");
+    const per = [["1m", "1 MONTH"], ["3m", "3 MONTH"], ["6m", "6 MONTH"], ["12m", "12 MONTH"]];
+    const [pcr, ret, pl, hb] = await Promise.all([
+      call("run_readonly_sql", { sql: `SELECT asx_code, company_name, ROUND(market_cap/1e6,1) mcap_m, ROUND(adjusted_cash_today_aud/1e6,2) adj_cash_m, ROUND(total_relevant_outgoings_aud/1e6,2) burn_q_m, ROUND(adjusted_estimated_quarters_funding_confirmed,2) runway_q FROM Cashflow.cashflow_daily WHERE report_date=(SELECT MAX(report_date) FROM Cashflow.cashflow_daily) AND asx_code IN (${inAll}) ORDER BY market_cap DESC`, user_question: q }, "Peer cash and runway", sig),
+      call("run_readonly_sql", { sql: `SELECT t.ticker, t.company_name, t.market_cap, t.close_price, ${per.map(([n, d]) => look(d) + " AS c_" + n).join(", ")}, t.market_cap/t.close_price AS s_now, ${per.map(([n, d]) => sharesAt(n, d)).join(", ")}, (SELECT ROUND(AVG(x.volume)) FROM ${TB} x WHERE x.ticker=t.ticker AND x.info_date>DATE_SUB(t.info_date, INTERVAL 60 DAY)) AS avgv FROM ${TB} t WHERE t.info_date=(SELECT MAX(info_date) FROM ${TB}) AND t.ticker IN (${inAll})`, user_question: q }, "Share price change for the company and its peers", sig),
+      pk.length ? call("run_readonly_sql", { sql: `SELECT deal_id, asx_code, filing_date, COALESCE(discount_pct_actual, discount_pct) AS discount_pct, raise_vs_market_cap_pct, dap_performance_post_30d_pct AS p30, dap_performance_post_90d_pct AS p90 FROM Placement.deals_daily WHERE asx_code IN (${inPk}) AND filing_date >= DATE_SUB(CURDATE(), INTERVAL 365 DAY) ORDER BY filing_date DESC LIMIT 60`, user_question: q }, "Peer placements, last 12 months", sig) : Promise.resolve({ label: "Peer placements", data: { rows: [] } }),
+      call("get_substantial_holders_batch", { tickers: all, days_back: 365, limit_per_ticker: 8, user_question: q }, "Substantial holders, company and peers (365 days)", sig)]);
+    if (sig.aborted) return;
+    const R = { T, m, lb, wk, c, cq, p, a, r, pe, pcr, ret, pl, hb, dl };
+    const keepAnalysis = S.analysis; S = derive(R); S.R = R; S.analysis = keepAnalysis;
+    renderHead(S); buildPanels(S); wireOutputs(); drawVisible();
+    const derived = { ticker: T, company: S.name, as_of_market: S.asOf, close_aud: S.close, market_cap_aud: S.mcap, adjusted_cash_aud: S.adjCash, market_value_to_cash: S.mcapToCash, quarterly_burn_aud: S.burn == null ? null : Math.abs(S.burn), runway_quarters_confirmed: S.runway, enterprise_value_aud: S.ev, change_7d_pct: S.c7, change_3m_pct: S.c91, change_12m_pct: S.c365, volume_vs_60d_norm: S.vrel, cash_watch_flags: S.flags.map(f => f[1]), peer_median_changes: S.rel, peer_placement_summary: S.pps };
+    const res = [m, c, cq, p, a, r, pe, pcr, ret, hb];
+    S.failed = res.filter(x => x.data && x.data.error).map(x => x.label);
+    ctx = `Company: ${S.name} (${T}). Today is ${todayISO()}.\nDERIVED FIGURES (computed by the page from Investair data; use these exactly):\n${JSON.stringify(derived)}\n\nINVESTAIR DATA:\n${res.map(x => `### ${x.label}\n${trim(x.data, 16000)}`).join("\n\n").slice(0, 150000)}`;
+    $("bAsk").disabled = false;
+    try { if (hashTicker() !== T) location.hash = T; } catch {}
+    kvSet("last", { t: T, name: S.name, asOf: S.asOf, close: S.close, mcap: S.mcap, runway: S.runway, adjCash: S.adjCash, ts: Date.now() });
+    if (opts.auto) { status("Data loaded. Select Write summary for the AI-drafted text."); $("bWrite").style.display = ""; }
+    else await writeSummary();
+  } catch (e) {
+    const cde = e && e.code;
+    if ($("cp").style.display === "none") { $("cpEmpty").style.display = ""; $("cpEmpty").textContent = cde === "cancelled" ? "Stopped." : "Couldn't build the page (" + (cde || (e && e.message) || "error") + "). Try again, or check the code."; }
+    else status("Couldn't finish (" + (cde || (e && e.message) || "error") + ").", true);
+  } finally { if (ctrl === myCtrl) setBusy(false); }
+}
+async function writeSummary() {
+  if (!S || !ctx || !sample) return;
+  if (sumCtrl) sumCtrl.abort(); const mine = sumCtrl = new AbortController(), sig = mine.signal, T = S.T, failed = S.failed || [], gid = genId;
+  const prompt = `You are Investair's research writer. Today is ${todayISO()}.\n\nWrite the written summary for a company page on ${S.name} (${T}). The page already shows the figures, charts and tables, so do NOT repeat them as tables; cite a figure only where it supports a point. Use exactly these sections, each a short paragraph or 2–4 bullets: "## Headline" (2–3 sentence takeaway, first), "## Funding" (cash, burn, runway, any cash-watch flag stated before the cash figure, raises in the data), "## Projects and business" (flagship first), "## Register" (top substantial holders and recent changes; prime-broker notices labelled as lending or collateral), "## News and catalysts (last 90 days)" (3–5 bullets, price-sensitive first, then catalysts the company has stated, inferred timing labelled), "## Against peers" (two sentences using the peer figures provided). Make each heading's data window clear.\n\n${STYLE}\n\n${ctx}${failed.length ? "\n\nFailed sources: " + failed.join(", ") + ". Say what is missing in a one-line Data notes entry." : ""}`;
+  $("bWrite").style.display = "none"; $("bStop").style.display = ""; status("Writing the summary…", false, true); $("out").innerHTML = "";
+  let out;
+  try { out = await sample(prompt, { modelTier: "default", cache: false, signal: sig, onText: ({ text }) => { $("out").innerHTML = md(text); const h = /##\s*Headline\s*\n+([\s\S]*?)(\n##|$)/i.exec(text); if (h) $("ovTake").textContent = h[1].trim(); } }); }
+  catch (e) { if (gid !== genId || !S) return; const cde = e && e.code; status(cde === "cancelled" ? "Stopped." : cde === "not_granted" ? "Claude access for this page was declined, so the written summary is unavailable. The figures and charts still work." : cde === "rate_limited" ? "Too many requests just now. Try again in a minute." : "Couldn't write the summary (" + (cde || (e && e.message) || "error") + ").", cde !== "cancelled"); if (e && e.text) $("out").innerHTML = md(e.text); $("bWrite").style.display = ""; $("bStop").style.display = "none"; return; }
+  if (gid !== genId || !S) return;
+  $("bStop").style.display = "none";
+  const keyMd = "## Key figures\n\n| Metric | Value |\n|---|---|\n" + [["Market value", aud(S.mcap)], ["Last close", px(S.close)], ["Adjusted cash", aud(S.adjCash)], ["Runway (confirmed)", S.runway == null ? "n/a" : S.runway.toFixed(1) + " quarters"], ["Burn per quarter", S.burn == null ? "n/a" : aud(Math.abs(S.burn))], ["Enterprise value", aud(S.ev)], ["7-day change", pct1(S.c7) || "n/a"], ["3-month change", pct1(S.c91) || "n/a"], ["12-month change", pct1(S.c365) || "n/a"]].map(r2 => `| ${r2[0]} | ${r2[1]} |`).join("\n");
+  const peerMd = S.peerCash.length ? "| Ticker | Company | Market value (A$m) | Adj. cash (A$m) | Burn / qtr (A$m) | Runway (qtrs) |\n|---|---|---|---|---|---|\n" + S.peerCash.map(x => `| ${x.asx_code}${x.asx_code === T ? " (this company)" : ""} | ${x.company_name} | ${x.mcap_m ?? "n/a"} | ${x.adj_cash_m ?? "n/a"} | ${x.burn_q_m == null ? "n/a" : Math.abs(x.burn_q_m)} | ${x.runway_q == null ? "n/a" : Number(x.runway_q).toFixed(1)} |`).join("\n") : "No peer cash data available.";
+  current = { md: `# ${S.name} (${T}) — company page\n\nInvestair data as at ${S.asOf}.\n\n${keyMd}\n\n${out.text}\n\n## Peers (cash and runway)\n\n${peerMd}\n\n*Sections not included: promises, scorecard, risks, customers and partners (under construction).*`, title: `${S.name} (${T}) — company page`, slug: `${T}-company-page-${todayISO()}` };
+  $("out").innerHTML = md(out.text);
+  const failed2 = S.failed || [];
+  status(out.truncated ? "Done, but the answer was cut short. Generate again for a full version." : `Done · Investair data as pulled ${todayLong()}${failed2.length ? " · missing: " + failed2.join(", ") : ""}`, !!out.truncated);
+  setActs(true);
+}
+$("gen").onclick = () => generate();
+$("tk").addEventListener("keydown", e => { if (e.key === "Enter" && !$("gen").disabled) generate(); });
+
+// ---------- open another company (peers, list overview, links) ----------
+function go(t) {
+  t = String(t || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!t || !mcp) return;
+  try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+  if (S && S.T === t && $("cp").style.display !== "none") return;
+  generate(t);
+}
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g) go(g.dataset.go); });
+document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("tr[data-go]")) { e.preventDefault(); go(e.target.dataset.go); } });
+window.addEventListener("hashchange", () => { const t = hashTicker(); if (t && mcp && (!S || S.T !== t)) generate(t, { auto: true }); });
+
+// ---------- follow-up ----------
+async function ask() {
+  const qn = ($("q").value || "").trim(); if (!qn || !ctx || !sample) return;
+  if (askCtrl) askCtrl.abort(); askCtrl = new AbortController(); $("bAsk").disabled = true;
+  const wrap = document.createElement("div"), qd = document.createElement("div"), ad = document.createElement("div"); qd.className = "q"; qd.textContent = qn; ad.className = "a md"; ad.textContent = "Thinking…"; wrap.append(qd, ad); $("qa").prepend(wrap); $("q").value = "";
+  const rules = `You answer questions about one ASX company using ONLY the Investair data below. ${STYLE}\nIf the data cannot answer the question, say so and what would be needed; never guess. Keep answers short.\n\n${ctx}`;
+  turns.push({ role: "user", content: qn });
+  try { const out = await sample([{ role: "user", content: rules }, ...turns.slice(-8)], { modelTier: "default", cache: false, signal: askCtrl.signal, onText: ({ text }) => { ad.innerHTML = md(text); } }); ad.innerHTML = md(out.text); turns.push({ role: "assistant", content: out.text }); }
+  catch (e) { turns.pop(); const cde = e && e.code; ad.textContent = cde === "cancelled" ? "Stopped." : cde === "not_granted" ? "Claude access was declined for this page." : cde === "rate_limited" ? "Too many requests just now. Wait a minute and try again." : "Couldn't answer (" + (cde || "error") + ")."; }
+  finally { $("bAsk").disabled = !ctx; }
+}
+$("bAsk").onclick = ask;
+
+// ---------- outputs ----------
+async function save(filename, data) {
+  if (!downloads) { status("Downloads aren't available in this view.", true); return; }
+  try { await downloads.save({ filename, data }); status("Saved " + filename + "."); }
+  catch (e) { const c = e && e.code; if (c === "declined") return; if (c === "extension_not_enabled") status("This file type isn't enabled here. Use Save as Markdown instead.", true); else status("Couldn't save the file (" + (c || "error") + ").", true); }
+}
+const loadJSZip = () => typeof JSZip !== "undefined" ? Promise.resolve() : new Promise((ok, no) => { const el = document.createElement("script"); el.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"; el.onload = ok; el.onerror = no; document.head.appendChild(el); });
+function wireOutputs() {
+  $("bCopy").onclick = async () => { if (!current) return; try { await navigator.clipboard.writeText(current.md); status("Copied to clipboard."); } catch { status("Copy isn't available here. Use Save as Markdown instead.", true); } };
+  $("bMd").onclick = () => current && save(current.slug + ".md", current.md);
+  $("bStop").onclick = () => sumCtrl && sumCtrl.abort();
+  $("bWrite").onclick = () => writeSummary();
+  $("bDocx").onclick = async () => {
+    if (!current) return;
+    try { await loadJSZip(); } catch {}
+    if (typeof JSZip === "undefined" || typeof iaBuildDocx !== "function") { status("Word export couldn't load. Use Save as Markdown instead.", true); return; }
+    try { const src = $("logoTop").src, bin = atob(src.split(",")[1]), logo = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) logo[i] = bin.charCodeAt(i); const blob = await iaBuildDocx(JSZip, current.md, current.title, logo, { eyebrow: "INVESTAIR COMPANY PAGE", sub: "Generated " + todayLong(), footer: "investair.com.au" }); await save(current.slug + ".docx", blob); }
+    catch (e) { status("Couldn't build the Word file (" + ((e && e.message) || "error") + "). Use Save as Markdown instead.", true); }
+  };
+}
+
+// ---------- my list (saved per viewer) ----------
+const LSK = "ia_std_reports_list";
+let uid = null, db = null;
+const listDoc = () => (db && uid) ? db.doc("data/users/" + uid + "/prefs/coverage") : null;
+const lsGet = () => { try { return JSON.parse(localStorage.getItem(LSK) || "null"); } catch { return null; } };
+const lsSet = v => { try { localStorage.setItem(LSK, JSON.stringify(v)); } catch {} };
+async function loadList() {
+  try { const u = window.claude ? await claude.use("user") : null; uid = u ? await u.id() : null; db = window.claude ? await claude.use("db") : null; } catch { db = null; }
+  let saved = null;
+  try { const d = listDoc(); if (d) { const sn = await d.get(); if (sn.exists) saved = sn.data().items; } } catch {}
+  if (!saved) saved = lsGet();
+  if (Array.isArray(saved) && saved.length) { COVERAGE = saved.filter(x => Array.isArray(x) && x[0]).map(x => [String(x[0]).toUpperCase(), String(x[1] || "")]); renderPick(); }
+}
+async function persist() { lsSet(COVERAGE); try { const d = listDoc(); if (d) await d.set({ items: COVERAGE, updated: new Date().toISOString() }); } catch {} }
+const lmsg = (t, err) => { const m = $("listMsg"); m.textContent = t; m.style.color = err ? "#b91c1c" : ""; };
+$("listSave").onclick = async () => {
+  const want = [...new Set(($("listTa").value || "").toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean))].slice(0, 25);
+  if (!want.length) { lmsg("Enter at least one ASX code.", true); return; }
+  if (!mcp) { lmsg("Investair isn't connected, so codes can't be checked.", true); return; }
+  const known = new Map(COVERAGE); const next = [], problems = [];
+  lmsg("Checking codes against Investair…");
+  for (const t of want) {
+    if (known.has(t)) { next.push([t, known.get(t)]); continue; }
+    const r = await call("get_market_snapshot", { ticker: t, user_question: "Check ASX code " + t + " for my list" }, t);
+    const sn = r.data && r.data.tool_response && r.data.tool_response.snapshot;
+    if (sn && sn.company_name) next.push([t, sn.company_name]); else problems.push(t);
+  }
+  if (!next.length) { lmsg("None of those codes were found. Check the spelling.", true); return; }
+  COVERAGE = next; renderPick(); await persist(); loadOverview();
+  lmsg(problems.length ? "Saved " + next.length + ". Not found or no market data, so left out: " + problems.join(", ") + "." : "Saved " + next.length + " companies.", !!problems.length);
+};
+$("listReset").onclick = async () => { COVERAGE = DEFAULT_COVERAGE.slice(); renderPick(); await persist(); loadOverview(); lmsg(COVERAGE.length ? "Reset to the list from setup." : "List cleared. Add ASX codes and select Check and save list."); };
+
+
+// ---------- my list overview ----------
+const kvGet = async name => { let v = null; try { const d = (db && uid) ? db.doc("data/users/" + uid + "/prefs/" + name) : null; if (d) { const sn = await d.get(); if (sn.exists) v = sn.data().v; } } catch {} if (v == null) { try { v = JSON.parse(localStorage.getItem("ia_cp_" + name) || "null"); } catch {} } return v; };
+const kvSet = async (name, v) => { try { localStorage.setItem("ia_cp_" + name, JSON.stringify(v)); } catch {} try { const d = (db && uid) ? db.doc("data/users/" + uid + "/prefs/" + name) : null; if (d) await d.set({ v }); } catch {} };
+const weeklyPrompt = () => `Every Monday at 8am Sydney time, check my Investair watch list: ${COVERAGE.map(c => c[0]).join(", ")}.\n\nUsing the Investair connector, pull for each company the cash and runway snapshot, the date of the last capital raise, and substantial holder notices from the last 7 days. Then tell me, answer first and in this order: (1) companies with under 2 quarters of confirmed runway; (2) any company whose confirmed runway fell by 0.3 quarters or more since last week; (3) new capital raises since last week; (4) new substantial holder notices, noting any that name a prime-broker arrangement as lending or collateral. Sort by who is closest to needing money. Attribute figures to Investair and keep it to one page.`;
+let ovBusy = false;
+async function loadOverview() {
+  const box = $("ovBox"); box.hidden = !COVERAGE.length; if (!COVERAGE.length) return;
+  $("wwText").value = weeklyPrompt();
+  if (!mcp || ovBusy) return;
+  ovBusy = true; $("ovMeta").textContent = "Loading…"; $("ovBody").innerHTML = '<p class="mut"><span class="spin" style="display:inline-block;vertical-align:middle;margin-right:8px"></span>Pulling the list from Investair…</p>';
+  try {
+    const L = COVERAGE.map(c => c[0]).slice(0, 25), inL = L.map(t => `'${sqlTk(t)}'`).join(","), uq = "My list overview";
+    const [cf, p3, lr, hd] = await Promise.all([
+      call("get_cashflow_snapshots", { asx_codes: L, user_question: uq }, "Cash and runway"),
+      call("run_readonly_sql", { sql: `SELECT t.ticker, t.market_cap, ${look("91 DAY")} AS c_3m, t.close_price, t.market_cap/t.close_price AS s_now, ${sharesAt("3m", "91 DAY")} FROM ${TB} t WHERE t.info_date=(SELECT MAX(info_date) FROM ${TB}) AND t.ticker IN (${inL})`, user_question: uq }, "Price change"),
+      call("run_readonly_sql", { sql: `SELECT asx_code, MAX(filing_date) AS last_raise FROM Placement.deals_daily WHERE asx_code IN (${inL}) GROUP BY asx_code`, user_question: uq }, "Last raise"),
+      call("get_substantial_holders_batch", { tickers: L, days_back: 7, limit_per_ticker: 5, user_question: uq }, "Holder notices, 7 days")]);
+    if (cf.data && cf.data.error) { $("ovMeta").textContent = ""; $("ovBody").innerHTML = '<p class="mut">Couldn\'t load the list (' + eh(cf.data.error) + '). Select Refresh to try again.</p>'; return; }
+    const snaps = tr_(cf).snapshots || {}, prices = new Map(rowsOf(p3).map(x => [x.ticker, x])), raises = new Map(rowsOf(lr).map(x => [x.asx_code, String(x.last_raise).slice(0, 10)])), hold = tr_(hd).holders_by_ticker || {}, today = todayISO();
+    const rows = L.map(t => {
+      const e = snaps[t], sn = e && e.found ? e.snapshot : null, k = sqlTk(t), pr = prices.get(k);
+      const rw = sn ? num(sn.adjusted_estimated_quarters_funding_confirmed) : null, rwAdj = sn ? num(sn.adjusted_estimated_quarters_funding) : null;
+      let c3 = null; if (pr) { const cp = num(pr.c_3m), now = num(pr.close_price), sn1 = num(pr.s_now), sp = num(pr.s_3m), split = sn1 && sp && (sn1 / sp > 3 || sn1 / sp < 1 / 3); if (cp && now && !split) c3 = chg(now, cp); }
+      const lastRaise = raises.get(k) || "", days = lastRaise ? Math.round((Date.parse(today) - Date.parse(lastRaise)) / 864e5) : null;
+      const flags = ((e && e.estimation_context && e.estimation_context.cash_watch) || []).map(w => w.flag || String(w));
+      return { t, name: (sn && sn.company_name) || (COVERAGE.find(c => c[0] === t) || [])[1] || "", mcap: sn ? num(sn.market_cap) : null, rw, rwAdj, c3, lastRaise, days, flags, notices: ((hold[t] && hold[t].holders) || []).length, found: !!sn };
+    });
+    rows.sort((a, b) => (a.rw == null) - (b.rw == null) || (a.rw ?? 0) - (b.rw ?? 0) || (b.mcap || 0) - (a.mcap || 0));
+    const old = await kvGet("ovsnap"), ref = old ? (old.date < today ? old : old.prev || null) : null, cur = {};
+    rows.forEach(r => { if (r.found) cur[r.t] = { rw: r.rw, lastRaise: r.lastRaise }; });
+    kvSet("ovsnap", { date: today, rows: cur, prev: old && old.date === today ? (old.prev || null) : (old ? { date: old.date, rows: old.rows } : null) });
+    const trs = rows.map(r => {
+      const sev = r.rw == null ? ["low", "No cash data"] : r.rw < 2 ? ["high", "Raise likely"] : r.rw < 3 ? ["medium", "Watch"] : ["low", "Funded"], sig = [];
+      r.flags.forEach(f => sig.push(`<span class="flag urgent">${eh(f)}</span>`));
+      if (r.rw != null && r.rwAdj != null && r.rwAdj - r.rw > 1) sig.push(`<span class="flag">Runway includes unconfirmed funding</span>`);
+      const rf = ref && ref.rows && ref.rows[r.t];
+      if (rf) { if (r.lastRaise && rf.lastRaise !== r.lastRaise) sig.push(`<span class="flag ok">New raise since ${eh(fmtS(ref.date))}</span>`); if (r.rw != null && rf.rw != null && Math.abs(r.rw - rf.rw) >= 0.3) sig.push(`<span class="rec ${r.rw < rf.rw ? "d" : "u"}">${r.rw < rf.rw ? "↓" : "↑"} ${Math.abs(r.rw - rf.rw).toFixed(1)} qtrs since ${eh(fmtS(ref.date))}</span>`); }
+      if (r.notices) sig.push(`<span class="badge">${r.notices} holder notice${r.notices > 1 ? "s" : ""}, 7 days</span>`);
+      return trow([[goBtn(r.t) + `<div class="mut" style="font-size:12px;margin-top:2px">${eh(r.name.replace(/\s+(limited|ltd)\.?$/i, ""))}</div>`], [r.mcap == null ? NA : aud(r.mcap), "num"], [r.rw == null ? NA : r.rw.toFixed(1) + " qtrs", "num"], [r.rwAdj == null ? NA : r.rwAdj.toFixed(1) + " qtrs", "num mut"], [r.c3 == null ? NA : pct1(r.c3), "num " + pcls(r.c3)], [r.lastRaise ? fmtD(r.lastRaise) + `<div class="mut" style="font-size:12px">${r.days} days ago</div>` : '<span class="mut">None on record</span>'], ['<div class="sigs">' + (sig.join("") || '<span class="mut">None</span>') + '</div>'], [`<span class="sev ${sev[0]}">${sev[1]}</span>`]], "", ` data-go="${eh(r.t)}" tabindex="0"`);
+    });
+    const nHigh = rows.filter(r => r.rw != null && r.rw < 2).length;
+    $("ovMeta").textContent = `(${rows.length} companies · ${nHigh} under 2 quarters)`;
+    $("ovBody").innerHTML = tbl([["Company"], ["Market value", "num"], ["Runway, confirmed", "num"], ["Incl. announced", "num"], ["3 months", "num"], ["Last raise"], ["Signals"], ["Status"]], trs, "ov-table");
+    $("ovNote").textContent = "Sorted by who is closest to needing money. Select a row to open that company." + (ref ? " Changes are against " + fmtD(ref.date) + "." : " Changes will show from your next visit.");
+  } catch (e) { $("ovMeta").textContent = ""; $("ovBody").innerHTML = '<p class="mut">Couldn\'t load the list (' + eh((e && (e.message || e.code)) || "error") + '). Select Refresh to try again.</p>'; }
+  finally { ovBusy = false; }
+}
+$("ovRefresh").onclick = () => loadOverview();
+$("wwCopy").onclick = async () => { const m = $("wwMsg"); $("wwText").value = weeklyPrompt(); try { await navigator.clipboard.writeText($("wwText").value); m.textContent = "Copied. Paste it into a new scheduled task in Claude."; } catch { $("wwText").select(); m.textContent = "Select and copy the text above."; } };
+
+// ---------- capabilities ----------
+setBusy(false);
+(async () => {
+  const [m, s, d] = window.claude ? await Promise.all([claude.use("mcp"), claude.use("sample"), claude.use("downloads")]) : [null, null, null];
+  mcp = m; sample = s; downloads = d;
+  if (!mcp || !sample) { const n = $("notice"); n.style.display = "block"; n.textContent = !mcp ? "Connect Investair in Settings → Connectors to use this page." : "This view can't reach Claude, so the written summary can't be produced here. Open the page on claude.ai."; }
+  setBusy(false);
+  await loadList();
+  $("ovBox").hidden = !COVERAGE.length;
+  if (mcp) {
+    loadOverview();
+    const h = hashTicker(), last = h ? null : await kvGet("last"), start = h || (last && last.t) || "";
+    if (start) generate(start, { auto: true, note: last ? "Last viewed: " + last.t + (last.name ? ", " + last.name : "") + (last.mcap != null ? ". Market value " + aud(last.mcap) : "") + (last.runway != null ? ", runway " + last.runway.toFixed(1) + " quarters" : "") + (last.asOf ? " (as at " + fmtD(last.asOf) + ")" : "") + ". Refreshing…" : "" });
+  } else $("ovBox").hidden = true;
+})();
+})();
+</script>
+
