@@ -5,15 +5,15 @@
     "email": "terry@investair.com.au"
   },
   "metadata": {
-    "description": "Public Investair Claude marketplace — skill descriptions and MCP link only.",
+    "description": "Public Investair Claude marketplace \u2014 skill descriptions and MCP link only.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "investair",
       "source": "./plugins/investair",
-      "description": "ASX research skills over Investair MCP: snapshots, peers, initiation and sector reports, investor targeting, weekly digests, and feedback.",
-      "version": "0.19.14",
+      "description": "Research workflows over Investair MCP: initiation, snapshots, sector reports, peer comparisons, Software & Services screens, multi-company director screens, investor targeting, weekly digests, guided Investair dashboards, and feedback. Skills call MCP tools.",
+      "version": "0.20.3",
       "author": {
         "name": "Stuart Frith"
       },

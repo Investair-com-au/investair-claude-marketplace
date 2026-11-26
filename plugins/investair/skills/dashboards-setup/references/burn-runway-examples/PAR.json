@@ -1,0 +1,105 @@
+{
+  "addedAt": "2026-10-09T00:00:00.000Z",
+  "analysis": {
+    "events": [
+      {
+        "basis": "Net operating outflow rose from A$11.0m to A$13.5m between the March and June quarters as enrolment peaked. Assumed 35% to 100% of that A$0.84m a month uplift falls away.",
+        "category": "cost_down",
+        "companyFigure": "No cost figure. Enrolment closed at 538 participants against 466 planned.",
+        "confidence": "inferred",
+        "date": "2026-07-30",
+        "end": null,
+        "id": "e1",
+        "mHi": 850000,
+        "mLo": 300000,
+        "oHi": 0,
+        "oLo": 0,
+        "ramp": 2,
+        "start": "2026-07-01",
+        "text": "Enrolment closed at 538 participants against a target of 466, so recruitment and screening costs stop while treatment and follow-up continue.",
+        "title": "Paradigm Biopharmaceuticals Limited. Completes Enrolment in Pivotal Phase 3 Trial"
+      },
+      {
+        "basis": "Trial activity is most of the A$4.5m monthly outflow, assumed about 85% (A$3.8m). Low case: about a fifth falls away within 3 months because follow-up and close-out continue. High case: treatment stops and about 70% ends within 3 months.",
+        "category": "cost_down",
+        "companyFigure": "No cost figure. Result below the continuation threshold; company is 'assessing the financial and operational implications'.",
+        "confidence": "inferred",
+        "date": "2026-09-23",
+        "end": null,
+        "id": "e2",
+        "mHi": 2600000,
+        "mLo": 800000,
+        "oHi": 0,
+        "oLo": 0,
+        "ramp": 3,
+        "start": "2026-09-23",
+        "text": "The interim efficacy result missed the threshold for the study to continue. The company is assessing the financial and operational implications and has not announced a wind-down plan.",
+        "title": "Paradigm Biopharmaceuticals Limited. Announces Phase 3 Interim Result Below Continuation Threshold"
+      },
+      {
+        "basis": "Assumed between a quarter and four-fifths of one month's trial spend (A$1m to A$3m). Neither the size nor the timing has been disclosed.",
+        "category": "one_off_out",
+        "companyFigure": "",
+        "confidence": "speculative",
+        "date": "2026-09-23",
+        "end": null,
+        "id": "e3",
+        "mHi": 0,
+        "mLo": 0,
+        "oHi": -1000000,
+        "oLo": -3000000,
+        "ramp": 0,
+        "start": "2026-11-15",
+        "text": "Closing a 65-site, four-country Phase 3 trial usually brings site and CRO close-out fees, final data work and contract terminations. None has been disclosed.",
+        "title": "Paradigm Biopharmaceuticals Limited. Announces Phase 3 Interim Result Below Continuation Threshold"
+      }
+    ],
+    "flags": [
+      "About A$10m of the funding Investair counts is the undrawn Obsidian convertible note facility. The company says it is reviewing its funding arrangements after the failed interim, so it may not be drawable.",
+      "Shares have been suspended since 23 Sep pending an update on the financial and operational implications, so a raise is unlikely until trading resumes.",
+      "US$2m drawn on 11 Sep was returned to Obsidian on 24 Sep with no premium. Investair's post-quarter list shows only the 13 Jul draw."
+    ],
+    "headline": "Investair's run-rate holds A$4.5m a month for ever. Enrolment finishing and the failed Phase 3 interim on 23 Sep both point to a lower burn, so the adjusted range sits above Investair's line. How far above depends on close-out costs and on whether the undrawn Obsidian facility is still there to draw.",
+    "ignored": [
+      "New Chief Medical Officer from 16 Sep: small cost, replaces an existing role",
+      "Option exercises and note conversions: funding, already in Investair",
+      "Governance statement and Appendix 4G: no cash effect"
+    ],
+    "quarterlyGuidance": "The 30 Jul quarterly gave no spend guidance. It said the company was funded through the Phase 3 interim analysis and the Q1 2027 top-line readout, with spend going to Day 112 follow-up, data work, NDA planning and manufacturing and commercial readiness. The interim result has since overtaken that plan.",
+    "s8CompanyView": "No spend guidance. Funded through the interim analysis and Q1 2027 readout, a plan the failed interim has since overtaken.",
+    "s8Signal": "unclear"
+  },
+  "lastChecked": "2026-10-09T00:00:00.000Z",
+  "name": "Paradigm Biopharmaceuticals Limited",
+  "q": {
+    "cashQE": 15373000,
+    "currency": "AUD",
+    "docType": "4C",
+    "facilities": 14558000,
+    "filedQuarters": 2.21,
+    "filing": "2026-07-30",
+    "netOp": -13542000,
+    "qe": "2026-06-30"
+  },
+  "sector": "Pharmaceuticals, Biotechnology & Life Sciences",
+  "snap": {
+    "asOf": "2026-10-09",
+    "baseQE": "2026-06-30",
+    "cash": 17208245.49,
+    "cashWatch": [],
+    "daily": -148405.4795,
+    "filing": "2026-07-30",
+    "funding": 27166606,
+    "outQ": 13542000,
+    "postQE": "A$0.93m refund following amended income tax assessment (FY2023) | A$4.76m R&D Tax Incentive refund (FY2025) | A$4.6m Tranche 4 convertible note drawdown on 13 Jul 2026 | 6 option exercise events",
+    "qEst": 2.0061
+  },
+  "stage": "Phase III",
+  "ticker": "PAR",
+  "window": {
+    "from": "2026-06-30",
+    "read": 13,
+    "reviewed": 26,
+    "to": "2026-10-09"
+  }
+}

@@ -1,0 +1,119 @@
+/* Investair brand: tokens from the Investair Style Guide (investair.com.au production CSS).
+   Layout: full-width navy masthead band with the wordmark, light content area, white cards with the amber rule, navy footer band.
+   Single deliberate light look with navy bands (the brand's own two grounds). */
+:root{
+  color-scheme: light;
+  --brand-navy:#0a2342; --brand-orange:#ff6b35; --brand-amber:#e8760a; --brand-teal:#1a7f8e;
+  --brand-gray:#f5f7fa; --surface-page:#f9fafb; --surface:#ffffff;
+  --ink:#0a2342; --ink-body:#4a5568; --ink-muted:#64748b; --ink-navy-body:#d1d5db; --ink-navy-muted:#9ca3af;
+  --border:#e2e8f0; --border-card:#e5e7eb; --danger:#ef4444;
+  --accent-tint:rgba(232,118,10,.18); --teal-tint:rgba(26,127,142,.1); --danger-tint:rgba(239,68,68,.08);
+  --shadow-sm:0 1px 2px 0 rgba(0,0,0,.05); --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+  --radius-md:6px; --radius-lg:8px; --radius-xl:12px;
+  --display:Montserrat,"Helvetica Neue",Arial,sans-serif; --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--surface-page);color:var(--ink-body);font-family:var(--body);font-size:15px;line-height:1.5}
+
+/* Navy masthead band */
+.ia-top{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:20px 28px}
+.ia-top .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-logo-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ia-logo{height:44px;width:auto;display:block}
+.ia-owner{font:600 12px/16px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-brand{font:600 13px/18px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-amber)}
+.mh-title{font:700 32px/1.2 var(--display);color:#fff;margin:0;text-wrap:balance}
+.mh-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mh-badge{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.mh-date{font:500 12.5px/16px var(--body);color:var(--ink-navy-muted)}
+.mh-note{font:400 15px/23px var(--body);color:var(--ink-navy-body);max-width:74ch;margin:4px 0 0}
+.mh-note b{color:#fff;font-weight:600}
+
+/* Content */
+.page{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:24px 40px}
+.ss-strip{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.ss-label{font:600 12px/16px var(--body);color:var(--ink-muted);margin-right:4px;text-transform:uppercase;letter-spacing:.1em}
+.ss-chip{font:600 12px/16px var(--body);padding:5px 10px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy)}
+.ss-chip.bz{background:var(--brand-navy);color:#fff}
+.ss-chip.cu{background:var(--brand-teal);color:#fff}
+.ss-chip.out{background:var(--surface);color:var(--ink);border:1px solid var(--border-card)}
+
+.sec-head{font:700 13px/18px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:28px 0 12px;display:flex;align-items:center;gap:10px}
+.sec-head::before{content:"";width:18px;height:4px;border-radius:2px;background:var(--brand-amber)}
+.sec-head .n{color:var(--ink)}
+.sec-rule{flex:1;height:1px;background:var(--border)}
+
+.deal-stack{display:flex;flex-direction:column;gap:14px}
+.deal{background:var(--surface);border:1px solid var(--border-card);border-left:4px solid var(--brand-amber);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);overflow:hidden}
+.deal-top{padding:18px 22px 12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.deal-ticker{font:700 30px/1 var(--display);color:var(--ink);letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.deal-name{font:500 14px/20px var(--body);color:var(--ink-muted);margin-top:6px}
+.deal-badge{font:600 12px/16px var(--body);padding:6px 11px;border-radius:var(--radius-md);background:var(--brand-amber);color:var(--brand-navy);align-self:flex-start;white-space:nowrap}
+.deal-badge.bz{background:var(--brand-navy);color:#fff}
+.deal-badge.cu{background:var(--brand-teal);color:#fff}
+.deal-badge.nt{background:var(--brand-gray);color:var(--ink);border:1px solid var(--border-card)}
+.flag{display:inline-flex;align-items:center;gap:6px;font:600 11.5px/16px var(--body);padding:3px 9px;border-radius:var(--radius-md);color:var(--ink);border:1px solid var(--border-card);background:var(--surface)}
+.flag.urgent{border-color:var(--danger);background:var(--danger-tint)}
+.flag.urgent::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--danger)}
+.flag.ok{border-color:var(--brand-teal);background:var(--teal-tint)}
+.flags{padding:0 22px 16px;display:flex;gap:8px;flex-wrap:wrap}
+
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--brand-gray)}
+.metric{padding:12px 16px;border-right:1px solid var(--border)}
+.metric:last-child{border-right:none}
+.m-lbl{font:600 11px/14px var(--body);color:var(--ink-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.m-val{font:700 18px/24px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+
+.deal-tl{padding:12px 22px 14px}
+.tl-note{font-size:14px;line-height:22px;color:var(--ink-body);margin-bottom:10px}
+.tl-note .k{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted)}
+.inf{color:var(--ink);font-weight:600;background:var(--accent-tint);padding:0 4px;border-radius:3px}
+.tl-track{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;height:10px;border-radius:2px;overflow:hidden}
+.tl-fill{background:var(--border)}
+.tl-fill.on{background:var(--brand-amber)}
+.tl-fill.on.bz{background:var(--brand-navy)}
+.tl-fill.on.cu{background:var(--brand-teal)}
+.tl-fill.on.nt{background:var(--ink-muted)}
+.tl-fill.on.zone,.tl-fill.on.zone.bz,.tl-fill.on.zone.cu,.tl-fill.on.zone.nt{background:var(--danger)}
+.tl-scale{position:relative;height:14px;font:500 10.5px/14px var(--body);color:var(--ink-muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.tl-scale span{position:absolute;top:0;transform:translateX(-50%)}
+.tl-scale span:first-child{transform:none}
+.tl-scale span:last-child{transform:translateX(-100%)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-muted);margin:4px 0 0}
+.legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+.watch-stack .deal{opacity:.9}
+.watch-stack .metric{padding:10px 14px}
+.watch-stack .m-val{font-size:16px}
+.watch-stack .deal-ticker{font-size:24px}
+
+.ex-wrap{background:var(--surface);border:1px solid var(--border-card);border-radius:var(--radius-lg);overflow-x:auto;box-shadow:var(--shadow-sm)}
+.ex-table{width:100%;border-collapse:collapse}
+.ex-table th{font:600 11px/14px var(--body);text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--brand-navy);text-align:left;padding:10px 14px;white-space:nowrap}
+.ex-table td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-tk{font:700 13px/18px var(--display);color:var(--ink)}
+.ex-wk,.ex-mc{font:500 12.5px/18px var(--body);white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+.ex-mc{color:var(--ink-muted)}
+.ex-rs{font-size:13px;color:var(--ink-body);min-width:220px}
+
+.method{margin-top:20px;font-size:13px;line-height:20px;color:var(--ink-muted);max-width:82ch}
+
+/* Navy footer band */
+.ia-foot{background:var(--brand-navy);color:var(--ink-navy-body);padding-inline:16px;padding-block:28px}
+.ia-foot .inner{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ia-foot .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ia-foot img{height:32px;width:auto}
+.ia-foot .tag{font-size:14px;color:var(--ink-navy-body)}
+.ia-foot .legal{border-top:1px solid rgba(255,255,255,.12);padding-top:12px;font-size:12.5px;color:var(--ink-navy-muted)}
+
+:focus-visible{outline:2px solid var(--brand-orange);outline-offset:2px}
+
+@media (max-width:640px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metric:nth-child(2){border-right:none}
+  .metric:nth-child(-n+2){border-bottom:1px solid var(--border)}
+  .deal-ticker{font-size:24px}
+  .mh-title{font-size:26px}
+  .deal-top,.deal-tl,.flags{padding-inline:16px}
+}
